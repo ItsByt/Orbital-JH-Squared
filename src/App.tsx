@@ -1,8 +1,12 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Welcome from "@/pages/welcome"
+import Register from "@/pages/register"
+import Login from "@/pages/login"
 import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@supabase/supabase-js";
 
-// 1. Connect to Supabase using the hidden keys from your .env.local file
+// 1. Connect to Supabase using the hidden keys from our .env.local file
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
@@ -35,16 +39,12 @@ export default function App() {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>My First Supabase Fetch!</h1>
-      <ul>
-        {instruments.map((instrument) => (
-          <li key={instrument.name}>{instrument.name}</li>
-        ))}
-      </ul>
-      <Button onClick={() => console.log("Button clicked!")}>
-      Click me
-    </Button>
-    </div>    
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
