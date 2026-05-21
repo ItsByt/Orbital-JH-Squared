@@ -1,7 +1,9 @@
 import { supabase } from '@/services/supabase'
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 import {
     Field,
     FieldDescription,
@@ -11,7 +13,7 @@ import {
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMsg, setErrorMsg] = useState("");
+    const navigate = useNavigate()
 
     async function userExists(email: String) {
         const { data, error } = await supabase
@@ -35,7 +37,7 @@ export default function Login() {
         const valid = await userExists(email)
 
         if (!valid) {
-            setErrorMsg("User does not exist")
+            console.log("user does not exist")
             return 
         }
         
@@ -45,9 +47,14 @@ export default function Login() {
         })
 
         if (signInError) {
-            setErrorMsg("Invalid Password. Please try again")
+            toast.error("Login Failed", {
+            description: signInError.message, 
+            });
+            console.log("Invalid email or password. Please try again")
         } else {
-            console.log("Signed in successfully!", data)
+            toast.success("Logged in Successfully!");
+            navigate("/home")
+            console.log("Logged in successfully!", data)
         }
     }
 

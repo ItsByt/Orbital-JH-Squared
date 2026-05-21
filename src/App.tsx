@@ -2,9 +2,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Welcome from "@/pages/welcome"
 import Register from "@/pages/register"
 import Login from "@/pages/login"
+import Home from "@/pages/home"
 import { useEffect, useState } from "react";
-import TestDemo from "@/pages/TestDemo"
 import { createClient } from "@supabase/supabase-js";
+import { Toaster } from "@/components/ui/sonner"
+
 
 // 1. Connect to Supabase using the hidden keys from our .env.local file
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -44,8 +46,9 @@ export default function App() {
         <Route path="/" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/test" element={<TestDemo />} />
+        <Route path="/home" element={<Home />} />
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

@@ -71,3 +71,6 @@ export default defineConfig([
   },
 ])
 ```
+
+
+{*/ dont forget to npm install and do .env.local details}

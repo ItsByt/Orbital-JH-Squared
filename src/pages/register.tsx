@@ -2,24 +2,17 @@ import { supabase } from '@/services/supabase'
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 import {
     Field,
-    FieldContent,
     FieldDescription,
-    FieldError,
-    FieldGroup,
     FieldLabel,
-    FieldLegend,
-    FieldSeparator,
-    FieldSet,
-    FieldTitle,
 } from "@/components/ui/field"
 
 
 export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMsg, setErrorMsg] = useState("");
 
     async function handleRegister(e: React.SubmitEvent) {
         e.preventDefault();
@@ -30,9 +23,15 @@ export default function Register() {
         })
 
         if (signUpError) {
-            setErrorMsg(signUpError.message)
+            toast.error("Registration Failed", {
+            description: signUpError.message, 
+            });
+            console.error("Registration error:", signUpError.message);
         } else {
-            console.log("Logged in successfully!", data)
+            toast.success("Account created! 🎉", {
+                description: "Please check your email to confirm your registration. Then log in again.",
+            });
+            console.log("Registered successfully! Please exit and login again.", data)
         }
     }
 
@@ -73,6 +72,7 @@ export default function Register() {
                     />
                     <FieldDescription>
                         Choose a unique password for your account.
+                        The password must be 6 letters or longer.
                     </FieldDescription>
                 </Field>
 
