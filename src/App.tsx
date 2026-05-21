@@ -3,7 +3,7 @@ import Welcome from "@/pages/welcome"
 import Register from "@/pages/register"
 import Login from "@/pages/login"
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import TestDemo from "@/pages/TestDemo"
 import { createClient } from "@supabase/supabase-js";
 
 // 1. Connect to Supabase using the hidden keys from our .env.local file
@@ -44,6 +44,7 @@ export default function App() {
         <Route path="/" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/test" element={<TestDemo />} />
       </Routes>
     </BrowserRouter>
   );
