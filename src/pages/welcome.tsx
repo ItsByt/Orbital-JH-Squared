@@ -10,19 +10,19 @@ export default function Welcome() {
             <h1>NUSMods Plus</h1>
 
             <h2>Welcome</h2>
-                <div className="flex flex-wrap items-center gap-2 md:flex-row">
-                    <Button onClick={() => navigate("/login")}>
-                        Go to Login
-                    </Button>
-                </div>
+            <div className="flex flex-wrap items-center gap-2 md:flex-row">
+                <Button onClick={() => navigate("/login")}>
+                    Go to Login
+                </Button>
+            </div>
 
-                <br></br>
+            <br></br>
 
-                <div className="flex flex-wrap items-center gap-2 md:flex-row">
+            <div className="flex flex-wrap items-center gap-2 md:flex-row">
                 <Button onClick={() => navigate("/register")}>
                     Go to Register
                 </Button>
-                </div>
+            </div>
         </>
     )
 }
