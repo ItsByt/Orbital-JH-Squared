@@ -10,6 +10,7 @@ import Register from "@/pages/Register"
 import Login from "@/pages/Login"
 import Layout from "@/components/Layout"
 import Home from "@/pages/Home"
+import Planner from "@/pages/Planner"
 
 
 // Connect to Supabase using the hidden keys from our .env.local file
@@ -59,7 +60,7 @@ export default function App() {
 
         <Route element={session ? <Layout /> : <Login />}>
           <Route path="/home" element={<Home />} />
-          <Route path="/planner" element={<></>}/>
+          <Route path="/planner" element={<Planner />}/>
         </Route>
       </Routes>
       <Toaster />
