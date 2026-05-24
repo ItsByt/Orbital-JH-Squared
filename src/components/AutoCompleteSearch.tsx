@@ -4,10 +4,14 @@ import type { ModuleSummary} from "@/services/nusmods";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
-export default function AutocompleteSearch() {
+//Mod Select property to define in each page
+interface AutocompleteSearchProps {
+    onSelect: (moduleCode: string) => void;
+}
+
+export default function AutocompleteSearch({ onSelect }: AutocompleteSearchProps) {
     const [allModules, setAllModules] = useState<ModuleSummary[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<ModuleSummary[]>([]);
 
@@ -36,7 +40,32 @@ export default function AutocompleteSearch() {
             mod.title.toLowerCase().includes(lowerCaseSearch)
         );
 
-        //Only keep top 10 results
+        filtered.sort((a, b) => {
+            const aCode = a.moduleCode.toLowerCase();
+            const bCode = b.moduleCode.toLowerCase();
+            
+            const aExact = aCode === lowerCaseSearch;
+            const bExact = bCode === lowerCaseSearch;
+
+            const aStartsWith = aCode.startsWith(lowerCaseSearch);
+            const bStartsWith = bCode.startsWith(lowerCaseSearch);
+
+            const aIncludes = aCode.includes(lowerCaseSearch);
+            const bIncludes = bCode.includes(lowerCaseSearch);
+
+            if (aExact && !bExact) return -1;
+            if (!aExact && bExact) return 1;
+
+            if (aStartsWith && !bStartsWith) return -1;
+            if (bStartsWith && !aStartsWith) return 1;
+
+            if (aIncludes && !bIncludes) return -1;
+            if (bIncludes && !aIncludes) return 1;
+
+            return aCode.localeCompare(bCode);
+        });
+
+        // Only keep top 10 results
         setSearchResults(filtered.slice(0, 10));
     }, [searchTerm, allModules]);
     
@@ -63,8 +92,11 @@ export default function AutocompleteSearch() {
                             className="px-4 py-2 hover:bg-slate-100 cursor-pointer border-b last:border-none"
                             onClick={() => {
                                 console.log("User selected:", mod.moduleCode);
-                                setSearchTerm(mod.moduleCode); 
+                                setSearchTerm(mod.moduleCode);
                                 setSearchResults([]); 
+
+                                //Trigger selection function on click
+                                onSelect(mod.moduleCode);
                             }}
                         >
                             <div className="font-bold text-blue-600">{mod.moduleCode}</div>

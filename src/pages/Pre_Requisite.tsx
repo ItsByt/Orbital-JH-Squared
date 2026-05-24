@@ -1,12 +1,12 @@
 import AutocompleteSearch from "@/components/AutoCompleteSearch";
 
-export default function Planner() {
+export default function Pre_Requisite() {
     return (
         <div className="space-y-6">
 
             <div>
-                <h1 className="text-3xl font-bold">Module Planner</h1>
-                <p className="text-gray-500">Search for modules to plan your years.</p>
+                <h1 className="text-3xl font-bold">Pre-Requisite</h1>
+                <p className="text-gray-500">See pre-requisites of a module</p>
             </div>
 
             <div className="bg-white p-6 rounded-xl shadow-sm border">
@@ -14,20 +14,10 @@ export default function Planner() {
             </div>
 
             <div>
-                <h2>Planned Schedule</h2>
+                <h2>Pre-Requisite</h2>
                 {/* To build and drop a <TimetableGrid /> component here */}
             </div>
 
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
-

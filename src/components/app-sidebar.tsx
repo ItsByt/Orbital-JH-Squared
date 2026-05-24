@@ -12,12 +12,20 @@ import {
 export function AppSidebar() {
     const navigate = useNavigate(); 
 
-    const goToModulePlanningPage = () => {
+    const goToPlannerPage = () => {
         navigate("/planner"); 
     }
 
     const goToTimetablePage = () => {
         navigate("/home");
+    }
+
+    const goToCoursesPage = () => {
+        navigate("/courses");
+    }
+
+    const goToPre_RequisitePage = () => {
+        navigate("/pre-requisite");
     }
 
     async function handleLogOut() {
@@ -40,11 +48,19 @@ export function AppSidebar() {
             <SidebarContent className="p-4 gap-4">
 
                 <Button onClick={goToTimetablePage} variant="outline" className="w-full">
-                    Timetable Planning
+                    Timetable
                 </Button>
 
-                <Button onClick={goToModulePlanningPage} variant="outline" className="w-full">
-                    Module Planning
+                <Button onClick={goToCoursesPage} variant="outline" className="w-full">
+                    Courses
+                </Button>
+
+                <Button onClick={goToPlannerPage} variant="outline" className="w-full">
+                    Planner
+                </Button>
+
+                <Button onClick={goToPre_RequisitePage} variant="outline" className="w-full">
+                    Pre-Requisite
                 </Button>
 
                 <Button onClick={handleLogOut} variant="destructive" className="w-full">

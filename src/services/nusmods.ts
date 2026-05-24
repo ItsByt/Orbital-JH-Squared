@@ -4,11 +4,24 @@ export interface ModuleSummary {
     semesters: number[];
 }
 
-
 export interface ModuleDetails {
     moduleCode: string
     title: string
     moduleCredit: string 
+    description?: string;
+    semesterData: {
+        semester: number;
+        timetable: {
+            classNo: string;
+            lessonType: string;
+            startTime: string;
+            endTime: string;
+            day: string;
+            venue: string;
+            weeks: number[] | string[];
+        }[];
+    }[];
+    
 }
 
 export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSummary[]> {
@@ -24,6 +37,7 @@ export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSumma
     }
 }
 
+//Includes Timetable and Pre-Requisite Tree Data
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
         const response = await fetch(`https://api.nusmods.com/v2/2025-2026/modules/${moduleCode.toUpperCase()}.json`)
