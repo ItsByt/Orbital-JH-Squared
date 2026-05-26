@@ -100,7 +100,7 @@ export default function Home() {
     const convertTimeToColumn = (timeString: string) => {
         const hour = parseInt(timeString.substring(0, 2), 10);
         const minute = parseInt(timeString.substring(2, 4), 10);
-        // Base starting point is 09:00 AM (Column 1)
+        // Base starting point is 08:00 AM (Column 1)
         const baseHour = 8; 
         const hourDiff = hour - baseHour;
         const minuteFraction = minute / 60;
@@ -136,60 +136,68 @@ export default function Home() {
                 </div>
 
                 {/* Contents */}
-                <div className="divide-y divide-slate-200 relative">
-                    {DAYS.map((day) => {
-                        const dayLessons = modules.filter(l => l.day.toLowerCase() === day.toLowerCase());
+                <div className="divide-y divide-slate-200">
+                {DAYS.map((day) => {
+                    const dayLessons = modules.filter(l => l.day.toLowerCase() === day.toLowerCase());
+
+                    return (
+                    <div key={day} className="grid grid-cols-[80px_repeat(22,1fr)] min-h-28 relative group">
+                        
+                        {/* Day Label (Spans 1 column, rows 1) */}
+                        <div className="flex items-center justify-center font-bold text-xs text-slate-700 border-r border-slate-200 bg-slate-50 uppercase tracking-wider select-none z-10 grid-row-start-1">
+                        {day.substring(0, 3)}
+                        </div>
+
+                        {/* BACKGROUND GRID */}
+                        {Array.from({ length: 22 }).map((_, i) => (
+                        <div 
+                            key={i} 
+                            style={{
+                            gridColumnStart: i + 2, 
+                            gridRowStart: 1
+                            }}
+                            className={`h-full border-r border-slate-100 min-h-[112px] ${i % 2 === 1 ? 'bg-slate-50/40' : ''}`} 
+                        />
+                        ))}
+
+                        {/* 2. MODULAR BLOCKS */}
+                        {dayLessons.map((lesson) => {
+                        const colStart = convertTimeToColumn(lesson.startTime);
+                        const colEnd = convertTimeToColumn(lesson.endTime);
 
                         return (
-                            <div key={day} className="grid grid-cols-[80px_repeat(22,1fr)] h-28 relative group">
-                                
-                                {/* Day Label  */}
-                                <div className="flex items-center justify-center font-bold text-xs text-slate-700 border-r border-slate-200 bg-slate-50 uppercase tracking-wider select-none z-10">
-                                    {day.substring(0, 3)}
+                            <div
+                            key={lesson.id}
+                            style={{
+                                gridColumnStart: colStart + 1, 
+                                gridColumnEnd: colEnd + 1,
+                                gridRowStart: 1,
+                            }}
+                            className="my-1 mx-0.5 p-2 bg-purple-100 border border-purple-300 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer hover:bg-purple-200 transition-all z-20"
+                            >
+                            <div>
+                                <div className="font-bold text-purple-900 truncate">
+                                {lesson.moduleCode}
                                 </div>
-
-                                {/* Background Grid */}
-                                {Array.from({ length: 22 }).map((_, i) => (
-                                    <div key={i} className={`h-full border-r border-slate-100 ${i % 2 === 1 ? 'bg-slate-50/40' : ''}`} />
-                                ))}
-
-                                {/* Modular Blocks - map dayLessons */}
-                                {dayLessons.map((lesson) => {
-                                    const colStart = convertTimeToColumn(lesson.startTime);
-                                    const colEnd = convertTimeToColumn(lesson.endTime);
-
-                                    return (
-                                        <div
-                                            key={lesson.id}
-                                            style={{
-                                                gridColumnStart: colStart + 1,
-                                                gridColumnEnd: colEnd + 1
-                                            }}
-                                            className="absolute inset-y-1 my-1 p-2 bg-purple-100 border border-purple-300 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer hover:bg-purple-200 transition-all z-20"
-                                        >
-                                            <div>
-                                                <div className="font-bold text-purple-900 truncate">
-                                                    {lesson.moduleCode}
-                                                </div>
-                                                <div className="text-[10px] text-purple-700 font-semibold mt-0.5">
-                                                    {lesson.lessonType.substring(0, 3).toUpperCase()} [{lesson.classNo}]
-                                                </div>
-                                                <div className="text-[10px] text-slate-600 mt-0.5 font-medium truncate">
-                                                    {lesson.venue}
-                                                </div>
-                                            </div>
-                                            
-                                            {lesson.weeks && (
-                                                <div className="text-[9px] text-slate-400 mt-1 font-medium">
-                                                    Weeks {typeof lesson.weeks === 'string' ? lesson.weeks : '3-13'}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                <div className="text-[10px] text-purple-700 font-semibold mt-0.5">
+                                {lesson.lessonType.substring(0, 3).toUpperCase()} [{lesson.classNo}]
+                                </div>
+                                <div className="text-[10px] text-slate-600 mt-0.5 font-medium truncate">
+                                {lesson.venue}
+                                </div>
+                            </div>
+                            
+                            {lesson.weeks && (
+                                <div className="text-[9px] text-slate-400 mt-1 font-medium">
+                                Weeks {typeof lesson.weeks === 'string' ? lesson.weeks : '3-13'}
+                                </div>
+                            )}
                             </div>
                         );
-                    })}
+                        })}
+                    </div>
+                    );
+                })}
                 </div>
             </div>
         </div>
