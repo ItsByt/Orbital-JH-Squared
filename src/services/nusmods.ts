@@ -24,6 +24,7 @@ export interface ModuleDetails {
     
 }
 
+//Gets a list of all the summaries of all modules in NUS
 export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSummary[]> {
     try {
         const response = await fetch(`https://api.nusmods.com/v2/${acadYear}/moduleList.json`)

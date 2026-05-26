@@ -1,5 +1,6 @@
 import { supabase } from '@/services/supabase'
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
@@ -11,6 +12,7 @@ import {
 
 
 export default function Register() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -32,6 +34,7 @@ export default function Register() {
                 description: "Please check your email to confirm your registration. Then log in again.",
             });
             console.log("Registered successfully! Please exit and login again.", data)
+            navigate("/login")
         }
     }
 
