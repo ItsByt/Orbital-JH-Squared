@@ -1,6 +1,7 @@
 import SearchBar from "@/components/SearchBar";
 import { useState } from "react";
-import { getModule, type ModuleDetails } from "@/services/nusmods";
+import { getModule } from "@/services/nusmods";
+import type { ModuleDetails } from "@/types"
 import { Loader2 } from "lucide-react";
 import ModuleDetailsCard from "@/components/ModuleDetailsCard"
 

@@ -1,28 +1,4 @@
-export interface ModuleSummary {
-    moduleCode: string;
-    title: string;
-    semesters: number[];
-}
-
-export interface ModuleDetails {
-    moduleCode: string
-    title: string
-    moduleCredit: string 
-    description?: string;
-    semesterData: {
-        semester: number;
-        timetable: {
-            classNo: string;
-            lessonType: string;
-            startTime: string;
-            endTime: string;
-            day: string;
-            venue: string;
-            weeks: number[] | string[];
-        }[];
-    }[];
-    
-}
+import type { ModuleSummary, ModuleDetails } from "@/types"
 
 //Gets a list of all the summaries of all modules in NUS
 export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSummary[]> {

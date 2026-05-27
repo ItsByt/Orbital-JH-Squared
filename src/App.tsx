@@ -9,7 +9,7 @@ import Welcome from "@/pages/Welcome"
 import Register from "@/pages/Register"
 import Login from "@/pages/Login"
 import Layout from "@/components/Layout"
-import Home from "@/pages/Timetable"
+import TimetablePage from "@/pages/Timetable"
 import Planner from "@/pages/Planner"
 import Courses from "@/pages/Courses"
 import Pre_Requisite from "@/pages/Pre_Requisite"
@@ -61,10 +61,11 @@ export default function App() {
         <Route path="/register" element={<Register />} />
 
         <Route element={session ? <Layout /> : <Login />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/planner" element={<Planner />}/>
-          <Route path="/pre-requisite" element={<Pre_Requisite />}/>
-          <Route path="/courses" element={<Courses />}/>
+          <Route path="/timetable/sem-1" element={<TimetablePage semester={1} />} />
+          <Route path="/timetable/sem-2" element={<TimetablePage semester={2} />} />
+          <Route path="/planner" element={<Planner />} />
+          <Route path="/pre-requisite" element={<Pre_Requisite />} />
+          <Route path="/courses" element={<Courses />} />
         </Route>
       </Routes>
       <Toaster />

@@ -1,3 +1,4 @@
+import { getCurrentAcadYear } from "@/lib/utils"; 
 import { useState, useEffect } from "react";
 import type { ModuleDetails } from "@/services/nusmods";
 import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";
@@ -6,37 +7,50 @@ import { Loader2 } from "lucide-react";
 export default function ModuleDetailsCard({ module }: { module: ModuleDetails }) {
     // Initialize variable with state to store description state (or null)
     // Initialize state boolean for fetching status similar to loading
-    const [isAdded, setIsAdded] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [isAddedSem1, setIsAddedSem1] = useState(false);
+    const [isProcessingSem1, setIsProcessingSem1] = useState(false);
+    const [isAddedSem2, setIsAddedSem2] = useState(false);
+    const [isProcessingSem2, setIsProcessingSem2] = useState(false);
+
+    const currentYear = getCurrentAcadYear();
 
     useEffect(() => {
         async function checkStatus() {
-            const saved = await isInTimetable(module.moduleCode, 2025, 2);
-            setIsAdded(saved);
+            const savedSem1 = await isInTimetable(module.moduleCode, currentYear, 1);
+            const savedSem2 = await isInTimetable(module.moduleCode, currentYear, 2);
+            setIsAddedSem1(savedSem1);
+            setIsAddedSem2(savedSem2);
         }
         checkStatus();
-    }, [module.moduleCode]);
+    }, [module.moduleCode, currentYear]);
 
-    const handleToggleTimetable = async () => {
-        const sem2Data = module.semesterData?.find(s => s.semester === 2);
-
-        if (!sem2Data || !sem2Data.timetable) {
-            alert("This module is not offered in Semester 2.");
+    const handleToggle = async (semester: number) => {
+        const semData = module.semesterData?.find(s => s.semester === semester);
+        if (!semData || !semData.timetable) {
+            alert(`This module is not offered in Semester ${semester}.`);
             return;
         }
 
-        setIsProcessing(true);
+        const isAdded = semester === 1 ? isAddedSem1 : isAddedSem2;
+        const setProcessing = semester === 1 ? setIsProcessingSem1 : setIsProcessingSem2;
+        const setAdded = semester === 1 ? setIsAddedSem1 : setIsAddedSem2;
+
+        setProcessing(true);
 
         if (isAdded) {
-            const success = await removeFromTimetable(module.moduleCode, 2025, 2);
-            if (success) setIsAdded(false);
-        } else { //If it has not been added
-            await addToTimetable(module.moduleCode, sem2Data.timetable);
-            setIsAdded(true);
+            const success = await removeFromTimetable(module.moduleCode, currentYear, semester);
+            if (success) setAdded(false);
+        } else {
+            // NOTE: Make sure you update addToTimetable in timetableDB.ts to accept `semester` and `year` as arguments!
+            await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
+            setAdded(true);
         }
 
-        setIsProcessing(false);
+        setProcessing(false);
     };
+
+    const offeredSem1 = module.semesterData?.some(s => s.semester === 1);
+    const offeredSem2 = module.semesterData?.some(s => s.semester === 2);
 
     return (
         <div className="p-6 bg-white border rounded-xl shadow-sm space-y-4 text-sm text-gray-600 leading-relaxed">
@@ -48,21 +62,33 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                 <span className="font-semibold text-gray-800 shrink-0">{module.moduleCredit} MCs</span>
             </div>
 
-            {/* THE SMART TOGGLE BUTTON */}
-            <button
-                onClick={handleToggleTimetable}
-                disabled={isProcessing} // Lock button while loading
-                className={`flex items-center font-medium px-3 py-1.5 rounded-lg text-xs transition text-white
-                    ${isAdded ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}
-                    ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
-                `}
-            >
-                {/* Show a tiny spinner if processing, otherwise show the text */}
-                {isProcessing && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                {isAdded ? "Remove from Timetable" : "Add to Timetable"}
-            </button>
+            <div className="flex gap-2">
+                {offeredSem1 && (
+                    <button
+                        onClick={() => handleToggle(1)}
+                        disabled={isProcessingSem1}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition
+                            ${isAddedSem1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
+                    >
+                        {isProcessingSem1 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                        {isAddedSem1 ? "Remove from Sem 1" : "Add to Sem 1"}
+                    </button>
+                )}
 
-            <p>{module.description || "No description provided for this module."}</p>
+                {offeredSem2 && (
+                    <button
+                        onClick={() => handleToggle(2)}
+                        disabled={isProcessingSem2}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition
+                            ${isAddedSem2 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
+                    >
+                        {isProcessingSem2 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+                        {isAddedSem2 ? "Remove from Sem 2" : "Add to Sem 2"}
+                    </button>
+                )}
+            </div>
+
+            <p className="text-sm text-gray-600 leading-relaxed">{module.description || "No description provided for this module."}</p>
         </div>
     );
 }

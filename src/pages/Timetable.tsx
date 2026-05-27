@@ -1,100 +1,14 @@
-import { supabase } from "@/services/supabase";
-import { getUserModules } from "@/services/timetableDB";
-import { getModule } from "@/services/nusmods";
-import type { ModuleDetails } from "@/services/nusmods";
-import { useEffect, useState } from "react";
+import { useTimeTableData } from "@/hooks/useTimetableData";
+import { getCurrentAcadYear, getAcadYearString } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-
-// Data template from Supabase to use
-interface SavedTimetableModule {
-  id: string;
-  module_code: string;
-  lesson_type: string;
-  class_no: string;
-}
-// Internal interface details for class BLOCKS 
-interface DisplayLesson {
-    id: string;
-    moduleCode: string;
-    lessonType: string;
-    classNo: string;
-    day: string;
-    startTime: string;
-    endTime: string;
-    venue: string;
-    weeks: number[] | string[];
-}
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700"];
 
-
-
-export default function Home() {
-    const [modules, setModules] = useState<DisplayLesson[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function loadPageData() {
-          try {
-            setLoading(true);
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            if (userError) throw userError;
-            if (!user) {
-                alert("Please log in to add modules to your timetable!");
-                return;
-            }
-
-            // Retrieve user added mod classes from Supabase and format
-            // Only contains important tokens, no details yet.
-            const { myModules } = await getUserModules(user.id);
-            const savedList = (myModules as SavedTimetableModule[] || []);
-            const compiledLessons: DisplayLesson[] = [];
-
-
-            // Fetch global module scheduling data from NUSMods, 
-            // extract Semester 2, and filter out non-matching class sections
-            for (const saved of savedList) {
-                    const details: ModuleDetails | null = await getModule(saved.module_code);
-                    if (!details) continue;
-                    const sem2Data = details?.semesterData?.find(s => s.semester === 2);
-                    
-                    if (sem2Data?.timetable) {
-                        const matchedSlots = sem2Data.timetable.filter(
-                            slot => slot.lessonType.toLowerCase() === saved.lesson_type.toLowerCase() && 
-                                    slot.classNo === saved.class_no
-                        );
-
-                        // Push all matching classes user selected
-                        // into compiledLessons array, which
-                        // formats to match UI block interface
-                        matchedSlots.forEach(slot => {
-                            compiledLessons.push({
-                                id: `${saved.id}-${slot.day}-${slot.startTime}`,
-                                moduleCode: saved.module_code,
-                                lessonType: saved.lesson_type,
-                                classNo: saved.class_no,
-                                day: slot.day,
-                                startTime: slot.startTime,
-                                endTime: slot.endTime,
-                                venue: slot.venue,
-                                weeks: slot.weeks
-                            });
-                        });
-                    }
-                }
-
-            // SET HERE + ERROR HANDLING
-            setModules(compiledLessons);
-        } catch (error) {
-            console.error("Error: ", error);
-        } finally {
-            setLoading(false);
-        }
-      }
-
-      loadPageData();
-    }, []);
+export default function TimetablePage({ semester }: { semester: number }) {
+    const currentYear: number = getCurrentAcadYear();
+    const acadYearString: String = getAcadYearString();
+    const { modules, loading } = useTimeTableData(currentYear, semester);
     
     // Helper for time conversion
     const convertTimeToColumn = (timeString: string) => {
@@ -119,7 +33,9 @@ export default function Home() {
 
     return (
         <div className="p-6 bg-slate-50 min-h-screen text-slate-900">
-            <h1 className="text-2xl font-bold mb-6 text-slate-800">Semester 2 Timetable</h1>
+            <h1 className="text-2xl font-bold mb-6 text-slate-800">
+                {acadYearString} Semester {semester} Timetable
+            </h1>
             <div className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm">
                 
                 {/* Header */}

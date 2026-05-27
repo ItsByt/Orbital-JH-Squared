@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getModuleList, type ModuleSummary } from "@/services/nusmods";
+import { getModuleList } from "@/services/nusmods";
+import type { ModuleSummary } from "@/types"
 
 export default function AutoCompleteSearch() {
     const [allModules, setAllModules] = useState<ModuleSummary[]>([]);

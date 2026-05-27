@@ -1,3 +1,4 @@
+import { getCurrentAcadSem } from "@/lib/utils"
 import { useNavigate } from "react-router-dom"
 import { supabase } from '@/services/supabase' 
 import { toast } from "sonner"
@@ -11,13 +12,14 @@ import {
 
 export function AppSidebar() {
     const navigate = useNavigate(); 
+    const currentSem = getCurrentAcadSem();
 
     const goToPlannerPage = () => {
         navigate("/planner"); 
     }
 
     const goToTimetablePage = () => {
-        navigate("/home");
+        navigate(`/timetable/sem-${currentSem}`);
     }
 
     const goToCoursesPage = () => {

@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { ModuleDetails } from "@/services/nusmods";
+import type { ModuleDetails } from "@/types"
 import { toast } from "sonner";
 
 export async function isInTimetable(moduleCode: string, year: number, semester: number) {
@@ -27,7 +27,9 @@ export async function isInTimetable(moduleCode: string, year: number, semester: 
 
 export async function addToTimetable(
     moduleCode: string,
-    timetableSlots: ModuleDetails["semesterData"][number]["timetable"]
+    timetableSlots: ModuleDetails["semesterData"][number]["timetable"],
+    year: number,
+    semester: number
 ) {
 
     try {
@@ -65,8 +67,8 @@ export async function addToTimetable(
                 module_code: moduleCode,
                 lesson_type: lessonType,
                 class_no: earliest.classNo,
-                year: 2025,
-                semester: 2
+                year: year,
+                semester: semester
             });
         }
 
@@ -118,8 +120,13 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
     }
 }
 
-export async function getUserModules(userId: string) {
-    const { data, error } = await supabase.from("timetable_modules").select('*').eq("user_id", userId)
+export async function getUserModules(userId: string, year: number, semester: number) {
+    const { data, error } = await supabase
+        .from("timetable_modules")
+        .select('*')
+        .eq("user_id", userId)
+        .eq("year", year)
+        .eq("semester", semester)
     return { myModules: data, error }
 }
 
