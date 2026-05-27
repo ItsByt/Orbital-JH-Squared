@@ -1,4 +1,4 @@
-import AutocompleteSearch from "@/components/AutoCompleteSearch";
+import AutocompleteSearch from "@/components/SearchBar";
 
 export default function Planner() {
     return (

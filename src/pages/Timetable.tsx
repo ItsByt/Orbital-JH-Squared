@@ -117,9 +117,6 @@ export default function Home() {
     );
   }
 
-
-
-
     return (
         <div className="p-6 bg-slate-50 min-h-screen text-slate-900">
             <h1 className="text-2xl font-bold mb-6 text-slate-800">Semester 2 Timetable</h1>
