@@ -1,3 +1,4 @@
+import { getCurrentAcadSem } from "@/lib/utils"
 import { supabase } from '@/services/supabase'
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -53,7 +54,8 @@ export default function Login() {
             console.log("Invalid email or password. Please try again")
         } else {
             toast.success("Logged in Successfully!");
-            navigate("/home")
+            const currentSem = getCurrentAcadSem();
+            navigate(`/timetable/sem-${currentSem}`)
             console.log("Logged in successfully!", data)
         }
     }
