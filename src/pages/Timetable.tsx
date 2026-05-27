@@ -1,4 +1,4 @@
-import { useTimeTableData } from "@/hooks/useTimetableData";
+import { getTimetableData } from "@/hooks/getTimetableData";
 import { getCurrentAcadYear, getAcadYearString } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
@@ -8,7 +8,7 @@ const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear: number = getCurrentAcadYear();
     const acadYearString: String = getAcadYearString();
-    const { modules, loading } = useTimeTableData(currentYear, semester);
+    const { modules, loading } = getTimetableData(currentYear, semester);
     
     // Helper for time conversion
     const convertTimeToColumn = (timeString: string) => {

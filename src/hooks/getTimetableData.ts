@@ -5,7 +5,7 @@ import { getModule } from "@/services/nusmods";
 import { useEffect, useState } from "react";
 
 
-export function useTimeTableData(year:number, semester: number) {
+export function getTimetableData(year:number, semester: number) {
     const [modules, setModules] = useState <DisplayLesson[]>([]);
     const [loading, setLoading] = useState(true);
 
