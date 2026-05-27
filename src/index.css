@@ -1,7 +1,47 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+/* Light Theme Colors */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --heading: sans-serif;
+  --text-h: #0f172a;
+  --mono: monospace;
+  --code-bg: #f1f5f9;
+}
+
+/* Dark Theme Colors */
+.dark {
+  --background: #242428;         
+  --foreground: #e4e4e7;        
+  --muted-foreground: #a1a1aa;   
+  --card: #1a1a1e;             
+  --card-foreground: #e4e4e7;     
+  --border: #2a2a30;       
+  --text-h: #ffffff;              
+  --code-bg: #222226;
+}
+
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+}
+
 
 body {
   margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
 h1,
@@ -20,6 +60,7 @@ h1 {
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
@@ -29,6 +70,7 @@ h2 {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }

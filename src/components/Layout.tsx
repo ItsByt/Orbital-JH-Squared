@@ -1,14 +1,16 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/App-Sidebar"
+import { Theme } from "@/components/theme"
 
 export default function Layout() {
     return (
-        <SidebarProvider>
+        <Theme defaultTheme="dark" storageKey="vite-ui-theme">
+            <SidebarProvider>
 
-            <AppSidebar />
+                <AppSidebar />
 
-            <main className="w-full p-8 min-h-screen bg-slate-50">
+                <main className="w-full p-8 min-h-screen bg-background text-foreground transition-colors duration-200">
 
                 {/* Opens and closes the sidebar */}
                 <SidebarTrigger className="mb-4" />
@@ -19,5 +21,6 @@ export default function Layout() {
             </main>
 
         </SidebarProvider>
+        </Theme>
     )
 }

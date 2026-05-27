@@ -26,11 +26,17 @@ export default function Courses() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Courses</h1>
-                <p className="text-gray-500">Search for modules to add to your timetable.</p>
+                <h1
+                className="text-4xl font-bold"
+                style={{
+                fontFamily: "Bahnschrift, sans-serif",
+                color: "#56A58B"}}
+                >
+                Course Information
+                </h1>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <div className="w-full max-w-4xl mx-auto mt-6">
                 <SearchBar onSelect={handleModuleSelect} />
             </div>
 

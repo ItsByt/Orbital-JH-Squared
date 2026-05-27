@@ -5,11 +5,17 @@ export default function Planner() {
         <div className="space-y-6">
 
             <div>
-                <h1 className="text-3xl font-bold">Module Planner</h1>
-                <p className="text-gray-500">Search for modules to plan your years.</p>
+                <h1
+                className="text-4xl font-bold"
+                style={{
+                fontFamily: "Bahnschrift, sans-serif",
+                color: "#56A58B"}}
+                >
+                Module Planner
+                </h1>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <div className= "w-full max-w-4xl mx-auto mt-6">
                 <AutocompleteSearch />
             </div>
 

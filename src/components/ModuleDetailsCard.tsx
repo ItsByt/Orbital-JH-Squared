@@ -5,8 +5,6 @@ import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/t
 import { Loader2 } from "lucide-react";
 
 export default function ModuleDetailsCard({ module }: { module: ModuleDetails }) {
-    // Initialize variable with state to store description state (or null)
-    // Initialize state boolean for fetching status similar to loading
     const [isAddedSem1, setIsAddedSem1] = useState(false);
     const [isProcessingSem1, setIsProcessingSem1] = useState(false);
     const [isAddedSem2, setIsAddedSem2] = useState(false);
@@ -41,7 +39,6 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
             const success = await removeFromTimetable(module.moduleCode, currentYear, semester);
             if (success) setAdded(false);
         } else {
-            // NOTE: Make sure you update addToTimetable in timetableDB.ts to accept `semester` and `year` as arguments!
             await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
             setAdded(true);
         }
@@ -53,21 +50,24 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
     const offeredSem2 = module.semesterData?.some(s => s.semester === 2);
 
     return (
-        <div className="p-6 bg-white border rounded-xl shadow-sm space-y-4 text-sm text-gray-600 leading-relaxed">
-            <div className="flex justify-between items-start border-b pb-3">
+        <div className="p-6 bg-card border border-border rounded-xl shadow-sm space-y-4 text-sm text-muted-foreground leading-relaxed transition-colors duration-200">
+            
+            {/* Header section wrapper */}
+            <div className="flex justify-between items-start border-b border-border pb-3">
                 <div>
-                    <span className="font-bold text-blue-600 tracking-wide">{module.moduleCode}</span>
-                    <h2 className="text-xl font-bold text-gray-900 mt-0.5">{module.title}</h2>
+                    <span className="font-bold text-foreground tracking-wide">{module.moduleCode}</span>
+                    <h2 className="text-xl font-bold text-foreground mt-0.5">{module.title}</h2>
                 </div>
-                <span className="font-semibold text-gray-800 shrink-0">{module.moduleCredit} MCs</span>
+                <span className="font-semibold text-foreground shrink-0">{module.moduleCredit} MCs</span>
             </div>
 
+            {/* Semester Action Buttons */}
             <div className="flex gap-2">
                 {offeredSem1 && (
                     <button
                         onClick={() => handleToggle(1)}
                         disabled={isProcessingSem1}
-                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition cursor-pointer
                             ${isAddedSem1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
                     >
                         {isProcessingSem1 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
@@ -79,7 +79,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                     <button
                         onClick={() => handleToggle(2)}
                         disabled={isProcessingSem2}
-                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition cursor-pointer
                             ${isAddedSem2 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
                     >
                         {isProcessingSem2 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
@@ -88,7 +88,10 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                 )}
             </div>
 
-            <p className="text-sm text-gray-600 leading-relaxed">{module.description || "No description provided for this module."}</p>
+            {/* Module Description Paragraph */}
+            <p className="text-sm text-muted-foreground leading-relaxed">
+                {module.description || "No description provided for this module."}
+            </p>
         </div>
     );
 }
