@@ -1,4 +1,4 @@
-import AutoCompleteSearch from "@/hooks/moduleSearch";
+import AutoCompleteSearch from "@/hooks/useModuleSearch";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";

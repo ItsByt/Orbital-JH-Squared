@@ -1,4 +1,4 @@
-import { getTimetableData } from "@/hooks/getTimetableData";
+import { getTimetableData } from "@/hooks/useTimetableData";
 import { getCurrentAcadYear, getAcadYearString } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

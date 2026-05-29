@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner"
 import { Loader2 } from "lucide-react";
-import { Theme } from "@/components/theme";
+import { Theme } from "@/components/Theme";
 
-import Welcome from "@/pages/welcome"
-import Register from "@/pages/register"
-import Login from "@/pages/login"
+import Welcome from "@/pages/Welcome"
+import Register from "@/pages/Register"
+import Login from "@/pages/Login"
 import Layout from "@/components/Layout"
 import TimetablePage from "@/pages/Timetable"
 import Planner from "@/pages/Planner"
@@ -67,9 +67,9 @@ export default function App() {
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
-        
-        <Toaster 
-          theme="dark" 
+
+        <Toaster
+          theme="dark"
           toastOptions={{
             classNames: {
               toast: "!bg-[#18181b] backdrop-blur-none opacity-100 border border-neutral-800 text-zinc-100 rounded-xl p-4 shadow-xl flex items-center",

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/App-Sidebar"
-import { Theme } from "@/components/theme"
+import { AppSidebar } from "@/components/AppSidebar"
+import { Theme } from "@/components/Theme"
 
 export default function Layout() {
     return (
@@ -12,15 +12,15 @@ export default function Layout() {
 
                 <main className="w-full p-8 min-h-screen bg-background text-foreground transition-colors duration-200">
 
-                {/* Opens and closes the sidebar */}
-                <SidebarTrigger className="mb-4" />
+                    {/* Opens and closes the sidebar */}
+                    <SidebarTrigger className="mb-4" />
 
-                {/* Outlet for page specific stuff */}
-                <Outlet />
+                    {/* Outlet for page specific stuff */}
+                    <Outlet />
 
-            </main>
+                </main>
 
-        </SidebarProvider>
+            </SidebarProvider>
         </Theme>
     )
 }
