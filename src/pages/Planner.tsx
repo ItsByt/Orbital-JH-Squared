@@ -1,5 +1,3 @@
-import AutocompleteSearch from "@/components/SearchBar";
-
 export default function Planner() {
     return (
         <div className="space-y-6">
@@ -16,7 +14,7 @@ export default function Planner() {
             </div>
 
             <div className= "w-full max-w-4xl mx-auto mt-6">
-                <AutocompleteSearch />
+                
             </div>
 
             <div>

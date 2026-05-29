@@ -1,4 +1,4 @@
-import { getCurrentAcadSem } from "@/lib/utils"
+import { getCurrentAcadSem } from "@/utils/time"
 import { useNavigate } from "react-router-dom"
 import { supabase } from '@/services/supabase' 
 import { toast } from "sonner"

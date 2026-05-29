@@ -1,5 +1,5 @@
 import { getTimetableData } from "@/hooks/useTimetableData";
-import { getCurrentAcadYear, getAcadYearString } from "@/lib/utils";
+import { getCurrentAcadYear, getAcadYearString } from "@/utils/time";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";

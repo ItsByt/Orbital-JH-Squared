@@ -1,6 +1,6 @@
-import { getCurrentAcadYear } from "@/lib/utils"; 
+import { getCurrentAcadYear } from "@/utils/time"; 
 import { useState, useEffect } from "react";
-import type { ModuleDetails } from "@/services/nusmods";
+import type { ModuleDetails } from "@/types";
 import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";
 import { Loader2 } from "lucide-react";
 

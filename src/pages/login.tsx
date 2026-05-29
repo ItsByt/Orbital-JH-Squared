@@ -1,4 +1,4 @@
-import { getCurrentAcadSem } from "@/lib/utils"
+import { getCurrentAcadSem } from "@/utils/time"
 import { supabase } from '@/services/supabase'
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
