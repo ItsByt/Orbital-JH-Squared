@@ -34,6 +34,11 @@ export interface SavedTimetableModule {
     class_no: string;
     year: number;
     semester: number;
+    day: string;
+    start_time: string;
+    end_time: string;
+    venue: string;
+    weeks: string | null;
 }
 
 //Details for class BLOCKS 
@@ -46,5 +51,6 @@ export interface DisplayLesson {
     startTime: string;
     endTime: string;
     venue: string;
-    weeks: number[] | string[];
+    weeks?: any;
+    isAlternative?: boolean;
 }

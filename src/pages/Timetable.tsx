@@ -1,16 +1,25 @@
-import { getTimetableData } from "@/hooks/useTimetableData";
+import { useTimetableData } from "@/hooks/useTimetableData";
 import { getCurrentAcadYear, getAcadYearString } from "@/utils/time";
 import { Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { calculateDayLayout } from "@/utils/subrowAllocation";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700"];
+const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800"];
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear: number = getCurrentAcadYear();
     const acadYearString: String = getAcadYearString();
-    const { modules, loading } = getTimetableData(currentYear, semester);
+    const { 
+        modules, 
+        loading,
+        selectedLesson,
+        alternatives,
+        selectModuleToCompare,
+        clearAlternatives,
+        swapModuleSlot
+     } = useTimetableData(currentYear, semester);
     const navigate = useNavigate();
     
     // Helper for time conversion
@@ -32,6 +41,24 @@ export default function TimetablePage({ semester }: { semester: number }) {
             </div>
         );
     }
+
+    // clicking selected class  to show alternatives
+    const handleSelectClass = (lesson: any) => {
+        selectModuleToCompare(lesson);
+    };
+
+    // clicking alternatives to shift class
+    const handleSwapClass = async (oldLesson: any, chosenAlternative: any) => {
+        if (!oldLesson) return;
+
+        try {
+            await swapModuleSlot(oldLesson.id, chosenAlternative);
+        } catch (err) {
+            console.error("Failed to change class:", err);
+        } finally {
+            clearAlternatives();
+        }
+    };
 
     return (
         <div className="w-full min-h-screen flex flex-col items-start justify-start pt-1 px-6 pb-6 space-y-4 bg-background text-foreground transition-colors duration-200">
@@ -57,68 +84,105 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 </div>
 
                 {/* Grid Contents */}
+                
                 <div className="divide-y divide-border">
+                {/* // For each day, get lessons matching that day */}
                 {DAYS.map((day) => {
-                    const dayLessons = modules.filter(l => l.day.toLowerCase() === day.toLowerCase());
+                    // get user selected lessons on that day
+                    const activeDayLessons = modules.filter(l => l.day.toLowerCase() === day.toLowerCase());
+                    
+                    // get all alternative lessons on that day too
+                    // second filter fixes bug of split second both existing same alt and newly updated blocks
+                    const alternativeDayLessons = alternatives
+                        .filter(l => l.day.toLowerCase() === day.toLowerCase())
+                        .filter(alt => !modules.some(mod => mod.moduleCode === alt.moduleCode && mod.classNo === alt.classNo))
+                        .map(l => ({ ...l, isAlternative: true }));
+
+                    // combine both for convenience
+                    const allVisibleLessons = [...activeDayLessons, ...alternativeDayLessons];
+
+                    // allocate them into subrows (rerender on click alt as part of visible lessons)
+                    const { totalRowsForDay, lessonRowMap } = calculateDayLayout(allVisibleLessons);
 
                     return (
-                    <div key={day} className="grid grid-cols-[80px_repeat(22,1fr)] min-h-28 relative group">
-                        
-                        {/* Left Side Day Label column */}
-                        <div className="flex items-center justify-center font-bold text-xs text-muted-foreground border-r border-border bg-muted/30 uppercase tracking-wider select-none z-10 grid-row-start-1">
-                            {day.substring(0, 3)}
-                        </div>
-
-                        {/* BACKGROUND GRID MATRIX CELLS */}
-                        {Array.from({ length: 22 }).map((_, i) => (
                         <div 
-                            key={i} 
-                            style={{
-                                gridColumnStart: i + 2, 
-                                gridRowStart: 1
-                            }}
-                            className={`h-full border-r border-border/20 min-h-[112px] ${i % 2 === 1 ? 'bg-muted/10' : ''}`} 
-                        />
-                        ))}
-
-                        {/* 2. TIMETABLE LESSON CELL BLOCKS */}
-                        {dayLessons.map((lesson) => {
-                        const colStart = convertTimeToColumn(lesson.startTime);
-                        const colEnd = convertTimeToColumn(lesson.endTime);
-
-                        return (
-                            <div
-                                key={lesson.id}
-                                style={{
-                                    gridColumnStart: colStart + 1, 
-                                    gridColumnEnd: colEnd + 1,
-                                    gridRowStart: 1,
-                                }}
-
-                                className="my-1 mx-0.5 p-2 bg-purple-500/10 dark:bg-purple-500/20 border border-purple-400/40 dark:border-purple-400/30 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer hover:bg-purple-500/20 dark:hover:bg-purple-500/30 transition-all duration-200 z-20"
-                            >
-                                <div>
-                                    <div className="font-bold text-purple-600 dark:text-purple-300 truncate">
-                                        {lesson.moduleCode}
-                                    </div>
-                                    <div className="text-[10px] text-purple-500 dark:text-purple-400 font-semibold mt-0.5">
-                                        {lesson.lessonType.substring(0, 3).toUpperCase()} [{lesson.classNo}]
-                                    </div>
-                                    <div className="text-[10px] text-muted-foreground mt-0.5 font-medium truncate">
-                                        {lesson.venue}
-                                    </div>
-                                </div>
-                                
-                                {lesson.weeks && (
-                                    <div className="text-[9px] text-muted-foreground/60 mt-1 font-medium">
-                                        Weeks {typeof lesson.weeks === 'string' ? lesson.weeks : '3-13'}
-                                    </div>
-                                )}
+                            key={day} 
+                            className="grid grid-cols-[80px_repeat(22,1fr)] relative"
+                            style={{ gridTemplateRows: `repeat(${totalRowsForDay}, minmax(112px, auto))` }}
+                        >
+                            {/*  Day Label Column */}
+                            <div className="p-3 font-bold text-xs border-r border-border bg-muted/20 select-none flex items-center justify-start row-span-full z-10 sticky left-0 backdrop-blur-sm">
+                                {day.substring(0, 3)}
                             </div>
-                        );
-                        })}
-                        
-                    </div>
+
+                            {/* Background Grid Lines */}
+                            <div className="absolute inset-0 left-[80px] grid grid-cols-22 pointer-events-none select-none">
+                                {Array.from({ length: 22 }).map((_, idx) => (
+                                    <div 
+                                        key={idx} 
+                                        className={`h-full border-r ${
+                                            idx % 2 === 1 
+                                                ? "border-border/40" 
+                                                : "border-border/10 border-dashed"
+                                        }`} 
+                                    />
+                                ))}
+                            </div>
+
+                            {/* Render Lesson Blocks */}
+                            {allVisibleLessons.map((lesson) => {
+                                const colStart = convertTimeToColumn(lesson.startTime);
+                                const colEnd = convertTimeToColumn(lesson.endTime);
+                                const rowIndex = (lessonRowMap.get(lesson.id) ?? 0) + 1;
+
+                                return (
+                                    <div
+                                        key={lesson.id}
+                                        style={{
+                                            gridColumnStart: colStart + 1, 
+                                            gridColumnEnd: colEnd + 1,
+                                            gridRowStart: rowIndex,
+                                        }}
+                                        // IMPORTANT: this will run the hooks
+                                        // which updates Visible Lessons forcing
+                                        // rerender and hence new blocks being subrow allocated
+                                        // or removed depending on nature of block clicked.
+                                        onClick={() => {
+                                            if (lesson.isAlternative) {
+                                                // clicked alternative
+                                                handleSwapClass(selectedLesson, lesson);
+                                            } else {
+                                                // clicked user selected
+                                                handleSelectClass(lesson);
+                                            }
+                                        }}
+
+                                        // alternative or selected display design
+                                        className={`my-1 mx-0.5 p-2 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-200 z-20 border
+                                            ${lesson.isAlternative 
+                                                ? "bg-amber-500/20 dark:bg-amber-500/10 border-dashed border-amber-400 opacity-60 hover:opacity-100 hover:bg-amber-500/30" 
+                                                : "bg-purple-500/10 dark:bg-purple-500/20 border-purple-400/40 dark:border-purple-400/30 hover:bg-purple-500/20"
+                                            }`}
+                                    >
+                                        {/* Module Details */}
+                                        <div className="flex flex-col space-y-0.5">
+                                            <span className="font-bold tracking-wide text-foreground">
+                                                {lesson.moduleCode}
+                                            </span>
+                                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                                                {lesson.lessonType} [{lesson.classNo}]
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="flex flex-col space-y-0.5 mt-2">
+                                            <span className="text-[11px] font-medium text-muted-foreground truncate">
+                                                 {lesson.venue || "No Venue"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     );
                 })}
                 

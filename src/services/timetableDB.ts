@@ -64,11 +64,22 @@ export async function addToTimetable(
             const earliest = slots[0];
             rowsToInsert.push({
                 user_id: user.id,
+
                 module_code: moduleCode,
                 lesson_type: lessonType,
                 class_no: earliest.classNo,
+
                 year: year,
-                semester: semester
+                semester: semester,
+
+                day: earliest.day,
+                start_time: earliest.startTime,
+                end_time: earliest.endTime,
+                venue: earliest.venue,
+
+                weeks: earliest.weeks
+                    ? JSON.stringify(earliest.weeks)
+                    : null
             });
         }
 
