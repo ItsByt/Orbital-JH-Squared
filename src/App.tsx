@@ -6,9 +6,9 @@ import { Toaster } from "@/components/ui/sonner"
 import { Loader2 } from "lucide-react";
 import { Theme } from "@/components/theme";
 
-import Welcome from "@/pages/Welcome"
-import Register from "@/pages/Register"
-import Login from "@/pages/Login"
+import Welcome from "@/pages/welcome"
+import Register from "@/pages/register"
+import Login from "@/pages/login"
 import Layout from "@/components/Layout"
 import TimetablePage from "@/pages/Timetable"
 import Planner from "@/pages/Planner"

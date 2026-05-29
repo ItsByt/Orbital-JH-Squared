@@ -9,7 +9,7 @@ export default function Settings() {
 
     return (
         <div className="w-full min-h-screen flex flex-col items-start justify-start pt-1 px-6 pb-6 space-y-4 bg-background text-foreground">
-      <div>
+        <div>
         <h1
                 className="text-4xl font-bold"
                 style={{
