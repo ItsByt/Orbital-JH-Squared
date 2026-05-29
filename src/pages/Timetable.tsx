@@ -44,7 +44,11 @@ export default function TimetablePage({ semester }: { semester: number }) {
 
     // clicking selected class  to show alternatives
     const handleSelectClass = (lesson: any) => {
-        selectModuleToCompare(lesson);
+        if (selectedLesson && selectedLesson.id === lesson.id) {
+            clearAlternatives();
+        } else {
+            selectModuleToCompare(lesson);
+        }
     };
 
     // clicking alternatives to shift class
