@@ -2,6 +2,7 @@ import { getCurrentAcadSem } from "@/utils/time"
 import { supabase } from '@/services/supabase'
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/NUSModsPlusLogo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
@@ -70,7 +71,7 @@ export default function Login() {
                 {/* Massive centered Png Logo */}
                 <div className="text-center w-full cursor-pointer" onClick={() => navigate("/")}>
                     <img 
-                        src="src\assets\NUSModsPlusLogo.png" 
+                        src={logo} 
                         alt="NUSMods Plus Logo" 
                         className="w-[450px] max-w-full h-auto object-contain mx-auto drop-shadow-sm" 
                     />

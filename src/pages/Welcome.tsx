@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/NUSModsPlusLogo.png";
 
 
 export default function Welcome() {
@@ -12,7 +13,7 @@ export default function Welcome() {
                 
                 <div className="w-full">
                     <img 
-                        src="src\assets\NUSModsPlusLogo.png" 
+                        src={logo}
                         alt="NUSMods Plus Logo" 
                         className="w-[500px] md:w-[700px] h-auto object-contain mx-auto drop-shadow-sm" 
                     />
