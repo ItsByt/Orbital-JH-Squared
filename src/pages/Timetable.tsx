@@ -92,10 +92,14 @@ export default function TimetablePage({ semester }: { semester: number }) {
                     const activeDayLessons = modules.filter(l => l.day.toLowerCase() === day.toLowerCase());
                     
                     // get all alternative lessons on that day too
-                    // second filter fixes bug of split second both existing same alt and newly updated blocks
                     const alternativeDayLessons = alternatives
                         .filter(l => l.day.toLowerCase() === day.toLowerCase())
-                        .filter(alt => !modules.some(mod => mod.moduleCode === alt.moduleCode && mod.classNo === alt.classNo))
+                        .filter(alt => !modules.some(mod => 
+                            mod.moduleCode === alt.moduleCode && 
+                            mod.classNo === alt.classNo &&
+                            mod.day.toLowerCase() === alt.day.toLowerCase() &&
+                            mod.startTime === alt.startTime
+                        ))
                         .map(l => ({ ...l, isAlternative: true }));
 
                     // combine both for convenience
@@ -116,7 +120,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
                             </div>
 
                             {/* Background Grid Lines */}
-                            <div className="absolute inset-0 left-[80px] grid grid-cols-22 pointer-events-none select-none">
+                            <div className="absolute inset-0 left-[80px] grid grid-cols-[repeat(22,1fr)] pointer-events-none select-none">
                                 {Array.from({ length: 22 }).map((_, idx) => (
                                     <div 
                                         key={idx} 
@@ -135,9 +139,13 @@ export default function TimetablePage({ semester }: { semester: number }) {
                                 const colEnd = convertTimeToColumn(lesson.endTime);
                                 const rowIndex = (lessonRowMap.get(lesson.id) ?? 0) + 1;
 
+                                const uniqueCardKey = lesson.isAlternative 
+                                ? `alt-${lesson.moduleCode}-${lesson.lessonType}-${lesson.classNo}-${lesson.day}-${lesson.startTime}`
+                                : `active-${lesson.id}-${lesson.classNo}-${lesson.day}`;
+
                                 return (
                                     <div
-                                        key={lesson.id}
+                                        key={uniqueCardKey}
                                         style={{
                                             gridColumnStart: colStart + 1, 
                                             gridColumnEnd: colEnd + 1,

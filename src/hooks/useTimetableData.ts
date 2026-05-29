@@ -73,11 +73,11 @@ export function useTimetableData(year:number, semester: number) {
 
             // filter out alternatives
             const alternativesFiltered = rawTimetable.filter((slot: any) => {
-                const apiLessonType = (slot.lessonType || "").toUpperCase();
-                const currentLessonType = (lesson.lessonType || "").toUpperCase();
-                const apiClassNo = slot.classNo || slot.class_no || ""; 
-                
-                return apiLessonType === currentLessonType && apiClassNo !== lesson.classNo;
+            const apiLessonType = (slot.lessonType || "").toUpperCase();
+            const currentLessonType = (lesson.lessonType || "").toUpperCase();
+            const apiClassNo = String(slot.classNo || slot.class_no || "").replace(/^0+/, "");
+            const currentClassNo = String(lesson.classNo || "").replace(/^0+/, ""); 
+            return apiLessonType === currentLessonType && apiClassNo !== currentClassNo;
             });
 
             // format into display lesson
