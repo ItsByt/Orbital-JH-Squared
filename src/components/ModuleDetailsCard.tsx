@@ -1,14 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { getCurrentAcadYear } from "@/utils/time"; 
+import { getCurrentAcadYear } from "@/utils/time";
 import { useState, useEffect } from "react";
 import type { ModuleDetails } from "@/types";
 import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";
 import { Loader2 } from "lucide-react";
 
 export default function ModuleDetailsCard({ module }: { module: ModuleDetails }) {
-    const queryClient = useQueryClient(); 
+    const queryClient = useQueryClient();
 
-    const [_isInitializing, setIsInitializing] = useState(true);
+    const [isInitializing, setIsInitializing] = useState(true);
     const [isAddedSem1, setIsAddedSem1] = useState(false);
     const [isProcessingSem1, setIsProcessingSem1] = useState(false);
     const [isAddedSem2, setIsAddedSem2] = useState(false);
@@ -18,7 +18,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
 
     useEffect(() => {
         async function checkStatus() {
-            setIsInitializing(true); 
+            setIsInitializing(true);
             const savedSem1 = await isInTimetable(module.moduleCode, currentYear, 1);
             const savedSem2 = await isInTimetable(module.moduleCode, currentYear, 2);
             setIsAddedSem1(savedSem1);
@@ -29,7 +29,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
     }, [module.moduleCode, currentYear]);
 
     const handleToggle = async (semester: number) => {
-        const semData = module.semesterData?.find(s => s.semester === semester);
+        const semData = module.semesterData?.find((s) => s.semester === semester);
         if (!semData || !semData.timetable) {
             alert(`This module is not offered in Semester ${semester}.`);
             return;
@@ -46,7 +46,12 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
             if (success) setAdded(false);
             queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
         } else {
-            const success = await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
+            const success = await addToTimetable(
+                module.moduleCode,
+                semData.timetable,
+                currentYear,
+                semester
+            );
             if (success) setAdded(true);
             queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
         }
@@ -54,19 +59,22 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
         setProcessing(false);
     };
 
-    const offeredSem1 = module.semesterData?.some(s => s.semester === 1);
-    const offeredSem2 = module.semesterData?.some(s => s.semester === 2);
+    const offeredSem1 = module.semesterData?.some((s) => s.semester === 1);
+    const offeredSem2 = module.semesterData?.some((s) => s.semester === 2);
 
     return (
         <div className="p-6 bg-card border border-border rounded-xl shadow-sm space-y-4 text-sm text-muted-foreground leading-relaxed transition-colors duration-200">
-            
             {/* Header section wrapper */}
             <div className="flex justify-between items-start border-b border-border pb-3">
                 <div>
-                    <span className="font-bold text-foreground tracking-wide">{module.moduleCode}</span>
+                    <span className="font-bold text-foreground tracking-wide">
+                        {module.moduleCode}
+                    </span>
                     <h2 className="text-xl font-bold text-foreground mt-0.5">{module.title}</h2>
                 </div>
-                <span className="font-semibold text-foreground shrink-0">{module.moduleCredit} MCs</span>
+                <span className="font-semibold text-foreground shrink-0">
+                    {module.moduleCredit} MCs
+                </span>
             </div>
 
             {/* Semester Action Buttons */}
@@ -74,24 +82,42 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                 {offeredSem1 && (
                     <button
                         onClick={() => handleToggle(1)}
-                        disabled={isProcessingSem1}
-                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition cursor-pointer
-                            ${isAddedSem1 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
+                        // 1. Disable button if processing OR initializing
+                        disabled={isProcessingSem1 || isInitializing}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition 
+                            ${isProcessingSem1 || isInitializing ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}
+                            ${isAddedSem1 ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}`}
                     >
-                        {isProcessingSem1 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                        {isAddedSem1 ? "Remove from Sem 1" : "Add to Sem 1"}
+                        {/* 2. Show spinner if processing OR initializing */}
+                        {(isProcessingSem1 || isInitializing) && (
+                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        )}
+
+                        {/* 3. Show "Checking..." text while loading */}
+                        {isInitializing
+                            ? "Checking..."
+                            : isAddedSem1
+                              ? "Remove from Sem 1"
+                              : "Add to Sem 1"}
                     </button>
                 )}
 
                 {offeredSem2 && (
                     <button
                         onClick={() => handleToggle(2)}
-                        disabled={isProcessingSem2}
-                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition cursor-pointer
-                            ${isAddedSem2 ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700'}`}
+                        disabled={isProcessingSem2 || isInitializing}
+                        className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition 
+                            ${isProcessingSem2 || isInitializing ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}
+                            ${isAddedSem2 ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}`}
                     >
-                        {isProcessingSem2 && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-                        {isAddedSem2 ? "Remove from Sem 2" : "Add to Sem 2"}
+                        {(isProcessingSem2 || isInitializing) && (
+                            <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                        )}
+                        {isInitializing
+                            ? "Checking..."
+                            : isAddedSem2
+                              ? "Remove from Sem 2"
+                              : "Add to Sem 2"}
                     </button>
                 )}
             </div>

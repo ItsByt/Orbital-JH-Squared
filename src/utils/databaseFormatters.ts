@@ -1,12 +1,12 @@
 // Formatting for Timetable Database
 export function formatForTimetableDatabase(
-    slots: any[], 
-    userId: string, 
-    year: number, 
-    semester: number, 
-    moduleCode?: string) {
-        
-    return slots.map(slot => ({
+    slots: any[],
+    userId: string,
+    year: number,
+    semester: number,
+    moduleCode?: string
+) {
+    return slots.map((slot) => ({
         user_id: userId,
         module_code: moduleCode || slot.moduleCode,
         lesson_type: slot.lessonType,
@@ -17,6 +17,6 @@ export function formatForTimetableDatabase(
         start_time: slot.startTime,
         end_time: slot.endTime,
         venue: slot.venue,
-        weeks: slot.weeks ? JSON.stringify(slot.weeks) : null
+        weeks: slot.weeks ? JSON.stringify(slot.weeks) : null,
     }));
 }

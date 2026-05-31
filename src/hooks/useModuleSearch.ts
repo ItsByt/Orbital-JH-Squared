@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getModuleList } from "@/services/nusmods";
-import type { ModuleSummary } from "@/types"
+import type { ModuleSummary } from "@/types";
 
 export default function AutoCompleteSearch() {
     const [allModules, setAllModules] = useState<ModuleSummary[]>([]);
@@ -28,9 +28,10 @@ export default function AutoCompleteSearch() {
         const lowerCaseSearch = searchTerm.toLowerCase();
 
         //Filtering through the array of ModuleSummary
-        const filtered = allModules.filter((mod) =>
-            mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
-            mod.title.toLowerCase().includes(lowerCaseSearch)
+        const filtered = allModules.filter(
+            (mod) =>
+                mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
+                mod.title.toLowerCase().includes(lowerCaseSearch)
         );
 
         filtered.sort((a, b) => {
@@ -58,7 +59,7 @@ export default function AutoCompleteSearch() {
             return aCode.localeCompare(bCode);
         });
         // Only keep top 10 results
-            setSearchResults(filtered.slice(0, 10));
+        setSearchResults(filtered.slice(0, 10));
     }, [searchTerm, allModules]);
 
     return {
@@ -66,8 +67,6 @@ export default function AutoCompleteSearch() {
         setSearchTerm,
         searchResults,
         setSearchResults,
-        isLoading
+        isLoading,
     };
 }
-
-
