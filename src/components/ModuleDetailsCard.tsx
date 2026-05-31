@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { getCurrentAcadYear } from "@/utils/time"; 
 import { useState, useEffect } from "react";
 import type { ModuleDetails } from "@/types";
@@ -5,6 +6,9 @@ import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/t
 import { Loader2 } from "lucide-react";
 
 export default function ModuleDetailsCard({ module }: { module: ModuleDetails }) {
+    const queryClient = useQueryClient(); 
+
+    const [_isInitializing, setIsInitializing] = useState(true);
     const [isAddedSem1, setIsAddedSem1] = useState(false);
     const [isProcessingSem1, setIsProcessingSem1] = useState(false);
     const [isAddedSem2, setIsAddedSem2] = useState(false);
@@ -14,10 +18,12 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
 
     useEffect(() => {
         async function checkStatus() {
+            setIsInitializing(true); 
             const savedSem1 = await isInTimetable(module.moduleCode, currentYear, 1);
             const savedSem2 = await isInTimetable(module.moduleCode, currentYear, 2);
             setIsAddedSem1(savedSem1);
             setIsAddedSem2(savedSem2);
+            setIsInitializing(false);
         }
         checkStatus();
     }, [module.moduleCode, currentYear]);
@@ -38,9 +44,11 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
         if (isAdded) {
             const success = await removeFromTimetable(module.moduleCode, currentYear, semester);
             if (success) setAdded(false);
+            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
         } else {
-            await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
-            setAdded(true);
+            const success = await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
+            if (success) setAdded(true);
+            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
         }
 
         setProcessing(false);

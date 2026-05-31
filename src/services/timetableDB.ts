@@ -1,17 +1,30 @@
 import { supabase } from "./supabase";
-import type { ModuleDetails } from "@/types"
+import { getUserId } from "@/services/auth";
+import type { ModuleDetails, DisplayLesson, SavedTimetableModule } from "@/types";
+import { formatSavedModules } from "@/utils/timetableUtils/lessonFormatters";
+import { formatForTimetableDatabase } from "@/utils/databaseFormatters";
+import { findBestFit } from "@/utils/timetableUtils/optimalScheduler";
 import { toast } from "sonner";
 
+
+export async function getUserModules(userId: string, year: number, semester: number) {
+    const { data, error } = await supabase
+        .from("timetable_modules")
+        .select('*')
+        .eq("user_id", userId)
+        .eq("year", year)
+        .eq("semester", semester)
+    return { myModules: data, error }
+}
+
 export async function isInTimetable(moduleCode: string, year: number, semester: number) {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-        return false;
-    }
+    const userId = await getUserId();
+    if (!userId) return false;
 
     const { data, error: moduleDNEerror } = await supabase
         .from("timetable_modules")
         .select("id")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("module_code", moduleCode)
         .eq("year", year)
         .eq("semester", semester)
@@ -34,54 +47,25 @@ export async function addToTimetable(
 
     try {
         // Get user (supabase). Add to timetable only works if logged in
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
+        const userId = await getUserId();
+        if (!userId) {
             toast.error("Authentication required. Please log in first.");
-            return;
+            return false;
         }
 
-        // For each timetable "block", group by type, add to Record 
-        // Create type if encountered new category
-        const groupBy: Record<string, ModuleDetails["semesterData"][number]["timetable"]> = {};
-        timetableSlots.forEach(slot => {
-            if (!groupBy[slot.lessonType]) {
-                groupBy[slot.lessonType] = [];
-            }
-            groupBy[slot.lessonType].push(slot);
-        });
+        const { myModules } = await getUserModules(userId, year, semester);
 
-        const rowsToInsert = [];
-        // parse every timetable type and retrieve earliest class
-        // then update details into supabase
-        for (const lessonType in groupBy) {
-            const slots = groupBy[lessonType];
-            slots.sort((a, b) => {
-                if (a.classNo != b.classNo)
-                    return a.classNo.localeCompare(b.classNo);
-                return parseInt(a.startTime) - parseInt(b.startTime);
-            });
+        // Convert existing Supabase data to DisplayLesson for the optimisation algorithm
+        const currentTimetable = formatSavedModules((myModules as SavedTimetableModule[]) || []);
 
-            const earliest = slots[0];
-            rowsToInsert.push({
-                user_id: user.id,
-
-                module_code: moduleCode,
-                lesson_type: lessonType,
-                class_no: earliest.classNo,
-
-                year: year,
-                semester: semester,
-
-                day: earliest.day,
-                start_time: earliest.startTime,
-                end_time: earliest.endTime,
-                venue: earliest.venue,
-
-                weeks: earliest.weeks
-                    ? JSON.stringify(earliest.weeks)
-                    : null
-            });
+        const optimalSlots = findBestFit(moduleCode, timetableSlots, currentTimetable);
+        if (optimalSlots.length === 0) {
+            toast.error("Could not schedule module. No valid lessons found.");
+            return false;
         }
+
+        // Upload optimal slots to Supabase
+        const rowsToInsert = formatForTimetableDatabase(optimalSlots, userId, year, semester, moduleCode);
 
         const { error: dbError } = await supabase
             .from("timetable_modules")
@@ -91,38 +75,42 @@ export async function addToTimetable(
         toast.success(`${moduleCode} has been successfully added!`, {
             description: "Please Check your Timetable"
         });
+
+        return true;
     } catch (error: any) {
         toast.error("Failed to update timetable database.", {
             description: error.message || "Unexpected error occurred."
         });
+
+        return false;
     }
 }
 
 export async function removeFromTimetable(moduleCode: string, year: number, semester: number) {
     try {
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        if (userError || !user) {
-            toast.error("Authentication required.");
+        const userId = await getUserId();
+        if (!userId) {
+            toast.error("Authentication required. Please log in first.");
             return false;
         }
 
         const { data, error: deletionError } = await supabase
             .from("timetable_modules")
             .delete()
-            .eq("user_id", user.id)
+            .eq("user_id", userId)
             .eq("module_code", moduleCode)
             .eq("year", year)
             .eq("semester", semester)
             .select();
-        
+
         if (deletionError) throw deletionError;
-        
+
         if (!data || data.length === 0) {
             toast.error("Could not find that module in your database to delete.");
             console.error("Delete failed. Check if year/sem match exactly in Supabase.");
             return false;
         }
-       
+
         toast.success(`${moduleCode} removed from your timetable.`);
         return true;
     } catch (error: any) {
@@ -131,13 +119,45 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
     }
 }
 
-export async function getUserModules(userId: string, year: number, semester: number) {
-    const { data, error } = await supabase
-        .from("timetable_modules")
-        .select('*')
-        .eq("user_id", userId)
-        .eq("year", year)
-        .eq("semester", semester)
-    return { myModules: data, error }
+export async function swapLessonInTimetable(
+    oldLesson: DisplayLesson,
+    newClassSlots: DisplayLesson[],
+    year: number,
+    semester: number
+) {
+    try {
+        const userId = await getUserId();
+        if (!userId) {
+            toast.error("Authentication required. Please log in first.");
+            return false;
+        }
+
+        // Delete all old slots tied to the previous classNo
+        const { error: deleteError } = await supabase
+            .from("timetable_modules")
+            .delete()
+            .eq("user_id", userId)
+            .eq("module_code", oldLesson.moduleCode)
+            .eq("lesson_type", oldLesson.lessonType)
+            .eq("class_no", oldLesson.classNo)
+            .eq("year", year)
+            .eq("semester", semester);
+
+        if (deleteError) throw deleteError;
+
+        // Insert all new slots tied to the new classNo
+        const rowsToInsert = formatForTimetableDatabase(newClassSlots, userId, year, semester);
+
+        const { error: insertError } = await supabase
+            .from("timetable_modules")
+            .insert(rowsToInsert);
+
+        if (insertError) throw insertError;
+
+        return true;
+    } catch (error) {
+        console.error("Failed to swap lesson in DB:", error);
+        throw error; // Throw to trigger React Query's onError rollback
+    }
 }
 

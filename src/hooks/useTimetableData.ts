@@ -1,177 +1,118 @@
-import { supabase } from "@/services/supabase";
-import type { DisplayLesson, SavedTimetableModule } from "@/types"
-import { getUserModules } from "@/services/timetableDB";
-import { useEffect, useState } from "react";
+import { getUserId } from "@/services/auth";
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getUserModules, swapLessonInTimetable } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
+import type { DisplayLesson, SavedTimetableModule } from "@/types";
+import { formatSavedModules, formatAlternativeLessons, buildDisplayLesson } from "@/utils/timetableUtils/lessonFormatters";
 
 
-export function useTimetableData(year:number, semester: number) {
-    const [modules, setModules] = useState <DisplayLesson[]>([]);
-    const [loading, setLoading] = useState(true);
+export function useTimetableData(year: number, semester: number) {
+    const queryClient = useQueryClient();
+    const queryKey = ["timetable", year, semester];
+
+    const { data: modules = [], isLoading: loading } = useQuery({
+        queryKey,
+        queryFn: async () => {
+            const userId = await getUserId();
+            if (!userId) return [];
+            const { myModules } = await getUserModules(userId, year, semester);
+            const savedList = (myModules as SavedTimetableModule[] || []);
+            const compiledLessons: DisplayLesson[] = formatSavedModules(savedList);
+            return compiledLessons;
+        },
+        staleTime: 1000 * 60 * 5, //Cache time of 5 minutes
+    });
+
     const [selectedLesson, setSelectedLesson] = useState<DisplayLesson | null>(null);
-    const [alternatives, setAlternatives] = useState<DisplayLesson[]>([]);
 
 
-    //_____________________________retrieve and format selected lessons whenever year/sem changes_______________________________//
-    useEffect(() => {
-        async function loadModuleData() {
-              try {
-                setLoading(true);
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) return;
-    
-                // Retrieve from Supabase firectly with a single call,
-                // Removed need to call API again using tokens (old)
-                const { myModules } = await getUserModules(user.id, year, semester);
-                const savedList = (myModules as SavedTimetableModule[] || []);
-                const compiledLessons: DisplayLesson[] = savedList.map(
-                    (saved) => ({
-                        id: saved.id,
-                        moduleCode: saved.module_code,
-                        lessonType: saved.lesson_type,
-                        classNo: saved.class_no,
-                        day: saved.day,
-                        startTime: saved.start_time,
-                        endTime: saved.end_time,
-                        venue: saved.venue,
-                        weeks: saved.weeks
-                            ? JSON.parse(saved.weeks)
-                            : null
-                    })
-                );
-
-    
-                
-                // SET HERE + ERROR HANDLING
-                setModules(compiledLessons);
-                setSelectedLesson(null);
-                setAlternatives([]);
-            } catch (error) {
-                console.error("Error: ", error);
-            } finally {
-                setLoading(false);
-            }
-          }
-    
-          loadModuleData();
-        }, [year, semester]);
+    const { data: modData } = useQuery({
+        queryKey: ["nusmods", selectedLesson?.moduleCode],
+        queryFn: () => getModule(selectedLesson!.moduleCode),
+        enabled: !!selectedLesson, // Only fetch when a lesson is selected
+        staleTime: Infinity, // NUSMods data does not change during a session
+    })
 
 
     //_____________________________fn to retrieve and format alternative lessons__________________________________//
-    const selectModuleToCompare = async (lesson: DisplayLesson) => {
-        setSelectedLesson(lesson);
+    const alternatives = useMemo(() => {
+        if (!selectedLesson || !modData) return [];
+        const semData = modData.semesterData?.find((s: any) => s.semester === semester);
+        const rawTimetable = semData?.timetable || [];
+        return formatAlternativeLessons(rawTimetable, selectedLesson);
+    }, [selectedLesson, modData, semester]);
 
-        try {
-            // Get alternative class mod data from NUSAPI since Supabase only stores personal selection
-            const modData = await getModule(lesson.moduleCode);
-            
-            if (!modData) throw new Error("Invalid module code");
 
-            // Find the timetable array for semester
+    //___________________________________ fn to clear current alternatives___________________________________________//
+    const clearAlternatives = () => setSelectedLesson(null);
+
+
+    //______________________________________ fn to swap to alternative__________________________________________//
+    const swapMutation = useMutation({
+        mutationFn: async ({ oldLesson, newClassSlots }: { oldLesson: DisplayLesson, newClassSlots: DisplayLesson[] }) => {
+            await swapLessonInTimetable(oldLesson, newClassSlots, year, semester);
+        },
+        onMutate: async ({ oldLesson, newClassSlots }) => {
+            // Cancel outgoing refetches
+            await queryClient.cancelQueries({ queryKey });
+
+            // Snapshot previous value for rollback
+            const previousModules = queryClient.getQueryData<DisplayLesson[]>(queryKey);
+
+            // Optimistically update UI
+            queryClient.setQueryData<DisplayLesson[]>(queryKey, (old) => {
+                if (!old) return [];
+
+                const filteredOld = old.filter(mod =>
+                    !(mod.moduleCode === oldLesson.moduleCode &&
+                        mod.lessonType === oldLesson.lessonType &&
+                        mod.classNo === oldLesson.classNo)
+                );
+
+                return [...filteredOld, ...newClassSlots];
+            });
+
+            clearAlternatives();
+            return { previousModules };
+        },
+
+        onError: (err, _variables, context) => {
+            console.error("Supabase failed, rolling back. The error was:", err);
+            if (context?.previousModules) {
+                queryClient.setQueryData(queryKey, context.previousModules);
+            }
+        },
+        onSettled: () => {
+            // Sync with server completely when done
+            queryClient.invalidateQueries({ queryKey });
+        }
+    });
+
+    return {
+        modules,
+        loading,
+        selectedLesson,
+        alternatives,
+        selectModuleToCompare: setSelectedLesson,
+        clearAlternatives,
+        swapModuleSlot: (oldLesson: DisplayLesson, newLesson: DisplayLesson) => {
+            if (!modData) return;
+
             const semData = modData.semesterData?.find((s: any) => s.semester === semester);
             const rawTimetable = semData?.timetable || [];
 
-            // filter out alternatives
-            const alternativesFiltered = rawTimetable.filter((slot: any) => {
-            const apiLessonType = (slot.lessonType || "").toUpperCase();
-            const currentLessonType = (lesson.lessonType || "").toUpperCase();
-            const apiClassNo = String(slot.classNo || slot.class_no || "").replace(/^0+/, "");
-            const currentClassNo = String(lesson.classNo || "").replace(/^0+/, ""); 
-            return apiLessonType === currentLessonType && apiClassNo !== currentClassNo;
-            });
+            // Find every lesson block that shares this new classNo
+            const tiedRawSlots = rawTimetable.filter((slot: any) =>
+                (slot.lessonType || "").toUpperCase() === newLesson.lessonType.toUpperCase() &&
+                slot.classNo === newLesson.classNo
+            );
 
-            // format into display lesson
-            const mappedAlternatives: DisplayLesson[] = alternativesFiltered.map((alt: any, index: number) => {
-                const finalClassNo = alt.classNo || alt.class_no || "";
+            const newClassSlots: DisplayLesson[] = tiedRawSlots.map((slot: any, index: number) =>
+                buildDisplayLesson(oldLesson.moduleCode, slot, `temp-swap-${index}`, false)
+            );
 
-                return {
-                    id: `alt-${lesson.moduleCode}-${alt.lessonType}-${finalClassNo}-${index}`,
-                    moduleCode: lesson.moduleCode,
-                    lessonType: alt.lessonType, 
-                    classNo: finalClassNo, 
-                    day: alt.day,
-                    startTime: alt.startTime,
-                    endTime: alt.endTime,
-                    venue: alt.venue || "No Venue",
-                    weeks: alt.weeks,
-                    isAlternative: true
-                };
-            });
-
-            setAlternatives(mappedAlternatives);
-        } catch (error) {
-            console.error("Failed to fetch alternative:", error);
-            setAlternatives([]);
+            swapMutation.mutate({ oldLesson, newClassSlots });
         }
     };
-    //___________________________________ fn to clear current alternatives___________________________________________//
-    const clearAlternatives = () => {
-        setSelectedLesson(null);
-        setAlternatives([]);
-        };
-
-    //______________________________________ fn to swap to alternative__________________________________________//
-    const swapModuleSlot = async (oldLessonId: string, newLessonData: DisplayLesson) => {
-        // recreate a fresh array with unmodified previously selected mods. Only modify the alt (same old id)
-        // with newLessonData info and set isAlt to false.
-        setModules((prevModules) =>
-            prevModules.map((mod) =>
-                mod.id === oldLessonId 
-                    ? { 
-                        ...mod, 
-                        classNo: newLessonData.classNo,
-                        day: newLessonData.day,
-                        startTime: newLessonData.startTime,
-                        endTime: newLessonData.endTime,
-                        venue: newLessonData.venue,
-                        weeks: newLessonData.weeks,
-                        isAlternative: false 
-                    } 
-                    : mod
-            )
-        );
-
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error("No authenticated user found");
-
-            // update Supabase to use this new alternative as currently selected mod
-            const { error } = await supabase
-                .from("timetable_modules") 
-                .update({
-                    class_no: newLessonData.classNo,
-                    day: newLessonData.day,
-                    start_time: newLessonData.startTime,
-                    end_time: newLessonData.endTime,
-                    venue: newLessonData.venue,
-                    weeks: JSON.stringify(newLessonData.weeks)
-                })
-                .eq("id", oldLessonId)
-                .eq("user_id", user.id)
-                // .select(); for DEBUGGING (update RLS)
-
-            if (error) throw error;
-
-        } catch (error) {
-            console.error("Failed to update Supabase:", error);
-            
-        } finally {
-            // always clear alternatives so rerender does not show blocks again
-            setSelectedLesson(null);
-            setAlternatives([]);
-        }
-    };
-
-    
-    
-
-    return { 
-        modules, 
-        loading, 
-        selectedLesson, 
-        alternatives, 
-        selectModuleToCompare, 
-        clearAlternatives,
-        swapModuleSlot
-    };
-}
+};

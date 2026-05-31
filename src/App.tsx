@@ -6,19 +6,23 @@ import { Toaster } from "@/components/ui/sonner"
 import { Loader2 } from "lucide-react";
 import { Theme } from "@/components/Theme";
 
-import Welcome from "@/pages/Welcome"
-import Register from "@/pages/Register"
-import Login from "@/pages/Login"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import Welcome from "@/pages/authentication/Welcome"
+import Register from "@/pages/authentication/Register"
+import Login from "@/pages/authentication/Login"
 import Layout from "@/components/Layout"
-import TimetablePage from "@/pages/Timetable"
-import Planner from "@/pages/Planner"
-import Courses from "@/pages/Courses"
-import Pre_Requisite from "@/pages/Pre_Requisite"
-import Settings from "@/pages/Settings";
+import TimetablePage from "@/pages/webpages/Timetable"
+import Planner from "@/pages/webpages/Planner"
+import Courses from "@/pages/webpages/Courses"
+import Pre_Requisite from "@/pages/webpages/Pre_Requisite"
+import Settings from "@/pages/webpages/Settings";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+const queryClient = new QueryClient();
 
 export default function App() {
 
@@ -51,34 +55,36 @@ export default function App() {
   }
 
   return (
-    <Theme defaultTheme="dark" storageKey="nusmods-plus-theme">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <QueryClientProvider client={queryClient}>
+      <Theme defaultTheme="dark" storageKey="nusmods-plus-theme">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          <Route element={session ? <Layout /> : <Login />}>
-            <Route path="/timetable/sem-1" element={<TimetablePage semester={1} />} />
-            <Route path="/timetable/sem-2" element={<TimetablePage semester={2} />} />
-            <Route path="/planner" element={<Planner />} />
-            <Route path="/pre-requisite" element={<Pre_Requisite />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
-        </Routes>
+            <Route element={session ? <Layout /> : <Login />}>
+              <Route path="/timetable/sem-1" element={<TimetablePage semester={1} />} />
+              <Route path="/timetable/sem-2" element={<TimetablePage semester={2} />} />
+              <Route path="/planner" element={<Planner />} />
+              <Route path="/pre-requisite" element={<Pre_Requisite />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+          </Routes>
 
-        <Toaster
-          theme="dark"
-          toastOptions={{
-            classNames: {
-              toast: "!bg-[#18181b] backdrop-blur-none opacity-100 border border-neutral-800 text-zinc-100 rounded-xl p-4 shadow-xl flex items-center",
-              title: "text-zinc-100 font-semibold text-sm",
-              description: "text-zinc-400 text-xs font-normal mt-1 block leading-relaxed",
-            },
-          }}
-        />
-      </BrowserRouter>
-    </Theme>
+          <Toaster
+            theme="dark"
+            toastOptions={{
+              classNames: {
+                toast: "!bg-[#18181b] backdrop-blur-none opacity-100 border border-neutral-800 text-zinc-100 rounded-xl p-4 shadow-xl flex items-center",
+                title: "text-zinc-100 font-semibold text-sm",
+                description: "text-zinc-400 text-xs font-normal mt-1 block leading-relaxed",
+              },
+            }}
+          />
+        </BrowserRouter>
+      </Theme>
+    </QueryClientProvider>
   );
 }
