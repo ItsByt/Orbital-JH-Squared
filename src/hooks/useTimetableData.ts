@@ -4,8 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserModules, swapLessonInTimetable } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
 import type { DisplayLesson, SavedTimetableModule } from "@/types";
-import { formatSavedModules, formatAlternativeLessons, buildDisplayLesson } from "@/utils/timetableUtils/lessonFormatters";
-
+import {
+    formatSavedModules,
+    formatAlternativeLessons,
+    buildDisplayLesson,
+} from "@/utils/timetableUtils/lessonFormatters";
 
 export function useTimetableData(year: number, semester: number) {
     const queryClient = useQueryClient();
@@ -17,7 +20,7 @@ export function useTimetableData(year: number, semester: number) {
             const userId = await getUserId();
             if (!userId) return [];
             const { myModules } = await getUserModules(userId, year, semester);
-            const savedList = (myModules as SavedTimetableModule[] || []);
+            const savedList = (myModules as SavedTimetableModule[]) || [];
             const compiledLessons: DisplayLesson[] = formatSavedModules(savedList);
             return compiledLessons;
         },
@@ -26,14 +29,12 @@ export function useTimetableData(year: number, semester: number) {
 
     const [selectedLesson, setSelectedLesson] = useState<DisplayLesson | null>(null);
 
-
     const { data: modData } = useQuery({
         queryKey: ["nusmods", selectedLesson?.moduleCode],
         queryFn: () => getModule(selectedLesson!.moduleCode),
         enabled: !!selectedLesson, // Only fetch when a lesson is selected
         staleTime: Infinity, // NUSMods data does not change during a session
-    })
-
+    });
 
     //_____________________________fn to retrieve and format alternative lessons__________________________________//
     const alternatives = useMemo(() => {
@@ -43,14 +44,18 @@ export function useTimetableData(year: number, semester: number) {
         return formatAlternativeLessons(rawTimetable, selectedLesson);
     }, [selectedLesson, modData, semester]);
 
-
     //___________________________________ fn to clear current alternatives___________________________________________//
     const clearAlternatives = () => setSelectedLesson(null);
 
-
     //______________________________________ fn to swap to alternative__________________________________________//
     const swapMutation = useMutation({
-        mutationFn: async ({ oldLesson, newClassSlots }: { oldLesson: DisplayLesson, newClassSlots: DisplayLesson[] }) => {
+        mutationFn: async ({
+            oldLesson,
+            newClassSlots,
+        }: {
+            oldLesson: DisplayLesson;
+            newClassSlots: DisplayLesson[];
+        }) => {
             await swapLessonInTimetable(oldLesson, newClassSlots, year, semester);
         },
         onMutate: async ({ oldLesson, newClassSlots }) => {
@@ -64,10 +69,13 @@ export function useTimetableData(year: number, semester: number) {
             queryClient.setQueryData<DisplayLesson[]>(queryKey, (old) => {
                 if (!old) return [];
 
-                const filteredOld = old.filter(mod =>
-                    !(mod.moduleCode === oldLesson.moduleCode &&
-                        mod.lessonType === oldLesson.lessonType &&
-                        mod.classNo === oldLesson.classNo)
+                const filteredOld = old.filter(
+                    (mod) =>
+                        !(
+                            mod.moduleCode === oldLesson.moduleCode &&
+                            mod.lessonType === oldLesson.lessonType &&
+                            mod.classNo === oldLesson.classNo
+                        )
                 );
 
                 return [...filteredOld, ...newClassSlots];
@@ -86,7 +94,7 @@ export function useTimetableData(year: number, semester: number) {
         onSettled: () => {
             // Sync with server completely when done
             queryClient.invalidateQueries({ queryKey });
-        }
+        },
     });
 
     return {
@@ -103,9 +111,10 @@ export function useTimetableData(year: number, semester: number) {
             const rawTimetable = semData?.timetable || [];
 
             // Find every lesson block that shares this new classNo
-            const tiedRawSlots = rawTimetable.filter((slot: any) =>
-                (slot.lessonType || "").toUpperCase() === newLesson.lessonType.toUpperCase() &&
-                slot.classNo === newLesson.classNo
+            const tiedRawSlots = rawTimetable.filter(
+                (slot: any) =>
+                    (slot.lessonType || "").toUpperCase() === newLesson.lessonType.toUpperCase() &&
+                    slot.classNo === newLesson.classNo
             );
 
             const newClassSlots: DisplayLesson[] = tiedRawSlots.map((slot: any, index: number) =>
@@ -113,6 +122,6 @@ export function useTimetableData(year: number, semester: number) {
             );
 
             swapMutation.mutate({ oldLesson, newClassSlots });
-        }
+        },
     };
-};
+}

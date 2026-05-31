@@ -13,7 +13,7 @@ export function getCurrentAcadYear(): number {
 //Formats it as AY1122/23
 export function getAcadYearString(): string {
     const year = getCurrentAcadYear();
-    return `AY${year}/${year % 100 + 1}`;
+    return `AY${year}/${(year % 100) + 1}`;
 }
 
 export function getCurrentAcadSem(): number {

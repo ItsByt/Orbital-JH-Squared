@@ -1,15 +1,11 @@
-import { supabase } from '@/services/supabase'
+import { supabase } from "@/services/supabase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/NUSModsPlusLogo.png";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
-import { toast } from "sonner"
-import {
-    Field,
-    FieldDescription,
-    FieldLabel,
-} from "@/components/ui/field"
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 
 export default function Register() {
     const navigate = useNavigate();
@@ -22,43 +18,45 @@ export default function Register() {
         const { data, error: signUpError } = await supabase.auth.signUp({
             email: email,
             password: password,
-        })
+        });
 
         if (signUpError) {
             toast.error("Registration Failed", {
-                description: signUpError.message, 
+                description: signUpError.message,
             });
             console.error("Registration error:", signUpError.message);
         } else {
             toast.success("Account created! 🎉", {
-                description: "Please check your email to confirm your registration. Then log in again.",
+                description:
+                    "Please check your email to confirm your registration. Then log in again.",
             });
-            console.log("Registered successfully! Please exit and login again.", data)
-            navigate("/login")
+            console.log("Registered successfully! Please exit and login again.", data);
+            navigate("/login");
         }
     }
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">
-            
             <div className="w-full max-w-md space-y-8 flex flex-col items-center">
-                
                 <div className="text-center w-full cursor-pointer" onClick={() => navigate("/")}>
-                    <img 
+                    <img
                         src={logo}
-                        alt="NUSMods Plus Logo" 
-                        className="w-[450px] max-w-full h-auto object-contain mx-auto drop-shadow-sm" 
+                        alt="NUSMods Plus Logo"
+                        className="w-[450px] max-w-full h-auto object-contain mx-auto drop-shadow-sm"
                     />
                 </div>
 
-                <form 
-                    onSubmit={handleRegister} 
+                <form
+                    onSubmit={handleRegister}
                     className="w-full bg-card p-6 rounded-xl border border-border shadow-sm space-y-5"
                 >
                     <h3 className="text-xl font-bold text-foreground text-center mb-2">Sign Up</h3>
 
                     <Field className="space-y-1.5 text-left">
-                        <FieldLabel htmlFor="input-field-email" className="text-sm font-medium text-foreground">
+                        <FieldLabel
+                            htmlFor="input-field-email"
+                            className="text-sm font-medium text-foreground"
+                        >
                             Email
                         </FieldLabel>
                         <Input
@@ -76,7 +74,10 @@ export default function Register() {
                     </Field>
 
                     <Field className="space-y-1.5 text-left">
-                        <FieldLabel htmlFor="input-field-password" className="text-sm font-medium text-foreground">
+                        <FieldLabel
+                            htmlFor="input-field-password"
+                            className="text-sm font-medium text-foreground"
+                        >
                             Password
                         </FieldLabel>
                         <Input
@@ -94,8 +95,8 @@ export default function Register() {
                     </Field>
 
                     <div className="pt-2">
-                        <Button 
-                            type="submit" 
+                        <Button
+                            type="submit"
                             variant="outline"
                             className="w-full h-11 text-base font-medium rounded-lg border-[#749c83] text-[#749c83] hover:bg-[#749c83] hover:text-white transition-all duration-200 cursor-pointer shadow-sm"
                         >
@@ -104,15 +105,14 @@ export default function Register() {
                     </div>
                 </form>
 
-                <button 
+                <button
                     type="button"
-                    onClick={() => navigate("/")} 
+                    onClick={() => navigate("/")}
                     className="text-xs text-muted-foreground hover:text-[#749c83] transition-colors cursor-pointer"
                 >
                     ← Return to Welcome
                 </button>
-
             </div>
         </div>
-    )
+    );
 }

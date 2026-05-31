@@ -1,8 +1,8 @@
 export function timeToMins(timeString: string): number {
-    if (!timeString) return 0
+    if (!timeString) return 0;
     const hours = parseInt(timeString.substring(0, 2), 10);
     const minutes = parseInt(timeString.substring(2, 4), 10);
-    return hours * 60 + minutes
+    return hours * 60 + minutes;
 }
 
 export const convertTimeToColumn = (timeString: string): number => {

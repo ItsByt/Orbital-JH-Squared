@@ -1,9 +1,9 @@
-import type { ModuleSummary, ModuleDetails } from "@/types"
+import type { ModuleSummary, ModuleDetails } from "@/types";
 
 //Gets a list of all the summaries of all modules in NUS
 export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSummary[]> {
     try {
-        const response = await fetch(`https://api.nusmods.com/v2/${acadYear}/moduleList.json`)
+        const response = await fetch(`https://api.nusmods.com/v2/${acadYear}/moduleList.json`);
 
         if (!response.ok) return [];
 
@@ -17,8 +17,10 @@ export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSumma
 //Includes Timetable and Pre-Requisite Tree Data
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
-        const response = await fetch(`https://api.nusmods.com/v2/2025-2026/modules/${moduleCode.toUpperCase()}.json`)
-        
+        const response = await fetch(
+            `https://api.nusmods.com/v2/2025-2026/modules/${moduleCode.toUpperCase()}.json`
+        );
+
         if (!response.ok) return null;
 
         const data = await response.json();

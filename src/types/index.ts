@@ -1,15 +1,15 @@
-//Basic Summary of each NUS Module 
+//Basic Summary of each NUS Module
 export interface ModuleSummary {
     moduleCode: string;
     title: string;
     semesters: number[];
 }
 
-//All Details for a Searched NUS Module 
+//All Details for a Searched NUS Module
 export interface ModuleDetails {
-    moduleCode: string
-    title: string
-    moduleCredit: string
+    moduleCode: string;
+    title: string;
+    moduleCredit: string;
     description?: string;
     semesterData: {
         semester: number;
@@ -44,7 +44,7 @@ export interface SavedTimetableModule {
     weeks: string | null;
 }
 
-//Details for class BLOCKS 
+//Details for class BLOCKS
 export interface DisplayLesson {
     id: string;
     moduleCode: string;
@@ -56,13 +56,12 @@ export interface DisplayLesson {
     venue: string;
     weeks?: number[] | string[];
     isAlternative?: boolean;
-    startMins: number
-    endMins: number
+    startMins: number;
+    endMins: number;
 
-    // We store each week using a corresponding bit (0 or 1), 
-    // where the ith week corresponds to the (i + 1)th bit from the right 
+    // We store each week using a corresponding bit (0 or 1),
+    // where the ith week corresponds to the (i + 1)th bit from the right
     // So the number 101010 means the lesson is on weeks 1, 3 and 5
     // Yes this means that the rightmost bit is always technically useless (it is always 0)
-    weekBitmask: number 
+    weekBitmask: number;
 }
-

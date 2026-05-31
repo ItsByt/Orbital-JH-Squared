@@ -1,9 +1,9 @@
 import SearchBar from "@/components/SearchBar";
 import { useState } from "react";
 import { getModule } from "@/services/nusmods";
-import type { ModuleDetails } from "@/types"
+import type { ModuleDetails } from "@/types";
 import { Loader2 } from "lucide-react";
-import ModuleDetailsCard from "@/components/ModuleDetailsCard"
+import ModuleDetailsCard from "@/components/ModuleDetailsCard";
 
 export default function Courses() {
     // Initialize variable with state to store description state (or null)
@@ -20,19 +20,19 @@ export default function Courses() {
         const desc = await getModule(moduleCode);
         setSelectedModule(desc);
         setIsFetchingDetails(false);
-
     };
 
     return (
         <div className="space-y-6">
             <div>
                 <h1
-                className="text-4xl font-bold"
-                style={{
-                fontFamily: "Bahnschrift, sans-serif",
-                color: "#56A58B"}}
+                    className="text-4xl font-bold"
+                    style={{
+                        fontFamily: "Bahnschrift, sans-serif",
+                        color: "#56A58B",
+                    }}
                 >
-                Course Information
+                    Course Information
                 </h1>
             </div>
 
@@ -47,9 +47,7 @@ export default function Courses() {
             )}
 
             {/* Using the ModuleDetailsCard component for displaying module details */}
-            {selectedModule && (
-                <ModuleDetailsCard module={selectedModule} />
-            )}
+            {selectedModule && <ModuleDetailsCard module={selectedModule} />}
         </div>
     );
 }
