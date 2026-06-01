@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTimetableData } from "@/hooks/useTimetableData";
-import { getCurrentAcadYear, getAcadYearString } from "@/utils/time";
+import { getCurrentAcadYear, getAcadYearString } from "@/utils/generalUtils/time";
 import { convertTimeToColumn } from "@/utils/timetableUtils/timeFormat";
 import type { DisplayLesson } from "@/types";
 import { Loader2 } from "lucide-react";
@@ -102,7 +102,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
         if (!oldLesson) return;
 
         try {
-            await swapModuleSlot(oldLesson, chosenAlternative);
+            swapModuleSlot(oldLesson, chosenAlternative);
         } catch (err) {
             console.error("Failed to change class:", err);
         }

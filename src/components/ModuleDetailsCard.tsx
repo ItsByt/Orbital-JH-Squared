@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { getCurrentAcadYear } from "@/utils/time";
+import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import { useState, useEffect } from "react";
 import type { ModuleDetails } from "@/types";
 import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";

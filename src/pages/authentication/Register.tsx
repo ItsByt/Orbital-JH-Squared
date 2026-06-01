@@ -2,6 +2,7 @@ import { supabase } from "@/services/supabase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/NUSModsPlusLogo.png";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -21,9 +22,7 @@ export default function Register() {
         });
 
         if (signUpError) {
-            toast.error("Registration Failed", {
-                description: signUpError.message,
-            });
+            toast.error("Registration Failed", { description: getErrorMessage(signUpError) });
             console.error("Registration error:", signUpError.message);
         } else {
             toast.success("Account created! 🎉", {
