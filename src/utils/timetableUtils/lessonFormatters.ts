@@ -25,11 +25,11 @@ export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLe
 
 export function buildDisplayLesson(
     moduleCode: string,
-    slot: any,
+    slot: NUSModsRawLesson,
     idPrefix: string,
     isAlternative: boolean = false
 ): DisplayLesson {
-    const finalClassNo = slot.classNo || slot.class_no || "";
+    const finalClassNo = slot.classNo || "";
 
     return {
         id: `${idPrefix}-${moduleCode}-${slot.lessonType}-${finalClassNo}`,

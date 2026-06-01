@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserModules, swapLessonInTimetable } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
-import type { DisplayLesson, SavedTimetableModule } from "@/types";
+import type { DisplayLesson, ModuleDetails, NUSModsRawLesson, SavedTimetableModule } from "@/types";
 import {
     formatSavedModules,
     formatAlternativeLessons,
@@ -29,7 +29,7 @@ export function useTimetableData(year: number, semester: number) {
 
     const [selectedLesson, setSelectedLesson] = useState<DisplayLesson | null>(null);
 
-    const { data: modData } = useQuery({
+    const { data: modData } = useQuery<ModuleDetails | null>({
         queryKey: ["nusmods", selectedLesson?.moduleCode],
         queryFn: () => getModule(selectedLesson!.moduleCode),
         enabled: !!selectedLesson, // Only fetch when a lesson is selected
@@ -39,7 +39,7 @@ export function useTimetableData(year: number, semester: number) {
     //_____________________________fn to retrieve and format alternative lessons__________________________________//
     const alternatives = useMemo(() => {
         if (!selectedLesson || !modData) return [];
-        const semData = modData.semesterData?.find((s: any) => s.semester === semester);
+        const semData = modData.semesterData?.find((s) => s.semester === semester);
         const rawTimetable = semData?.timetable || [];
         return formatAlternativeLessons(rawTimetable, selectedLesson);
     }, [selectedLesson, modData, semester]);
@@ -107,17 +107,17 @@ export function useTimetableData(year: number, semester: number) {
         swapModuleSlot: (oldLesson: DisplayLesson, newLesson: DisplayLesson) => {
             if (!modData) return;
 
-            const semData = modData.semesterData?.find((s: any) => s.semester === semester);
+            const semData = modData.semesterData?.find((s) => s.semester === semester);
             const rawTimetable = semData?.timetable || [];
 
             // Find every lesson block that shares this new classNo
             const tiedRawSlots = rawTimetable.filter(
-                (slot: any) =>
+                (slot: NUSModsRawLesson) =>
                     (slot.lessonType || "").toUpperCase() === newLesson.lessonType.toUpperCase() &&
                     slot.classNo === newLesson.classNo
             );
 
-            const newClassSlots: DisplayLesson[] = tiedRawSlots.map((slot: any, index: number) =>
+            const newClassSlots: DisplayLesson[] = tiedRawSlots.map((slot: NUSModsRawLesson, index: number) =>
                 buildDisplayLesson(oldLesson.moduleCode, slot, `temp-swap-${index}`, false)
             );
 

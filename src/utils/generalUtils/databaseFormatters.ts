@@ -1,6 +1,8 @@
+import type { DisplayLesson } from "@/types";
+
 // Formatting for Timetable Database
 export function formatForTimetableDatabase(
-    slots: any[],
+    slots: DisplayLesson[],
     userId: string,
     year: number,
     semester: number,

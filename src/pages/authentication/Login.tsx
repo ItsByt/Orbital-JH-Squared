@@ -1,8 +1,9 @@
-import { getCurrentAcadSem } from "@/utils/time";
+import { getCurrentAcadSem } from "@/utils/generalUtils/time";
 import { supabase } from "@/services/supabase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/NUSModsPlusLogo.png";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -48,9 +49,7 @@ export default function Login() {
         });
 
         if (signInError) {
-            toast.error("Login Failed", {
-                description: signInError.message,
-            });
+            toast.error("Login Failed", { description: getErrorMessage(signInError) });
             console.log("Invalid email or password. Please try again");
         } else {
             toast.success("Logged in Successfully!");

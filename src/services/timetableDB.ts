@@ -1,8 +1,9 @@
 import { supabase } from "./supabase";
 import { getUserId } from "@/services/auth";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { ModuleDetails, DisplayLesson, SavedTimetableModule } from "@/types";
 import { formatSavedModules } from "@/utils/timetableUtils/lessonFormatters";
-import { formatForTimetableDatabase } from "@/utils/databaseFormatters";
+import { formatForTimetableDatabase } from "@/utils/generalUtils/databaseFormatters";
 import { findBestFit } from "@/utils/timetableUtils/optimalScheduler";
 import { toast } from "sonner";
 
@@ -79,11 +80,8 @@ export async function addToTimetable(
         });
 
         return true;
-    } catch (error: any) {
-        toast.error("Failed to update timetable database.", {
-            description: error.message || "Unexpected error occurred.",
-        });
-
+    } catch (error) {
+        toast.error("Failed to update database", { description: getErrorMessage(error) });
         return false;
     }
 }
@@ -115,8 +113,8 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
 
         toast.success(`${moduleCode} removed from your timetable.`);
         return true;
-    } catch (error: any) {
-        toast.error("Failed to remove module.");
+    } catch (error) {
+        toast.error("Failed to remove", { description: getErrorMessage(error) });
         return false;
     }
 }

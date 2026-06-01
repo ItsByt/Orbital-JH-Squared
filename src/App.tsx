@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type Session  } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 import { Theme } from "@/components/Theme";
@@ -25,7 +25,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const queryClient = new QueryClient();
 
 export default function App() {
-    const [session, setSession] = useState<any>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
