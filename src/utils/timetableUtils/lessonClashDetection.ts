@@ -1,13 +1,5 @@
 import type { DisplayLesson } from "@/types";
 
-export function calculateWeekBitmask(weeks: Array<number | string>): number {
-    if (!Array.isArray(weeks)) return 0;
-    return weeks.reduce<number>((mask, week) => {
-        const weekNum = typeof week == "number" ? week : parseInt(week, 10);
-        return mask | (1 << weekNum);
-    }, 0);
-}
-
 export function doLessonsSchedulesClash(l1: DisplayLesson, l2: DisplayLesson): boolean {
     if (l1.day !== l2.day) return false;
 
