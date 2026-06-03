@@ -7,7 +7,6 @@ export function findBestFit(
     newSlots: NUSModsRawLesson[],
     currentTimetable: DisplayLesson[]
 ): DisplayLesson[] {
-
     // Format Raw Data into DisplayLessons
     const formattedNewSlots: DisplayLesson[] = newSlots.map((slot, index) =>
         buildDisplayLesson(moduleCode, slot, `auto-${index}`, false)
@@ -16,9 +15,10 @@ export function findBestFit(
     // Group by lessonType, then by classNo
     const groupedByType: Record<string, Record<string, DisplayLesson[]>> = {};
 
-    formattedNewSlots.forEach(slot => {
+    formattedNewSlots.forEach((slot) => {
         if (!groupedByType[slot.lessonType]) groupedByType[slot.lessonType] = {};
-        if (!groupedByType[slot.lessonType][slot.classNo]) groupedByType[slot.lessonType][slot.classNo] = [];
+        if (!groupedByType[slot.lessonType][slot.classNo])
+            groupedByType[slot.lessonType][slot.classNo] = [];
 
         groupedByType[slot.lessonType][slot.classNo].push(slot);
     });
@@ -58,7 +58,7 @@ export function findBestFit(
                 }
             }
 
-            const totalClashes = currentClashes + newClashes
+            const totalClashes = currentClashes + newClashes;
             if (totalClashes >= minClashes) continue;
 
             currentConfig.push(...optionSlots);

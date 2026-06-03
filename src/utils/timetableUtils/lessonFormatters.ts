@@ -18,18 +18,18 @@ export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLe
             weeks: parsedWeeks,
             startMins: timeToMins(saved.start_time),
             endMins: timeToMins(saved.end_time),
-            weekBitmask: calculateWeekBitmask(parsedWeeks)
-        }
+            weekBitmask: calculateWeekBitmask(parsedWeeks),
+        };
     });
 }
 
 export function buildDisplayLesson(
     moduleCode: string,
-    slot: any,
+    slot: NUSModsRawLesson,
     idPrefix: string,
     isAlternative: boolean = false
 ): DisplayLesson {
-    const finalClassNo = slot.classNo || slot.class_no || "";
+    const finalClassNo = slot.classNo || "";
 
     return {
         id: `${idPrefix}-${moduleCode}-${slot.lessonType}-${finalClassNo}`,
@@ -44,7 +44,7 @@ export function buildDisplayLesson(
         isAlternative: isAlternative,
         startMins: timeToMins(slot.startTime),
         endMins: timeToMins(slot.endTime),
-        weekBitmask: calculateWeekBitmask(slot.weeks)
+        weekBitmask: calculateWeekBitmask(slot.weeks),
     };
 }
 
@@ -53,7 +53,6 @@ export function formatAlternativeLessons(
     rawTimetable: NUSModsRawLesson[],
     currentLesson: DisplayLesson
 ): DisplayLesson[] {
-
     // 1. Filter out lessons that don't match the type, or are the exact same class
     const alternativesFiltered = rawTimetable.filter((slot) => {
         const apiLessonType = (slot.lessonType || "").toUpperCase();

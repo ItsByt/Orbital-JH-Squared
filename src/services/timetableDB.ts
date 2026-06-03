@@ -1,20 +1,20 @@
 import { supabase } from "./supabase";
 import { getUserId } from "@/services/auth";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { ModuleDetails, DisplayLesson, SavedTimetableModule } from "@/types";
 import { formatSavedModules } from "@/utils/timetableUtils/lessonFormatters";
-import { formatForTimetableDatabase } from "@/utils/databaseFormatters";
+import { formatForTimetableDatabase } from "@/utils/generalUtils/databaseFormatters";
 import { findBestFit } from "@/utils/timetableUtils/optimalScheduler";
 import { toast } from "sonner";
-
 
 export async function getUserModules(userId: string, year: number, semester: number) {
     const { data, error } = await supabase
         .from("timetable_modules")
-        .select('*')
+        .select("*")
         .eq("user_id", userId)
         .eq("year", year)
-        .eq("semester", semester)
-    return { myModules: data, error }
+        .eq("semester", semester);
+    return { myModules: data, error };
 }
 
 export async function isInTimetable(moduleCode: string, year: number, semester: number) {
@@ -44,7 +44,6 @@ export async function addToTimetable(
     year: number,
     semester: number
 ) {
-
     try {
         // Get user (supabase). Add to timetable only works if logged in
         const userId = await getUserId();
@@ -65,23 +64,24 @@ export async function addToTimetable(
         }
 
         // Upload optimal slots to Supabase
-        const rowsToInsert = formatForTimetableDatabase(optimalSlots, userId, year, semester, moduleCode);
+        const rowsToInsert = formatForTimetableDatabase(
+            optimalSlots,
+            userId,
+            year,
+            semester,
+            moduleCode
+        );
 
-        const { error: dbError } = await supabase
-            .from("timetable_modules")
-            .upsert(rowsToInsert);
+        const { error: dbError } = await supabase.from("timetable_modules").upsert(rowsToInsert);
         if (dbError) throw dbError;
 
         toast.success(`${moduleCode} has been successfully added!`, {
-            description: "Please Check your Timetable"
+            description: "Please Check your Timetable",
         });
 
         return true;
-    } catch (error: any) {
-        toast.error("Failed to update timetable database.", {
-            description: error.message || "Unexpected error occurred."
-        });
-
+    } catch (error) {
+        toast.error("Failed to update database", { description: getErrorMessage(error) });
         return false;
     }
 }
@@ -113,8 +113,8 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
 
         toast.success(`${moduleCode} removed from your timetable.`);
         return true;
-    } catch (error: any) {
-        toast.error("Failed to remove module.");
+    } catch (error) {
+        toast.error("Failed to remove", { description: getErrorMessage(error) });
         return false;
     }
 }
@@ -160,4 +160,3 @@ export async function swapLessonInTimetable(
         throw error; // Throw to trigger React Query's onError rollback
     }
 }
-

@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
 export default function SearchBar({ onSelect }: { onSelect: (moduleCode: string) => void }) {
-    const { searchTerm, setSearchTerm, searchResults, setSearchResults, isLoading } = AutoCompleteSearch();
+    const { searchTerm, setSearchTerm, searchResults, setSearchResults, isLoading } =
+        AutoCompleteSearch();
     const [isOpen, setIsOpen] = useState(false);
-    
+
     return (
         <div className="w-full max-w-3xl mx-auto relative">
-
             {/* Search Bar */}
             <div className="relative">
                 <Input
@@ -20,9 +20,11 @@ export default function SearchBar({ onSelect }: { onSelect: (moduleCode: string)
                         setIsOpen(true);
                     }}
                     disabled={isLoading}
-                    className="w-full h-16 py-6 pl-6 pr-14 text-xl rounded-2xl border border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56A58B] focus-visible:border-transparent shadow-md transition-all duration-200" 
+                    className="w-full h-16 py-6 pl-6 pr-14 text-xl rounded-2xl border border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56A58B] focus-visible:border-transparent shadow-md transition-all duration-200"
                 />
-                {isLoading && <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-muted-foreground" />}
+                {isLoading && (
+                    <Loader2 className="absolute right-3 top-2.5 h-5 w-5 animate-spin text-muted-foreground" />
+                )}
             </div>
 
             {/* Autocomplete Dropdown */}
@@ -35,21 +37,21 @@ export default function SearchBar({ onSelect }: { onSelect: (moduleCode: string)
                             onClick={() => {
                                 console.log("User selected:", mod.moduleCode);
                                 setSearchTerm(mod.moduleCode);
-                                setSearchResults([]); 
-                                setIsOpen(false); 
+                                setSearchResults([]);
+                                setIsOpen(false);
 
                                 //Trigger selection function on click
                                 onSelect(mod.moduleCode);
                             }}
                         >
                             <div className="font-bold text-foreground">{mod.moduleCode}</div>
-                            <div className="text-sm text-muted-foreground truncate">{mod.title}</div>
+                            <div className="text-sm text-muted-foreground truncate">
+                                {mod.title}
+                            </div>
                         </li>
                     ))}
                 </ul>
             )}
-
         </div>
     );
 }
-
