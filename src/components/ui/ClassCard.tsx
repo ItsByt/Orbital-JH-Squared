@@ -25,9 +25,8 @@ export default function ClassCard({
     onSelectClass: (lesson: DisplayLesson) => void;
     onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
 }) {
-    
-    // CLASH LOGIC: FILTER OUT SELF AND ALTERNATIVES
-    // USE LESSONSCHEDULESCLASH FUNCTION
+
+    // Conflict Logic (ignore alt and self to compare overlap)
     const conflictingLessons = lesson.isAlternative
         ? []
         : allVisibleLessons.filter(
@@ -42,10 +41,10 @@ export default function ClassCard({
                   doLessonsSchedulesClash(lesson, other)
           );
 
-    // As long as clash exists,hasOverlap = true as indicator
+    // hasOverlap true if exists conflicting lesson
     const hasOverlap = conflictingLessons.length > 0;
 
-    // Warning hover
+    // Basic Hover warning
     const warningTooltip = hasOverlap
         ? `TIMETABLE CLASH: Overlaps with ${conflictingLessons
               .map((c) => `${c.moduleCode} (${c.lessonType})`)
@@ -71,13 +70,13 @@ export default function ClassCard({
             }}
             className={`my-1 mx-0.5 p-2 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 z-20 border
                 ${
-                // Amber if alternative
-                // Purple if active
-                // Pulsing red if conflicting
                     lesson.isAlternative
+                    // amber if alt
                         ? "bg-amber-500/20 dark:bg-amber-500/10 border-dashed border-amber-400 opacity-60 hover:opacity-100 hover:bg-amber-500/30"
                         : hasOverlap
+                    // pulse red if conflict
                         ? "bg-destructive/10 border-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)] dark:shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse hover:animate-none group"
+                    // otherwise standard purple    
                         : "bg-purple-500/10 dark:bg-purple-500/20 border-purple-400/40 dark:border-purple-400/30 hover:bg-purple-500/20"
                 }`}
         >

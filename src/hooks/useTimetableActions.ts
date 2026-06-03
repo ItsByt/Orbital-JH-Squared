@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getModule } from "@/services/nusmods";
-import { addToTimetable, removeFromTimetable } from "@/services/timetableDB";
+import { addToTimetable, removeFromTimetable, addCustomEventToDB } from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import type { DisplayLesson } from "@/types";
+import { timeToMins } from "@/utils/timetableUtils/timeFormat";
 
 export function useTimetableActions(
     semester: number,
@@ -68,10 +69,43 @@ export function useTimetableActions(
         queryClient.invalidateQueries({queryKey: ["timetable", currentYear, semester],});
     }; 
 
+    // Handle addition of customized events
+    const handleCustomEvent = async (eventData: {
+        name: string;
+        day: string;
+        startTime: string;
+        endTime: string;
+        venue: string;
+    }) => {
+        const newCustomCard: DisplayLesson = {
+            id: `custom-${Date.now()}`,
+            moduleCode: eventData.name.toUpperCase(),
+            lessonType: "Personal Block",
+            classNo: "CUSTOM",
+            day: eventData.day,
+            startTime: eventData.startTime,
+            endTime: eventData.endTime,
+            venue: eventData.venue || "No Venue Assigned",
+            weekBitmask: 8191, // Assumed for now...
+            isAlternative: false,
+            startMins: timeToMins(eventData.startTime),
+            endMins: timeToMins(eventData.endTime)
+        };
+
+        // Save to Supabase
+        const success = await addCustomEventToDB(newCustomCard, currentYear, semester);
+        if (success) {
+            await queryClient.invalidateQueries({
+                queryKey: ["timetable", currentYear, semester],
+            });
+        }
+    }
+
     return {
         handleSelectClass,
         handleSwapClass,
         handleAddModule,
         handleRemoveModule,
+        handleCustomEvent
     };
 }
