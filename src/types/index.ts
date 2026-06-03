@@ -65,3 +65,24 @@ export interface DisplayLesson {
     // Yes this means that the rightmost bit is always technically useless (it is always 0)
     weekBitmask: number;
 }
+
+//Details for modules added to the Planner
+export interface PlannerModule {
+    moduleCode: string;
+    title: string;
+    moduleCredit: number;
+}
+
+//Details for Planner modules stored in supabase
+export interface SavedPlannerRow {
+    id: string;
+    user_id: string;
+    created_at: string;
+    year: number;
+    semester: number;
+    module_code: string;
+    module_title: string;
+    module_credit: number;
+    display_order: number;
+}
+

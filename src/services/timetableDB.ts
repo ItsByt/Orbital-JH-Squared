@@ -2,8 +2,7 @@ import { supabase } from "./supabase";
 import { getUserId } from "@/services/auth";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { ModuleDetails, DisplayLesson, SavedTimetableModule } from "@/types";
-import { formatSavedModules } from "@/utils/timetableUtils/lessonFormatters";
-import { formatForTimetableDatabase } from "@/utils/generalUtils/databaseFormatters";
+import { formatSavedModules, formatForTimetableDatabase } from "@/utils/timetableUtils/lessonFormatters";
 import { findBestFit } from "@/utils/timetableUtils/optimalScheduler";
 import { toast } from "sonner";
 
