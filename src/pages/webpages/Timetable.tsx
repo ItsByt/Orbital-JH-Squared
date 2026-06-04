@@ -1,15 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { formatWeeksDisplay } from "@/utils/timetableUtils/weekFormat";
 import { useTimetableData } from "@/hooks/TimetableHooks/useTimetableData";
 import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
 import { getCurrentAcadYear, getAcadYearString } from "@/utils/generalUtils/time";
-import { Loader2, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+
 import CustomSlotDialog from "@/components/TimetableComponent/CustomSlotDialog";
+import SemesterNavigation from "@/components/TimetableComponent/SemesterNavigation";
+import ActiveContainer from "@/components/TimetableComponent/ActiveContainer";
 import TimetableGrid from "@/components/TimetableComponent/TimetableGrid";
-import SearchBar from "@/components/SearchBar";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800"];
@@ -18,8 +16,6 @@ const WEEKS = Array.from({ length: 13 }, (_, i) => i + 1);
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
     const acadYearString = getAcadYearString();
-    const navigate = useNavigate();
-    const [searchResetKey, setSearchResetKey] = useState(0);
 
     // TimetableData abstractions - retrieve, select and swap
     const {
@@ -54,14 +50,6 @@ export default function TimetablePage({ semester }: { semester: number }) {
         swapModuleSlot
     );
 
-    // 1 NEW HANDLER REQUIRED IN THIS FILE:
-    // AddHandler to support searchbar reset - use new key value
-    const handleAddModuleWithReset = async (moduleCode: string) => {
-        await handleAddModule(moduleCode, uniqueActiveModules);
-        setSearchResetKey((k) => k + 1);
-    };
-
-    
     // The usual loading 
     if (loading) {
         return (
@@ -73,7 +61,6 @@ export default function TimetablePage({ semester }: { semester: number }) {
             </div>
         );
     }
-
 
     //_________________________________FRONTEND_________________________________________//
     return (
@@ -101,80 +88,15 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 </div>
 
                 {/* Semester Page Selection */}
-                <div className="w-full flex justify-start items-center gap-2 pt-2">
-                    <Button
-                        variant={semester === 1 ? "default" : "outline"}
-                        onClick={() => navigate("/timetable/sem-1")}
-                        className={`h-9 px-4 text-xs font-medium cursor-pointer transition-colors duration-150 ${
-                            semester === 1 ? "bg-[#749c83] text-white hover:bg-[#638570]" : "border-border"
-                        }`}
-                    >
-                        Semester 1
-                    </Button>
-
-                    <Button
-                        variant={semester === 2 ? "default" : "outline"}
-                        onClick={() => navigate("/timetable/sem-2")}
-                        className={`h-9 px-4 text-xs font-medium cursor-pointer transition-colors duration-150 ${
-                            semester === 2 ? "bg-[#749c83] text-white hover:bg-[#638570]" : "border-border"
-                        }`}
-                    >
-                        Semester 2
-                    </Button>
-                </div>
+                <SemesterNavigation semester={semester} />
 
                 {/* Search/Add/Delete Modules */}
-                <div className="w-full max-w-4xl mx-auto mt-6 space-y-4">
-                    <SearchBar key={searchResetKey} onSelect={handleAddModuleWithReset} />
-
-                    {uniqueActiveModules.length > 0 && (
-                        <div className="space-y-3">
-                            <h3 className="text-sm md:text-base font-semibold text-muted-foreground">
-                                Active Modules ({uniqueActiveModules.length})
-                            </h3>
-                            <div className="flex flex-wrap gap-2.5 items-center">
-                                {uniqueActiveModules.map((mod) => {
-                                    const isCustom = mod.lessonType === "Personal Block";
-                                    const hasDuplicateName = isCustom && (customNameCounts[mod.moduleCode.toUpperCase()] > 1);
-
-                                    return (
-                                        <div
-                                            key={mod.id || mod.moduleCode}
-                                            className="flex items-center gap-3 bg-secondary text-secondary-foreground px-4 py-2 min-h-9 h-auto rounded-lg border border-border text-sm font-bold tracking-wide shadow-sm select-none"
-                                        >
-                                            <span>{mod.moduleCode}</span>
-
-                                            {/* Extra details for duplicate custom entries */}
-                                            {hasDuplicateName && (
-                                                <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground font-normal bg-muted/40 dark:bg-muted/20 px-1.5 py-0.5 rounded border border-border/20">
-                                                    <span className="text-[#56A58B] font-medium">
-                                                        {mod.day ? mod.day.slice(0, 3) : ""}
-                                                    </span>
-                                                    <span className="opacity-40">|</span>
-                                                    <span>
-                                                        {mod.startTime || "0000"}-{mod.endTime || "0000"}
-                                                    </span>
-                                                    <span className="opacity-40">|</span>
-                                                    <span className="text-amber-500 dark:text-amber-400/90 font-medium">
-                                                        {formatWeeksDisplay(mod.weeks || (mod as any).selectedWeeks || [])}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            <button
-                                                onClick={() => handleRemoveModule(mod.moduleCode, mod.id, mod.lessonType)}
-                                                className="text-muted-foreground hover:text-destructive rounded-full p-1 hover:bg-muted transition-colors cursor-pointer"
-                                                aria-label={`Remove ${mod.moduleCode}`}
-                                            >
-                                                <X className="h-3.5 w-3.5" />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <ActiveContainer
+                    uniqueActiveModules={uniqueActiveModules}
+                    customNameCounts={customNameCounts}
+                    handleAddModule={handleAddModule}
+                    handleRemoveModule={handleRemoveModule}
+                />
             </div>
         );
 }

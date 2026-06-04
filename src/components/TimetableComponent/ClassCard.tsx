@@ -26,20 +26,27 @@ export default function ClassCard({
     onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
 }) {
 
-    // Conflict Logic (ignore alt and self to compare overlap)
+    // Conflict Logic - filter out to get conflict classes by ignoring...
+    // 1. alternatives 
+    // 2. itself 
+    // 3. same overlap timing but is the SAME class (EITHER IS NOT CUSTOM, SO CONTINUOUS)
     const conflictingLessons = lesson.isAlternative
-        ? []
-        : allVisibleLessons.filter(
-              (other) =>
-                  !other.isAlternative &&
-                  other.id !== lesson.id &&
-                  !(
-                      other.moduleCode === lesson.moduleCode &&
-                      other.classNo === lesson.classNo &&
-                      other.lessonType === lesson.lessonType
-                  ) &&
-                  doLessonsSchedulesClash(lesson, other)
-          );
+            ? []
+            : allVisibleLessons.filter((other) => {
+                if (other.isAlternative || other.id === lesson.id) return false;
+                const isCustomA = lesson.classNo.startsWith("CUSTOM") || lesson.lessonType === "Personal Block";
+                const isCustomB = other.classNo.startsWith("CUSTOM") || other.lessonType === "Personal Block";
+                if (!isCustomA || !isCustomB) {
+                    if (
+                        other.moduleCode === lesson.moduleCode &&
+                        other.classNo === lesson.classNo &&
+                        other.lessonType === lesson.lessonType
+                    ) {
+                        return false; 
+                    }
+                }
+                return doLessonsSchedulesClash(lesson, other);
+            });
 
     // hasOverlap true if exists conflicting lesson
     const hasOverlap = conflictingLessons.length > 0;
