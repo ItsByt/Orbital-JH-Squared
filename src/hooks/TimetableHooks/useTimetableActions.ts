@@ -4,6 +4,7 @@ import { addToTimetable, removeFromTimetable, addCustomEventToDB } from "@/servi
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import type { DisplayLesson } from "@/types";
 import { timeToMins } from "@/utils/timetableUtils/timeFormat";
+import { toast } from "sonner";
 
 export function useTimetableActions(
     semester: number,
@@ -39,7 +40,22 @@ export function useTimetableActions(
     };
 
     // Handle adding a module from SearchBar
-    const handleAddModule = async (moduleCode: string) => {
+    const handleAddModule = async (moduleCode: string, currentlyActive: any[] = []) => {
+        
+        // Ensure that module cannot be added twice (unless its a custom)
+        const isDuplicate = currentlyActive.some((mod) => {
+            const isCustom = mod?.id && typeof mod.id === "string" && mod.id.startsWith("custom-");
+            if (isCustom) return false; 
+            return mod?.moduleCode?.toUpperCase() === moduleCode.toUpperCase();
+        });
+
+        if (isDuplicate) {
+            toast.error("Failed to Add Module", {
+                description: `${moduleCode} is already added to your timetable!`,
+            });
+            return false; 
+        }
+                
         const module = await getModule(moduleCode);
 
         const semData = module?.semesterData?.find(
@@ -64,10 +80,19 @@ export function useTimetableActions(
     };
 
     // Handle removing a module from Active Modules Container
-    const handleRemoveModule = async (moduleCode: string) => {
-        await removeFromTimetable(moduleCode, currentYear, semester);
-        queryClient.invalidateQueries({queryKey: ["timetable", currentYear, semester],});
-    }; 
+    const handleRemoveModule = async (moduleCode: string, id?: string | number, lessonType?: string) => {
+        if (!moduleCode) return;
+
+        if (lessonType === "Personal Block" && id) {
+            await removeFromTimetable(moduleCode, currentYear, semester, String(id));
+        } else {
+            await removeFromTimetable(moduleCode, currentYear, semester);
+        }
+
+        await queryClient.invalidateQueries({
+            queryKey: ["timetable", currentYear, semester],
+        });
+    };
 
 
     // Handle addition of customized events

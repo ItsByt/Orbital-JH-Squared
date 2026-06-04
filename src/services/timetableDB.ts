@@ -86,7 +86,7 @@ export async function addToTimetable(
     }
 }
 
-export async function removeFromTimetable(moduleCode: string, year: number, semester: number) {
+export async function removeFromTimetable(moduleCode: string, year: number, semester: number, id?: string) {
     try {
         const userId = await getUserId();
         if (!userId) {
@@ -94,14 +94,21 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
             return false;
         }
 
-        const { data, error: deletionError } = await supabase
+        let query = supabase
             .from("timetable_modules")
             .delete()
             .eq("user_id", userId)
-            .eq("module_code", moduleCode)
             .eq("year", year)
-            .eq("semester", semester)
-            .select();
+            .eq("semester", semester);
+
+        if (id) {
+            const targetId = id.startsWith("custom-") ? id : Number(id);
+            query = query.eq("id", targetId);
+        } else {
+            query = query.eq("module_code", moduleCode);
+        }
+
+        const { data, error: deletionError } = await query.select();
 
         if (deletionError) throw deletionError;
 

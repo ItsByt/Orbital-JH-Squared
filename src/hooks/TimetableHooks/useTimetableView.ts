@@ -47,14 +47,36 @@ export function useTimetableView( modules: DisplayLesson[], alternatives: Displa
         const seen = new Set<string>();
 
         return modules.filter((mod) => {
+            if (!mod) return false;
+
+            if (mod.lessonType === "Personal Block") {
+                return true; // all individual custom blocks stay in the list
+            }
+
+            // Deduplicate regular academic modules
             if (seen.has(mod.moduleCode)) return false;
             seen.add(mod.moduleCode);
             return true;
         });
     }, [modules]);
 
+    // Tracks number of custom block names active using Dictionary (Record)
+    const customNameCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        
+        uniqueActiveModules.forEach((mod) => {
+            if (mod && mod.lessonType === "Personal Block") {
+                const nameKey = mod.moduleCode.toUpperCase();
+                counts[nameKey] = (counts[nameKey] || 0) + 1;
+            }
+        });
+        
+        return counts;
+    }, [uniqueActiveModules]);
+
     return {
         lessonsByDay,
         uniqueActiveModules,
+        customNameCounts
     };
 }
