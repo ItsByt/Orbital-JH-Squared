@@ -76,30 +76,41 @@ export function useTimetableActions(
         startTime: string;
         endTime: string;
         venue: string;
+        startWeek: number;
+        endWeek: number;
+        weekBitmask: number
     }) => {
+
+        // FIX: format into numerical array used by Supabase standards
+        const weeksArray = Array.from(
+            { length: eventData.endWeek - eventData.startWeek + 1 }, 
+            (_, i) => eventData.startWeek + i
+        );
+
         const newCustomCard: DisplayLesson = {
             id: `custom-${Date.now()}`,
-            moduleCode: eventData.name.toUpperCase(),
+            moduleCode: eventData.name.trim().toUpperCase(),
             lessonType: "Personal Block",
             classNo: "CUSTOM",
             day: eventData.day,
-            startTime: eventData.startTime,
-            endTime: eventData.endTime,
-            venue: eventData.venue || "No Venue Assigned",
-            weekBitmask: 8191, // Assumed for now...
+            startTime: eventData.startTime, 
+            endTime: eventData.endTime,     
+            venue: eventData.venue.trim() || "No Venue Assigned",
+            weeks: weeksArray, 
+            weekBitmask: eventData.weekBitmask,           
             isAlternative: false,
             startMins: timeToMins(eventData.startTime),
             endMins: timeToMins(eventData.endTime)
         };
 
-        // Save to Supabase
         const success = await addCustomEventToDB(newCustomCard, currentYear, semester);
+        
         if (success) {
             await queryClient.invalidateQueries({
                 queryKey: ["timetable", currentYear, semester],
             });
         }
-    }
+    };
 
     return {
         handleSelectClass,

@@ -82,13 +82,12 @@ export default function App() {
                     </Routes>
 
                     <Toaster
-                        theme="dark"
+                        theme="system"
                         toastOptions={{
                             classNames: {
-                                toast: "!bg-[#18181b] backdrop-blur-none opacity-100 border border-neutral-800 text-zinc-100 rounded-xl p-4 shadow-xl flex items-center",
-                                title: "text-zinc-100 font-semibold text-sm",
-                                description:
-                                    "text-zinc-400 text-xs font-normal mt-1 block leading-relaxed",
+                                toast: "bg-background border border-border text-foreground rounded-xl p-4 shadow-xl flex items-center",
+                                title: "text-foreground font-semibold text-sm",
+                                description: "text-muted-foreground dark:!text-[#e4e4e7] text-xs font-normal mt-1 block leading-relaxed",
                             },
                         }}
                     />

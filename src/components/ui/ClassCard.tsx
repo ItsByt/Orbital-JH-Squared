@@ -92,7 +92,7 @@ export default function ClassCard({
                     )}
                 </div>
                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {lesson.lessonType} [{lesson.classNo}]
+                    {lesson.lessonType} {lesson.classNo !== "CUSTOM" && ` [${lesson.classNo}]`}
                 </span>
             </div>
 

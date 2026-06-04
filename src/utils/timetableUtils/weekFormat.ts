@@ -7,6 +7,15 @@ export function weeksToBitmask(weeks: Array<number | string>): number {
     }, 0);
 }
 
+// Convert given interval of weeks into a bitmask
+export function generateWeekBitmask(startWeek: number, endWeek: number): number {
+    let mask = 0;
+    for (let w = startWeek; w <= endWeek; w++) {
+        mask |= (1 << (w - 1)); 
+    }
+    return mask;
+}
+
 // Convert bitmask to weeks array
 export function bitmaskToWeeks(bitmask: number): number[] {
     const weeks: number[] = [];
