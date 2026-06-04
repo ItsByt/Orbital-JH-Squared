@@ -1,5 +1,5 @@
 import { type DisplayLesson } from "@/types";
-import { formatWeeks, bitmaskToWeeks } from "@/utils/timetableUtils/weekFormat";
+import { formatWeeksDisplay, bitmaskToWeeks } from "@/utils/timetableUtils/weekFormat";
 import { doLessonsSchedulesClash } from "@/utils/timetableUtils/lessonClashDetection";
 
 
@@ -92,7 +92,7 @@ export default function ClassCard({
                     )}
                 </div>
                 <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                    {lesson.lessonType} {lesson.classNo !== "CUSTOM" && ` [${lesson.classNo}]`}
+                    {lesson.lessonType} {!lesson.classNo.startsWith("CUSTOM") && ` [${lesson.classNo}]`}
                 </span>
             </div>
 
@@ -101,7 +101,7 @@ export default function ClassCard({
                     {lesson.venue || "No Venue"}
                 </span>
                 <span className={`text-[10px] ${hasOverlap ? "text-destructive/90 font-medium" : "text-muted-foreground"}`}>
-                    {formatWeeks(bitmaskToWeeks(lesson.weekBitmask))}
+                    {formatWeeksDisplay(bitmaskToWeeks(lesson.weekBitmask))}
                 </span>
             </div>
         </div>

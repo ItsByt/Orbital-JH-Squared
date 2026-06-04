@@ -1,27 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTimetableData } from "@/hooks/useTimetableData";
-import { useTimetableView } from "@/hooks/useTimetableView";
-import { useTimetableActions } from "@/hooks/useTimetableActions";
+import { useTimetableData } from "@/hooks/TimetableHooks/useTimetableData";
+import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
+import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
 import { getCurrentAcadYear, getAcadYearString } from "@/utils/generalUtils/time";
-import { convertTimeToColumn } from "@/utils/timetableUtils/timeFormat";
-import { Loader2, X, Plus } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { calculateDayLayout } from "@/utils/timetableUtils/subrowAllocation";
-import ClassCard from "@/components/ui/ClassCard";
+import CustomSlotDialog from "@/components/TimetableComponent/CustomSlotDialog";
+import TimetableGrid from "@/components/TimetableComponent/TimetableGrid";
 import SearchBar from "@/components/SearchBar";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter, 
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { generateWeekBitmask } from "@/utils/timetableUtils/weekFormat";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const HOURS = ["0800", "0900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800"];
@@ -32,17 +19,6 @@ export default function TimetablePage({ semester }: { semester: number }) {
     const acadYearString = getAcadYearString();
     const navigate = useNavigate();
     const [searchResetKey, setSearchResetKey] = useState(0);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    // Dialog Input Form for Customized Blocks
-    const [formName, setFormName] = useState("");
-    const [formDay, setFormDay] = useState("Monday");
-    const [formStart, setFormStart] = useState("0900");
-    const [formEnd, setFormEnd] = useState("1100");
-    const [formVenue, setFormVenue] = useState("");
-    const [formStartWeek, setFormStartWeek] = useState("1"); 
-    const [formEndWeek, setFormEndWeek] = useState("13");
-    
 
     // TimetableData abstractions - retrieve, select and swap
     const {
@@ -73,52 +49,13 @@ export default function TimetablePage({ semester }: { semester: number }) {
         swapModuleSlot
     );
 
-    // 2 NEW HANDLERS REQUIRED IN THIS FILE:
+    // 1 NEW HANDLER REQUIRED IN THIS FILE:
     // AddHandler to support searchbar reset - use new key value
     const handleAddModuleWithReset = async (moduleCode: string) => {
         await handleAddModule(moduleCode);
         setSearchResetKey((k) => k + 1);
     };
 
-    // React Submit form for Custom blocks
-    const handleCreateCustomSubmit = async (e: React.SubmitEvent) => {
-        e.preventDefault();
-        // Error Handling: empty name/venue/ invalid start_end times or weeks
-        if (!formName.trim()) return;
-        if (!formVenue.trim()) {
-            alert("Invalid Selection: Venue cannot be empty.");
-            return;
-        }
-        if (parseInt(formEnd, 10) <= parseInt(formStart, 10)) {
-            alert("Invalid Time Selection: End time must be strictly after the start time.");
-            return; 
-        }
-        if (parseInt(formStartWeek, 10) > parseInt(formEndWeek, 10)) {
-            alert("Invalid Week Selection: End week cannot be before start week.");
-            return;
-        }
-
-        const startWeekForm = parseInt(formStartWeek, 10);
-        const endWeekForm = parseInt(formEndWeek, 10);
-        const computedBitmask = generateWeekBitmask(startWeekForm, endWeekForm);
-
-        await handleCustomEvent({
-            name: formName,
-            day: formDay,
-            startTime: formStart,
-            endTime: formEnd,
-            venue: formVenue,
-            startWeek: startWeekForm,
-            endWeek: endWeekForm,
-            weekBitmask: computedBitmask
-        });
-
-        setIsDialogOpen(false);
-        setFormName("");
-        setFormVenue("");
-        setFormStartWeek("1");
-        setFormEndWeek("13");
-    };
     
     // The usual loading 
     if (loading) {
@@ -144,178 +81,18 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 </h1>
 
                 {/* Timetable Matrix Grid */}
-                <div className="w-full border border-border rounded-xl overflow-hidden bg-card shadow-sm relative">
-                    {/* Hour Markings */}
-                    <div className="grid grid-cols-[80px_repeat(22,1fr)] border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none">
-                        <div className="p-3 border-r border-border text-left text-foreground font-bold">Day</div>
-                        {HOURS.map((hour) => (
-                            <div key={hour} className="p-3 col-span-2 text-left pl-2 border-r border-border/40">
-                                {hour}
-                            </div>
-                        ))}
-                    </div>
+                <TimetableGrid 
+                    DAYS={DAYS} 
+                    HOURS={HOURS} 
+                    lessonsByDay={lessonsByDay} 
+                    selectedLesson={selectedLesson} 
+                    handleSelectClass={handleSelectClass} 
+                    handleSwapClass={handleSwapClass} 
+                />
 
-                    {/* Day Rows */}
-                    <div className="divide-y divide-border">
-                        {DAYS.map((day) => {
-                            const allVisibleLessons = lessonsByDay[day] || [];
-                            const { totalRowsForDay, lessonRowMap } = calculateDayLayout(allVisibleLessons);
-
-                            return (
-                                <div
-                                    key={day}
-                                    className="grid grid-cols-[80px_repeat(22,1fr)] relative"
-                                    style={{ gridTemplateRows: `repeat(${totalRowsForDay}, minmax(112px, auto))` }}
-                                >
-                                    {/* Day Column Titles */}
-                                    <div className="p-3 font-bold text-xs border-r border-border bg-muted/20 flex items-center justify-start row-span-full z-10 sticky left-0 backdrop-blur-sm select-none">
-                                        {day.substring(0, 3)}
-                                    </div>
-
-                                    {/* Background Line Grid */}
-                                    <div className="absolute inset-0 left-[80px] grid grid-cols-[repeat(22,1fr)] pointer-events-none select-none">
-                                        {Array.from({ length: 22 }).map((_, idx) => (
-                                            <div
-                                                key={idx}
-                                                className={`h-full border-r ${idx % 2 === 1 ? "border-border/40" : "border-border/10 border-dashed"}`}
-                                            />
-                                        ))}
-                                    </div>
-
-                                    {/* All Rendered active blocks with ClassCard */}
-                                    {allVisibleLessons.map((lesson) => (
-                                        <ClassCard
-                                            key={lesson.id}
-                                            lesson={lesson}
-                                            allVisibleLessons={allVisibleLessons}
-                                            colStart={convertTimeToColumn(lesson.startTime)}
-                                            colEnd={convertTimeToColumn(lesson.endTime)}
-                                            rowIndex={(lessonRowMap.get(lesson.id) ?? 0) + 1}
-                                            selectedLesson={selectedLesson}
-                                            onSelectClass={handleSelectClass}
-                                            onSwapClass={handleSwapClass}
-                                        />
-                                    ))}
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Floating plus to make custom block*/}
-                    <div className="absolute bottom-4 right-4 z-30">
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button 
-                                    size="icon"
-                                    className="h-12 w-12 rounded-full bg-[#56A58B] hover:bg-[#458570] text-white shadow-lg cursor-pointer transition-transform duration-200 hover:scale-105"
-                                >
-                                    <Plus className="h-6 w-6" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[420px]">
-                                <DialogHeader>
-                                    <DialogTitle>Custom Slot Creator</DialogTitle>
-                                    <DialogDescription>Add your own personal events!</DialogDescription>
-                                </DialogHeader>
-                                <form onSubmit={handleCreateCustomSubmit} className="space-y-4 pt-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="custom-name">Activity Name</Label>
-                                        <Input 
-                                            id="custom-name" 
-                                            placeholder="e.g. CCAs, Mealtime, Gym" 
-                                            value={formName} 
-                                            onChange={(e) => setFormName(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-day">Day</Label>
-                                            <select 
-                                                id="custom-day"
-                                                value={formDay}
-                                                onChange={(e) => setFormDay(e.target.value)}
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                            >
-                                                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-venue">Venue</Label>
-                                            <Input 
-                                                id="custom-venue" 
-                                                placeholder="e.g. University Town" 
-                                                value={formVenue} 
-                                                onChange={(e) => setFormVenue(e.target.value)}
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-start">Start Time</Label>
-                                            <select 
-                                                id="custom-start"
-                                                value={formStart}
-                                                onChange={(e) => setFormStart(e.target.value)}
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                            >
-                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-end">End Time</Label>
-                                            <select 
-                                                id="custom-end"
-                                                value={formEnd}
-                                                onChange={(e) => setFormEnd(e.target.value)}
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                            >
-                                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* Custom Start Week and End Week Row Selection */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-start-week">Start Week</Label>
-                                            <select 
-                                                id="custom-start-week"
-                                                value={formStartWeek}
-                                                onChange={(e) => setFormStartWeek(e.target.value)}
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                            >
-                                                {WEEKS.map(w => <option key={w} value={w.toString()}>Week {w}</option>)}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <Label htmlFor="custom-end-week">End Week</Label>
-                                            <select 
-                                                id="custom-end-week"
-                                                value={formEndWeek}
-                                                onChange={(e) => setFormEndWeek(e.target.value)}
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                                            >
-                                                {WEEKS.map(w => <option key={w} value={w.toString()}>Week {w}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <DialogFooter className="pt-2">
-                                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                            Cancel
-                                        </Button>
-                                        <Button type="submit" className="bg-[#749c83] hover:bg-[#638570] text-white">
-                                            Insert into Schedule
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
+                {/* Floating Plus and Custom Block Dialog */}
+                <div className="fixed bottom-4 right-4 z-30">
+                    <CustomSlotDialog DAYS={DAYS} HOURS={HOURS} WEEKS={WEEKS} onCustomEvent={handleCustomEvent} />
                 </div>
 
                 {/* Semester Page Selection */}
@@ -372,4 +149,4 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 </div>
             </div>
         );
-    }
+}

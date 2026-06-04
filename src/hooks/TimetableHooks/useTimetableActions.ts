@@ -38,7 +38,7 @@ export function useTimetableActions(
         }
     };
 
-       // Handle adding a module from SearchBar
+    // Handle adding a module from SearchBar
     const handleAddModule = async (moduleCode: string) => {
         const module = await getModule(moduleCode);
 
@@ -69,34 +69,28 @@ export function useTimetableActions(
         queryClient.invalidateQueries({queryKey: ["timetable", currentYear, semester],});
     }; 
 
+
     // Handle addition of customized events
     const handleCustomEvent = async (eventData: {
-        name: string;
-        day: string;
-        startTime: string;
-        endTime: string;
-        venue: string;
-        startWeek: number;
-        endWeek: number;
-        weekBitmask: number
-    }) => {
-
-        // FIX: format into numerical array used by Supabase standards
-        const weeksArray = Array.from(
-            { length: eventData.endWeek - eventData.startWeek + 1 }, 
-            (_, i) => eventData.startWeek + i
-        );
-
+            name: string;
+            day: string;
+            startTime: string;
+            endTime: string;
+            venue: string;
+            selectedWeeks: number[];
+            weekBitmask: number
+            classNo: string;
+        }) => {
         const newCustomCard: DisplayLesson = {
             id: `custom-${Date.now()}`,
             moduleCode: eventData.name.trim().toUpperCase(),
             lessonType: "Personal Block",
-            classNo: "CUSTOM",
+            classNo: eventData.classNo,
             day: eventData.day,
             startTime: eventData.startTime, 
             endTime: eventData.endTime,     
             venue: eventData.venue.trim() || "No Venue Assigned",
-            weeks: weeksArray, 
+            weeks: eventData.selectedWeeks, 
             weekBitmask: eventData.weekBitmask,           
             isAlternative: false,
             startMins: timeToMins(eventData.startTime),
