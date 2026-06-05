@@ -117,8 +117,9 @@ export function useTimetableData(year: number, semester: number) {
                     slot.classNo === newLesson.classNo
             );
 
-            const newClassSlots: DisplayLesson[] = tiedRawSlots.map((slot: NUSModsRawLesson, index: number) =>
-                buildDisplayLesson(oldLesson.moduleCode, slot, `temp-swap-${index}`, false)
+            const newClassSlots: DisplayLesson[] = tiedRawSlots.map(
+                (slot: NUSModsRawLesson, index: number) =>
+                    buildDisplayLesson(oldLesson.moduleCode, slot, `temp-swap-${index}`, false)
             );
 
             swapMutation.mutate({ oldLesson, newClassSlots });

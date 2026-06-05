@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import { createClient, type Session  } from "@supabase/supabase-js";
+import { createClient, type Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 import { Theme } from "@/components/Theme";

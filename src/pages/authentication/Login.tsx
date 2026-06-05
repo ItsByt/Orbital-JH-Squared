@@ -113,6 +113,7 @@ export default function Login() {
                             type="password"
                             placeholder="Enter your password"
                             value={password}
+                            autoComplete="current-password"
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             className="w-full h-11 px-3 bg-background border-border text-foreground placeholder:text-muted-foreground/50 rounded-md focus-visible:ring-1 focus-visible:ring-[#749c83]/50"

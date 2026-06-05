@@ -81,8 +81,7 @@ export interface SavedPlannerRow {
     year: number;
     semester: number;
     module_code: string;
-    module_title: string;
+    title: string;
     module_credit: number;
     display_order: number;
 }
-

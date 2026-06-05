@@ -1,6 +1,7 @@
-import { ChevronDown, Trash2  } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import type { PlannerModule } from "@/types";
 import { usePlannerStore } from "@/store/usePlannerStore";
+import { removeFromPlannerModuleDB } from "@/services/plannerDB";
 
 import {
     DropdownMenu,
@@ -15,18 +16,28 @@ interface ModuleBlockProps {
 }
 
 export default function ModuleBlock({ module, semesterKey }: ModuleBlockProps) {
-    const removeModule = usePlannerStore(state => state.removeModule);
+    const removeModule = usePlannerStore((state) => state.removeModule);
+
+    const handleDelete = async () => {
+        // Optimistic removal of module
+        removeModule(semesterKey, module.moduleCode);
+
+        const success = await removeFromPlannerModuleDB(module.moduleCode);
+
+        if (!success) {
+            usePlannerStore.getState().addModule(semesterKey, module);
+        }
+    };
 
     return (
         // Block background, text color, and hover effects
-        <div 
+        <div
             className="relative group bg-[#3070b3] 
             hover:bg-[#28619e] text-black p-2.5 rounded-md 
             shadow-sm transition-colors duration-150 
             cursor-grab active:cursor-grabbing 
             flex flex-col"
         >
-            
             <div className="flex justify-between items-start mb-1">
                 <span className="text-[12px] font-bold tracking-tight leading-none">
                     {module.moduleCode}
@@ -39,11 +50,13 @@ export default function ModuleBlock({ module, semesterKey }: ModuleBlockProps) {
                             <ChevronDown size={14} className="text-white/80" />
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40 bg-[#18181a] border-zinc-800 text-zinc-300">
-
+                    <DropdownMenuContent
+                        align="end"
+                        className="w-40 bg-[#18181a] border-zinc-800 text-zinc-300"
+                    >
                         {/* Removing a module */}
-                        <DropdownMenuItem 
-                            onClick={() => removeModule(semesterKey, module.moduleCode)}
+                        <DropdownMenuItem
+                            onClick={handleDelete}
                             className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer"
                         >
                             <Trash2 className="mr-2 h-3.5 w-3.5" />
