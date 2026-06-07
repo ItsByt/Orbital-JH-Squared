@@ -41,14 +41,14 @@ export default function Planner() {
             <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-200">
                 <Loader2 className="h-10 w-10 animate-spin text-[#749c83]" />
                 <span className="ml-3 mt-4 text-base font-medium text-muted-foreground">
-                    Loading timetable data...
+                    Loading planner data...
                 </span>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col flex-1 min-h-0 space-y-4 pt-1 px-6 pb-2 w-full">
+        <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden space-y-4 pt-1 px-6 pb-2 w-full">
             <div className="flex justify-between items-end shrink-0 border-b border-border/50 pb-2">
                 <h1
                     className="text-3xl font-bold tracking-tight"

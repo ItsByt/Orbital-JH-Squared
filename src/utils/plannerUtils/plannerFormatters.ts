@@ -2,11 +2,12 @@ import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import type { ModuleDetails, PlannerModule, SavedPlannerRow } from "@/types";
 
 // Formats NUSMods API information into PlannerModule
-export function buildPlannerModule(details: ModuleDetails): PlannerModule {
+export function buildPlannerModule(details: ModuleDetails, displayOrder: number): PlannerModule {
     return {
         moduleCode: details.moduleCode,
         title: details.title,
         moduleCredit: Number(details.moduleCredit) || 0,
+        displayOrder: displayOrder
     };
 }
 
@@ -37,6 +38,7 @@ export function formatSavedPlannerModules(savedRows: SavedPlannerRow[]): Planner
         moduleCode: row.module_code,
         title: row.title,
         moduleCredit: row.module_credit,
+        displayOrder: row.display_order
     }));
 }
 
@@ -45,7 +47,7 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
     const board: Record<string, PlannerModule[]> = {};
     for (let year = 1; year <= TOTAL_PLANNER_YEARS; year++) {
         board[`Y${year}S1`] = [];
-        board[`Y${year}S1`] = [];
+        board[`Y${year}S2`] = [];
     }
 
     return board;
@@ -61,9 +63,38 @@ export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string,
                 moduleCode: row.module_code,
                 title: row.title,
                 moduleCredit: row.module_credit,
+                displayOrder: row.display_order,
             });
         }
     });
 
+    for (const key in board) {
+        board[key].sort((a, b) => a.displayOrder - b.displayOrder);
+    }
+
     return board;
+}
+
+// Extracts Year and Semester number from SemesterKeys: "Y1S2"
+export function parseSemesterKey(key: string) {
+    const match = key.match(/Y(\d+)S(\d+)/);
+
+    if (!match) {
+        console.log("Developer Error: Invalid semesterKey format");
+        throw new Error(`Invalid semesterKey format "${key}". Expected format like "Y1S1".`);
+    }
+
+    return {
+        year: parseInt(match[1], 10),
+        semester: parseInt(match[2], 10)
+    };
+}
+
+// Get the next Display Order for showing on Planner
+export function getNextDisplayOrder(currentModules: PlannerModule[]): number {
+    if (currentModules.length === 0) return 0;
+
+    // Find the highest displayOrder currently in the list, then add 1
+    const maxOrder = Math.max(...currentModules.map(m => m.displayOrder ?? 0));
+    return maxOrder + 1;
 }

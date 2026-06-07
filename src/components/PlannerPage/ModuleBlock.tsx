@@ -19,13 +19,15 @@ export default function ModuleBlock({ module, semesterKey }: ModuleBlockProps) {
     const removeModule = usePlannerStore((state) => state.removeModule);
 
     const handleDelete = async () => {
+        const previousSemesterSnapshot = [...usePlannerStore.getState().board[semesterKey]];
+
         // Optimistic removal of module
         removeModule(semesterKey, module.moduleCode);
 
         const success = await removeFromPlannerModuleDB(module.moduleCode);
 
         if (!success) {
-            usePlannerStore.getState().addModule(semesterKey, module);
+            usePlannerStore.getState().setSemesterData(semesterKey, previousSemesterSnapshot);
         }
     };
 

@@ -3,9 +3,13 @@ import { Search, Loader2 } from "lucide-react";
 import AutoCompleteSearch from "@/hooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
-import { buildPlannerModule } from "@/utils/plannerUtils/plannerFormatters";
+import {
+    parseSemesterKey,
+    getNextDisplayOrder,
+    buildPlannerModule,
+} from "@/utils/plannerUtils/plannerFormatters";
 import { addToPlannerModuleDB } from "@/services/plannerDB";
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export default function AddCourseModal({
@@ -19,38 +23,39 @@ export default function AddCourseModal({
 }) {
     const { searchTerm, setSearchTerm, searchResults, isLoading } = AutoCompleteSearch();
     const addModule = usePlannerStore((state) => state.addModule);
+    const removeModule = usePlannerStore((state) => state.removeModule);
     const [isAdding, setIsAdding] = useState(false);
 
     const handleSelectModule = async (moduleCode: string) => {
         if (isAdding) return;
 
         const board = usePlannerStore.getState().board;
+        const currentSemModules = board[semesterKey] || [];
+
         const isDuplicate = Object.values(board).some((semesterArray) =>
             semesterArray.some((mod) => mod.moduleCode == moduleCode)
         );
-
         if (isDuplicate) {
             toast.error(`${moduleCode} is already in your planner!`);
             return;
         }
 
         setIsAdding(true);
-
         const moduleDetails = await getModule(moduleCode);
         if (!moduleDetails) {
             setIsAdding(false);
             return;
         }
 
-        const year = parseInt(semesterKey[1]);
-        const semester = parseInt(semesterKey[3]);
-        const displayOrder = usePlannerStore.getState().board[semesterKey].length;
+        const { year, semester } = parseSemesterKey(semesterKey);
+        const nextOrder = getNextDisplayOrder(currentSemModules);
 
         // Optimistic addition of module
-        const newModule = buildPlannerModule(moduleDetails);
+        const newModule = buildPlannerModule(moduleDetails, nextOrder);
         addModule(semesterKey, newModule);
         onOpenChange(false);
         setSearchTerm("");
+        setIsAdding(false);
 
         const success = await addToPlannerModuleDB(
             moduleDetails.moduleCode,
@@ -58,14 +63,12 @@ export default function AddCourseModal({
             Number(moduleDetails.moduleCredit),
             year,
             semester,
-            displayOrder
+            nextOrder
         );
 
         if (!success) {
-            usePlannerStore.getState().removeModule(semesterKey, moduleCode);
+            removeModule(semesterKey, moduleCode);
         }
-
-        setIsAdding(false);
     };
 
     const handleOpenChange = (newOpen: boolean) => {
@@ -79,6 +82,7 @@ export default function AddCourseModal({
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-[450px] bg-[#18181b] border-zinc-800 p-0 overflow-hidden gap-0">
+                <DialogTitle className="sr-only">Add Module to {semesterKey}</DialogTitle>
                 <DialogHeader className="p-4 border-b border-zinc-800">
                     <div className="flex items-center gap-3">
                         <Search className="h-4 w-4 text-zinc-500" />

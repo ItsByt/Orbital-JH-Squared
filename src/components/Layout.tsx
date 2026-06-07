@@ -9,7 +9,7 @@ export default function Layout() {
             <SidebarProvider>
                 <AppSidebar />
 
-                <main className="w-full p-8 min-h-screen bg-background text-foreground transition-colors duration-200">
+                <main className="w-full p-8 flex-1 min-w-0 h-screen overflow-hidden min-h-screen bg-background text-foreground transition-colors duration-200">
                     {/* Opens and closes the sidebar */}
                     <SidebarTrigger className="mb-4" />
 

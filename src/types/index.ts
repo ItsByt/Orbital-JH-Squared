@@ -71,6 +71,7 @@ export interface PlannerModule {
     moduleCode: string;
     title: string;
     moduleCredit: number;
+    displayOrder: number;
 }
 
 //Details for Planner modules stored in supabase
