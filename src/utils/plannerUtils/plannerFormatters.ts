@@ -45,7 +45,7 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
     const board: Record<string, PlannerModule[]> = {};
     for (let year = 1; year <= TOTAL_PLANNER_YEARS; year++) {
         board[`Y${year}S1`] = [];
-        board[`Y${year}S1`] = [];
+        board[`Y${year}S2`] = [];
     }
 
     return board;
