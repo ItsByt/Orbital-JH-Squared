@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { Droppable } from "@hello-pangea/dnd";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
@@ -25,11 +26,29 @@ export default function SemesterColumn({ title, semesterKey }: SemesterColumnPro
             </div>
 
             {/* The Stack of Cards */}
-            <div className="flex flex-col gap-2 flex-1 mb-4">
-                {modules.map((mod) => (
-                    <ModuleBlock key={mod.moduleCode} module={mod} semesterKey={semesterKey} />
-                ))}
-            </div>
+            <Droppable droppableId={semesterKey}>
+                {/* Draggable snapshot properties -> isDraggingOver, draggingOverWith */}
+                {(provided, snapshot) => (
+                    <div
+                        className={`flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px] 
+                            ${snapshot.isDraggingOver ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
+                        `}
+                        ref={provided.innerRef} //attaches the DOM node
+                        {...provided.droppableProps} //props needed for DnD
+                    >
+                        {modules.map((mod, index) => (
+                            <ModuleBlock
+                                key={mod.moduleCode}
+                                module={mod}
+                                semesterKey={semesterKey}
+                                index={index}
+                            />
+                        ))}
+                        {provided.placeholder}{" "}
+                        {/* Required by DnD to increase the space during a drag when needed*/}
+                    </div>
+                )}
+            </Droppable>
 
             {/* Adding Courses*/}
             <div className="mt-2 shrink-0">

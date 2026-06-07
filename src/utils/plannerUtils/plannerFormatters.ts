@@ -7,7 +7,7 @@ export function buildPlannerModule(details: ModuleDetails, displayOrder: number)
         moduleCode: details.moduleCode,
         title: details.title,
         moduleCredit: Number(details.moduleCredit) || 0,
-        displayOrder: displayOrder
+        displayOrder: displayOrder,
     };
 }
 
@@ -38,7 +38,7 @@ export function formatSavedPlannerModules(savedRows: SavedPlannerRow[]): Planner
         moduleCode: row.module_code,
         title: row.title,
         moduleCredit: row.module_credit,
-        displayOrder: row.display_order
+        displayOrder: row.display_order,
     }));
 }
 
@@ -86,7 +86,7 @@ export function parseSemesterKey(key: string) {
 
     return {
         year: parseInt(match[1], 10),
-        semester: parseInt(match[2], 10)
+        semester: parseInt(match[2], 10),
     };
 }
 
@@ -95,6 +95,6 @@ export function getNextDisplayOrder(currentModules: PlannerModule[]): number {
     if (currentModules.length === 0) return 0;
 
     // Find the highest displayOrder currently in the list, then add 1
-    const maxOrder = Math.max(...currentModules.map(m => m.displayOrder ?? 0));
+    const maxOrder = Math.max(...currentModules.map((m) => m.displayOrder ?? 0));
     return maxOrder + 1;
 }

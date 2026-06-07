@@ -2,6 +2,7 @@ import { supabase } from "./supabase";
 import { getUserId } from "./auth";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { formatForPlannerDatabase } from "@/utils/plannerUtils/plannerFormatters";
+import type { PlannerModule } from "@/types";
 import { toast } from "sonner";
 
 export async function getPlannerModules() {
@@ -90,6 +91,41 @@ export async function removeFromPlannerModuleDB(moduleCode: string) {
         return true;
     } catch (error) {
         toast.error("Failed to remove", { description: getErrorMessage(error) });
+        return false;
+    }
+}
+
+// Used to update multiple modules in a specific year and semester
+export async function massUpdatePlannerModulesDB(
+    modules: PlannerModule[],
+    year: number,
+    semester: number
+) {
+    try {
+        const userId = await getUserId();
+        if (!userId) return false;
+
+        if (modules.length === 0) return true; 
+
+        const rowsToUpsert = modules.map((mod) =>
+            formatForPlannerDatabase(
+                userId,
+                mod.moduleCode,
+                mod.title,
+                mod.moduleCredit,
+                year,
+                semester,
+                mod.displayOrder
+            )
+        );
+
+        const { error } = await supabase.from("planner_modules").upsert(rowsToUpsert, { onConflict: "user_id, module_code" });
+        if (error) throw error;
+
+        return true;
+    } catch (error) {
+        toast.error("Failed to mass update", { description: getErrorMessage(error) });
+        console.log(error);
         return false;
     }
 }
