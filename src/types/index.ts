@@ -72,6 +72,7 @@ export interface PlannerModule {
     title: string;
     moduleCredit: number;
     displayOrder: number;
+    availableSemesters: number[];
 }
 
 //Details for Planner modules stored in supabase
@@ -85,4 +86,5 @@ export interface SavedPlannerRow {
     title: string;
     module_credit: number;
     display_order: number;
+    available_semesters: number[];
 }

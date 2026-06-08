@@ -5,18 +5,24 @@ import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
 interface PlannerState {
     //board key format: "Y1S1"
     board: Record<string, PlannerModule[]>;
+    dragState: { draggingModuleCode: string | null; isOverInvalidSem: boolean };
 
     setBoard: (board: Record<string, PlannerModule[]>) => void;
+    setDragState: (state: { draggingModuleCode: string | null; isOverInvalidSem: boolean }) => void;
     setSemesterData: (semesterKey: string, modules: PlannerModule[]) => void;
     addModule: (semesterKey: string, module: PlannerModule) => void;
     removeModule: (semesterKey: string, moduleId: string) => void;
     moveModule: (fromSem: string, toSem: string, fromIndex: number, toIndex: number) => void;
+    
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
     board: generateEmptyBoard(),
+    dragState: { draggingModuleCode: null, isOverInvalidSem: false },
 
     setBoard: (board) => set({ board }),
+
+    setDragState: (dragState) => set({ dragState }),
 
     setSemesterData: (semesterKey, modules) =>
         set((state) => ({
@@ -48,6 +54,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             const sourceColumn = [...newBoard[fromSem]];
             const destColumn = fromSem === toSem ? sourceColumn : [...newBoard[toSem]];
 
+            // Extract and move the module to the right position within destColumn
             const [movedModule] = sourceColumn.splice(fromIndex, 1);
             destColumn.splice(toIndex, 0, movedModule);
 
@@ -55,6 +62,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             sourceColumn.forEach((mod, index) => (mod.displayOrder = index));
             destColumn.forEach((mod, index) => (mod.displayOrder = index));
 
+            // Update the board with the updated columns
             newBoard[fromSem] = sourceColumn;
             newBoard[toSem] = destColumn;
             return { board: newBoard };

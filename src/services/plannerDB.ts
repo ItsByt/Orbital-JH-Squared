@@ -29,7 +29,8 @@ export async function addToPlannerModuleDB(
     moduleCredit: number,
     year: number,
     semester: number,
-    displayOrder: number
+    displayOrder: number,
+    availableSemesters: number[]
 ) {
     try {
         const userId = await getUserId();
@@ -45,7 +46,8 @@ export async function addToPlannerModuleDB(
             moduleCredit,
             year,
             semester,
-            displayOrder
+            displayOrder,
+            availableSemesters
         );
 
         const { error: dbError } = await supabase.from("planner_modules").insert(rowToInsert);
@@ -115,7 +117,8 @@ export async function massUpdatePlannerModulesDB(
                 mod.moduleCredit,
                 year,
                 semester,
-                mod.displayOrder
+                mod.displayOrder,
+                mod.availableSemesters
             )
         );
 

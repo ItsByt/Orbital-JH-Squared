@@ -9,10 +9,9 @@ import {
     buildPlannerModule,
 } from "@/utils/plannerUtils/plannerFormatters";
 import { addToPlannerModuleDB } from "@/services/plannerDB";
-import { checkValidSemesterUsingModuleDetails } from "@/utils/generalUtils/validateModuleSemester";
+import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-
 
 export default function AddCourseModal({
     open,
@@ -49,10 +48,8 @@ export default function AddCourseModal({
             return;
         }
 
-        const { year, semester } = parseSemesterKey(semesterKey);
-        const nextOrder = getNextDisplayOrder(currentSemModules);
-
         // Check if valid semester for module
+        const { year, semester } = parseSemesterKey(semesterKey);
         const isValidSemester = checkValidSemesterUsingModuleDetails(moduleDetails, semester);
         if (!isValidSemester) {
             toast.error(`${moduleCode} is not available in this semester!`);
@@ -61,7 +58,8 @@ export default function AddCourseModal({
         }
 
         // Optimistic addition of module
-        const newModule = buildPlannerModule(moduleDetails, nextOrder);
+        const nextOrder = getNextDisplayOrder(currentSemModules);
+        const newModule = buildPlannerModule(moduleDetails, nextOrder); 
         addModule(semesterKey, newModule);
         onOpenChange(false);
         setSearchTerm("");
@@ -73,7 +71,8 @@ export default function AddCourseModal({
             Number(moduleDetails.moduleCredit),
             year,
             semester,
-            nextOrder
+            nextOrder,
+            newModule.availableSemesters
         );
 
         if (!success) {

@@ -1,23 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
+import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea/dnd";
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import YearBlock from "@/components/PlannerPage/YearBlock";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { formatPlannerBoard, parseSemesterKey } from "@/utils/plannerUtils/plannerFormatters";
+import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
 import { getPlannerModules, massUpdatePlannerModulesDB } from "@/services/plannerDB";
-import { checkValidSemesterUsingModuleCode } from "@/utils/generalUtils/validateModuleSemester";
-import { toast } from "sonner";
 
+import { toast } from "sonner";
 
 const YEARS = Array.from({ length: TOTAL_PLANNER_YEARS }, (_, i) => i + 1);
 
 export default function Planner() {
     const board = usePlannerStore((state) => state.board);
     const setBoard = usePlannerStore((state) => state.setBoard);
+    const setDragState = usePlannerStore((state) => state.setDragState);
     const moveModule = usePlannerStore((state) => state.moveModule);
     const [isLoading, setIsLoading] = useState(true);
-
+    
     useEffect(() => {
         async function loadBoard() {
             const rows = await getPlannerModules();
@@ -40,7 +41,27 @@ export default function Planner() {
         return { count, units };
     }, [board]);
 
+    // Handle while-dragging updates
+    const handleDragUpdate = (update: DragUpdate) => {
+        const { draggableId, destination } = update;
+        if (!destination) {
+            setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: false });
+            return;
+        }
+
+        // Check if module is dragged over invalid semester
+        const { semester: toSem } = parseSemesterKey(destination.droppableId);
+        const draggedModuleDetails = Object.values(board)
+            .flat()
+            .find((m) => m.moduleCode === draggableId);
+        const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModuleDetails, toSem);
+
+        setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: !isValidSemester });
+    };
+
+    // Handle end-of-drag updates
     const handleDragEnd = async (result: DropResult) => {
+        setDragState({ draggingModuleCode: null, isOverInvalidSem: false });
         const { source, destination } = result;
 
         if (!destination) return;
@@ -59,12 +80,12 @@ export default function Planner() {
 
         // Checking if new semester moved to is valid
         const draggedModule = boardSnapshot[fromYearSem][fromIndex];
-        const moduleCode = draggedModule.moduleCode
+        const moduleCode = draggedModule.moduleCode;
         const { year: toYear, semester: toSem } = parseSemesterKey(toYearSem);
-        const isValidSemester = await checkValidSemesterUsingModuleCode(moduleCode, toSem);
+        const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
         if (!isValidSemester) {
             toast.error(`${moduleCode} is not available in this semester!`);
-            return
+            return;
         }
 
         // Optimistic update of module
@@ -77,7 +98,7 @@ export default function Planner() {
             toYear,
             toSem
         );
-        
+
         // If the columns are the same, the previous update already suffices
         let successInUpdatingSourceColDB = true;
         if (fromYearSem !== toYearSem) {
@@ -109,9 +130,9 @@ export default function Planner() {
     }
 
     return (
-        // Also available to use: onDragStart and onDragUpdate
+        // Also available to use: onDragStart
         // onDragEnd is the only one required
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
             <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden space-y-4 pt-1 px-6 pb-2 w-full">
                 <div className="flex justify-between items-end shrink-0 border-b border-border/50 pb-2">
                     <h1

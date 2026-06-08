@@ -18,6 +18,10 @@ interface ModuleBlockProps {
 }
 
 export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockProps) {
+    const dragState = usePlannerStore((state) => state.dragState);
+    const isBeingDraggedInvalidly =
+        dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
+        
     const removeModule = usePlannerStore((state) => state.removeModule);
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
 
@@ -43,8 +47,13 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`relative group bg-[#3070b3] hover:bg-[#28619e] text-white p-2.5 rounded-md shadow-sm flex flex-col 
-                        ${snapshot.isDragging ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
+                    className={`relative group bg-[#3070b3] hover:bg-[#28619e] text-white p-2.5 rounded-md shadow-sm flex flex-col transition-colors duration-150
+                        ${
+                            snapshot.isDragging && isBeingDraggedInvalidly
+                                ? "bg-red-600 animate-pulse ring-2 ring-red-400"
+                                : "bg-[#3070b3] hover:bg-[#28619e]"
+                        }
+                            ${snapshot.isDragging && !isBeingDraggedInvalidly ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
                     `}
                     style={{ ...provided.draggableProps.style }}
                 >

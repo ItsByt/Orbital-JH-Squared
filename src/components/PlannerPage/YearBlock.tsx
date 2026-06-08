@@ -8,6 +8,7 @@ interface YearBlockProps {
 
 export default function YearBlock({ yearNum }: YearBlockProps) {
     const board = usePlannerStore((state) => state.board);
+    const dragState = usePlannerStore((state) => state.dragState);
 
     // Calculate Totals for a specific year (Sem 1 + Sem 2)
     const yearTotals = useMemo(() => {
@@ -43,8 +44,16 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
 
             {/* Content: Two Semester Columns */}
             <div className="grid grid-cols-2 gap-3 flex-1 overflow-hidden">
-                <SemesterColumn title="Sem 1" semesterKey={`Y${yearNum}S1`} />
-                <SemesterColumn title="Sem 2" semesterKey={`Y${yearNum}S2`} />
+                <SemesterColumn
+                    title="Sem 1"
+                    semesterKey={`Y${yearNum}S1`}
+                    isInvalidDropTarget={dragState.isOverInvalidSem}
+                />
+                <SemesterColumn
+                    title="Sem 2"
+                    semesterKey={`Y${yearNum}S2`}
+                    isInvalidDropTarget={dragState.isOverInvalidSem}
+                />
             </div>
         </div>
     );

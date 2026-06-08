@@ -3,11 +3,14 @@ import type { ModuleDetails, PlannerModule, SavedPlannerRow } from "@/types";
 
 // Formats NUSMods API information into PlannerModule
 export function buildPlannerModule(details: ModuleDetails, displayOrder: number): PlannerModule {
+    const availableSemesters = details.semesterData.map((s) => s.semester);
+
     return {
         moduleCode: details.moduleCode,
         title: details.title,
         moduleCredit: Number(details.moduleCredit) || 0,
         displayOrder: displayOrder,
+        availableSemesters: availableSemesters
     };
 }
 
@@ -19,7 +22,8 @@ export function formatForPlannerDatabase(
     moduleCredit: number,
     year: number,
     semester: number,
-    displayOrder: number
+    displayOrder: number,
+    availableSemesters: number[]
 ) {
     return {
         user_id: userId,
@@ -29,6 +33,7 @@ export function formatForPlannerDatabase(
         year: year,
         semester: semester,
         display_order: displayOrder,
+        available_semesters: availableSemesters,
     };
 }
 
@@ -39,6 +44,7 @@ export function formatSavedPlannerModules(savedRows: SavedPlannerRow[]): Planner
         title: row.title,
         moduleCredit: row.module_credit,
         displayOrder: row.display_order,
+        availableSemesters: row.available_semesters
     }));
 }
 
@@ -64,6 +70,7 @@ export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string,
                 title: row.title,
                 moduleCredit: row.module_credit,
                 displayOrder: row.display_order,
+                availableSemesters: row.available_semesters,
             });
         }
     });

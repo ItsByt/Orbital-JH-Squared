@@ -8,9 +8,14 @@ import AddCourseModal from "./AddCourseModal";
 interface SemesterColumnProps {
     title: string; //Format: Semester 1
     semesterKey: string;
+    isInvalidDropTarget: boolean;
 }
 
-export default function SemesterColumn({ title, semesterKey }: SemesterColumnProps) {
+export default function SemesterColumn({
+    title,
+    semesterKey,
+    isInvalidDropTarget,
+}: SemesterColumnProps) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const rawModules = usePlannerStore((state) => state.board[semesterKey]);
     const modules = rawModules || [];
@@ -31,7 +36,8 @@ export default function SemesterColumn({ title, semesterKey }: SemesterColumnPro
                 {(provided, snapshot) => (
                     <div
                         className={`flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px] 
-                            ${snapshot.isDraggingOver ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
+                            ${snapshot.isDraggingOver && !isInvalidDropTarget ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
+                            ${snapshot.isDraggingOver && isInvalidDropTarget ? "ring-2 ring-red-500/70 bg-red-950/20" : ""}
                         `}
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
