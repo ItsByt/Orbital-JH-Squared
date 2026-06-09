@@ -63,6 +63,9 @@ export function useTimetableActions(
         );
 
         if (!semData?.timetable) {
+            toast.error("Failed to Add Module", {
+                description: `Module is not available in ${semester}`,
+            });
             alert(`Module not offered in Semester ${semester}`);
             return;
         }
@@ -108,7 +111,7 @@ export function useTimetableActions(
         }) => {
         const newCustomCard: DisplayLesson = {
             id: `custom-${Date.now()}`,
-            moduleCode: eventData.name.trim().toUpperCase(),
+            moduleCode: eventData.name.trim(),
             lessonType: "Personal Block",
             classNo: eventData.classNo,
             day: eventData.day,

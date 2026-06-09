@@ -25,6 +25,7 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
     const [formVenue, setFormVenue] = useState("");
     const [formWeeks, setFormWeeks] = useState<number[]>(WEEKS);
     const [formCheckOverlap, setFormCheckOverlap] = useState<boolean>(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleWeekToggle = (week: number) => {
         setFormWeeks((prev) =>
@@ -34,62 +35,70 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
 
     const handleCreateCustomSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!formName.trim()) return;
-        if (parseInt(formEnd, 10) <= parseInt(formStart, 10)) {
-            toast.error("Invalid Selection", {
-                description: "End time must be strictly after the start time.",
-            });
-            return;
-        }
-        if (formWeeks.length === 0) {
-            toast.error("Invalid Selection", {
-                description: "Please select at least one week.",
-            });
-            return;
-        }
+        if (isSubmitting) return; 
+            setIsSubmitting(true); // Debug: stop em from spamming insert
 
-        // format to allow comparison with NUSAPI's module names
-        const normalizedName = formName.trim().toUpperCase();
-
-        if (!normalizedName) {
-            toast.error("Missing Input", {
-                description: "Please enter a valid name for your custom activity.",
-            });
-            return;
-        }
-
-        // BLOCK ANY NAMES THAT MATCH AN EXISTING MODULE NUSAPI (Try catch if getModule fails)
         try {
-            const matchingModule = await getModule(normalizedName);
-            if (matchingModule && matchingModule.moduleCode) {
-                toast.error("Name Conflict with Existing Module", {
-                    description: `"${normalizedName}" already exists as an official module.`,
-                    
+            if (!formName.trim()) return;
+            if (parseInt(formEnd, 10) <= parseInt(formStart, 10)) {
+                toast.error("Invalid Selection", {
+                    description: "End time must be strictly after the start time.",
                 });
-                return; 
+                return;
             }
-        } catch (error) {
-            console.error("Failed to validate module name compatibility:", error);
+            if (formWeeks.length === 0) {
+                toast.error("Invalid Selection", {
+                    description: "Please select at least one week.",
+                });
+                return;
+            }
+
+            // format to allow comparison with NUSAPI's module names
+            // but don't uppercase here, do it when comparing
+            const normalizedName = formName.trim();
+
+            if (!normalizedName) {
+                toast.error("Missing Input", {
+                    description: "Please enter a valid name for your custom activity.",
+                });
+                return;
+            }
+
+            // BLOCK ANY NAMES THAT MATCH AN EXISTING MODULE NUSAPI (Try catch if getModule fails)
+            try {
+                const matchingModule = await getModule(normalizedName.toUpperCase());
+                if (matchingModule && matchingModule.moduleCode) {
+                    toast.error("Name conflicts with an existing module", {
+                        description: `"${normalizedName}" already exists as an official module.`,
+                        
+                    });
+                    return; 
+                }
+            } catch (error) {
+                console.error("Failed to validate module name compatibility:", error);
+            }
+
+            const computedBitmask = weeksToBitmask(formWeeks);
+
+            await onCustomEvent({
+                name: normalizedName,
+                day: formDay,
+                startTime: formStart,
+                endTime: formEnd,
+                venue: formVenue,
+                selectedWeeks: formWeeks,
+                weekBitmask: computedBitmask,
+                classNo: formCheckOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG"
+            });
+
+            setIsDialogOpen(false);
+            setFormName("");
+            setFormVenue("");
+            setFormWeeks(WEEKS);
+            setFormCheckOverlap(true);
+        } finally {
+            setIsSubmitting(false);
         }
-
-        const computedBitmask = weeksToBitmask(formWeeks);
-
-        await onCustomEvent({
-            name: normalizedName,
-            day: formDay,
-            startTime: formStart,
-            endTime: formEnd,
-            venue: formVenue,
-            selectedWeeks: formWeeks,
-            weekBitmask: computedBitmask,
-            classNo: formCheckOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG"
-        });
-
-        setIsDialogOpen(false);
-        setFormName("");
-        setFormVenue("");
-        setFormWeeks(WEEKS);
-        setFormCheckOverlap(true);
     };
 
     return (

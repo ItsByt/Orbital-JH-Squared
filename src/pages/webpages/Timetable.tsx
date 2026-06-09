@@ -72,23 +72,30 @@ export default function TimetablePage({ semester }: { semester: number }) {
                     {acadYearString} Semester {semester} Timetable
                 </h1>
 
-                {/* Timetable Matrix Grid */}
-                <TimetableGrid 
-                    DAYS={DAYS} 
-                    HOURS={HOURS} 
-                    lessonsByDay={lessonsByDay} 
-                    selectedLesson={selectedLesson} 
-                    handleSelectClass={handleSelectClass} 
-                    handleSwapClass={handleSwapClass} 
-                />
+                <div className="w-full relative">
+                    {/* Scalable Timetable Grid (sem nav and custom anchored) */}
+                    <TimetableGrid 
+                        DAYS={DAYS} 
+                        HOURS={HOURS} 
+                        lessonsByDay={lessonsByDay} 
+                        selectedLesson={selectedLesson} 
+                        handleSelectClass={handleSelectClass} 
+                        handleSwapClass={handleSwapClass} 
+                    />
 
-                {/* Floating Plus and Custom Block Dialog */}
-                <div className="fixed bottom-4 right-4 z-30">
-                    <CustomSlotDialog DAYS={DAYS} HOURS={HOURS} WEEKS={WEEKS} onCustomEvent={handleCustomEvent} />
+                    <div className="w-full flex items-center justify-between mt-4">
+                        {/* Semester Navigation */}
+                        <SemesterNavigation semester={semester} />
+
+                        {/* Add Custom Event PLUS */}
+                        <CustomSlotDialog
+                            DAYS={DAYS}
+                            HOURS={HOURS}
+                            WEEKS={WEEKS}
+                            onCustomEvent={handleCustomEvent}
+                        />
+                    </div>
                 </div>
-
-                {/* Semester Page Selection */}
-                <SemesterNavigation semester={semester} />
 
                 {/* Search/Add/Delete Modules */}
                 <ActiveContainer
