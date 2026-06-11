@@ -4,7 +4,6 @@ import AutoCompleteSearch from "@/hooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
 import {
-    parseSemesterKey,
     getNextDisplayOrder,
     buildPlannerModule,
 } from "@/utils/plannerUtils/plannerFormatters";
@@ -12,6 +11,7 @@ import { addToPlannerModuleDB } from "@/services/plannerDB";
 import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { isExemptionKey, isUnvalidatedSemester, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 export default function AddCourseModal({
     open,
@@ -50,16 +50,19 @@ export default function AddCourseModal({
 
         // Check if valid semester for module
         const { year, semester } = parseSemesterKey(semesterKey);
-        const isValidSemester = checkValidSemesterUsingModuleDetails(moduleDetails, semester);
-        if (!isValidSemester) {
-            toast.error(`${moduleCode} is not available in this semester!`);
-            setIsAdding(false);
-            return;
+        if (!isUnvalidatedSemester(semesterKey)) {
+            const isValidSemester = checkValidSemesterUsingModuleDetails(moduleDetails, semester);
+            if (!isValidSemester) {
+                toast.error(`${moduleCode} is not available in this semester!`);
+                setIsAdding(false);
+                return;
+            }
         }
 
         // Optimistic addition of module
         const nextOrder = getNextDisplayOrder(currentSemModules);
-        const newModule = buildPlannerModule(moduleDetails, nextOrder); 
+        const newModule = buildPlannerModule(moduleDetails, nextOrder, semesterKey); 
+        const isExemption = isExemptionKey(semesterKey);
         addModule(semesterKey, newModule);
         onOpenChange(false);
         setSearchTerm("");
@@ -72,7 +75,8 @@ export default function AddCourseModal({
             year,
             semester,
             nextOrder,
-            newModule.availableSemesters
+            newModule.availableSemesters,
+            isExemption
         );
 
         if (!success) {

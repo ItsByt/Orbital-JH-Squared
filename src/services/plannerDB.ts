@@ -30,7 +30,9 @@ export async function addToPlannerModuleDB(
     year: number,
     semester: number,
     displayOrder: number,
-    availableSemesters: number[]
+    availableSemesters: number[],
+    isExemption: boolean = false, 
+    excludeFromTotal: boolean = false
 ) {
     try {
         const userId = await getUserId();
@@ -47,7 +49,9 @@ export async function addToPlannerModuleDB(
             year,
             semester,
             displayOrder,
-            availableSemesters
+            availableSemesters,
+            isExemption,
+            excludeFromTotal
         );
 
         const { error: dbError } = await supabase.from("planner_modules").insert(rowToInsert);
@@ -97,6 +101,45 @@ export async function removeFromPlannerModuleDB(moduleCode: string) {
     }
 }
 
+// Used to toggle Exclude From Total field for a specific module
+export async function toggleExcludeInPlannerModuleDB(moduleCode: string) {
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      toast.error("Authentication required. Please log in first.");
+      return false;
+    }
+
+    const { data: retrieveData, error: retrieveError } = await supabase
+      .from("planner_modules")
+      .select("exclude_from_total")
+      .eq("user_id", userId)
+      .eq("module_code", moduleCode)
+      .single();
+
+    if (retrieveError || !retrieveData) {
+      toast.error("Could not find that module in your database to update.");
+      return false;
+    }
+
+    const updatedExclusion = !retrieveData.exclude_from_total;
+
+    const { error: updateError } = await supabase
+      .from("planner_modules")
+      .update({ exclude_from_total: updatedExclusion })
+      .eq("user_id", userId)
+      .eq("module_code", moduleCode);
+
+    if (updateError) throw updateError;
+
+    return true;
+  } catch (error) {
+    toast.error("Failed to update", { description: getErrorMessage(error) });
+    return false;
+  }
+}
+
+
 // Used to update multiple modules in a specific year and semester
 export async function massUpdatePlannerModulesDB(
     modules: PlannerModule[],
@@ -118,7 +161,9 @@ export async function massUpdatePlannerModulesDB(
                 year,
                 semester,
                 mod.displayOrder,
-                mod.availableSemesters
+                mod.availableSemesters,
+                mod.isExemption ?? false,
+                mod.excludeFromTotal ?? false
             )
         );
 

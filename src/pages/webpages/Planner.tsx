@@ -4,11 +4,13 @@ import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import YearBlock from "@/components/PlannerPage/YearBlock";
 import { usePlannerStore } from "@/store/usePlannerStore";
-import { formatPlannerBoard, parseSemesterKey } from "@/utils/plannerUtils/plannerFormatters";
+import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
 import { getPlannerModules, massUpdatePlannerModulesDB } from "@/services/plannerDB";
 
 import { toast } from "sonner";
+import ExemptionRow from "@/components/PlannerPage/ExemptionRow";
+import { isUnvalidatedSemester, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 const YEARS = Array.from({ length: TOTAL_PLANNER_YEARS }, (_, i) => i + 1);
 
@@ -34,9 +36,12 @@ export default function Planner() {
     const globalTotals = useMemo(() => {
         let count = 0;
         let units = 0;
-        Object.values(board).forEach((sem) => {
-            count += sem.length;
-            units += sem.reduce((sum, m) => sum + m.moduleCredit, 0);
+        Object.entries(board).forEach(([key, sem]) => {
+            sem.forEach(mod => {
+                if (key === "EXEMPTIONS" && mod.excludeFromTotal) return;
+                count += 1;
+                units += mod.moduleCredit;
+            });
         });
         return { count, units };
     }, [board]);
@@ -44,7 +49,7 @@ export default function Planner() {
     // Handle while-dragging updates
     const handleDragUpdate = (update: DragUpdate) => {
         const { draggableId, destination } = update;
-        if (!destination) {
+        if (!destination || isUnvalidatedSemester(destination.droppableId)) {
             setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: false });
             return;
         }
@@ -66,45 +71,47 @@ export default function Planner() {
 
         if (!destination) return;
 
-        const fromYearSem = source.droppableId;
-        const toYearSem = destination.droppableId;
+        const fromKey = source.droppableId;
+        const toKey = destination.droppableId;
         const fromIndex = source.index;
         const toIndex = destination.index;
 
         // No net movement
-        if (fromYearSem === toYearSem && fromIndex === toIndex) return;
+        if (fromKey === toKey && fromIndex === toIndex) return;
 
         // moveModule completely reassigns the arrays for the semesters involved,
         // so a shallow copy is sufficient
         const boardSnapshot = { ...usePlannerStore.getState().board };
 
         // Checking if new semester moved to is valid
-        const draggedModule = boardSnapshot[fromYearSem][fromIndex];
+        const draggedModule = boardSnapshot[fromKey][fromIndex];
         const moduleCode = draggedModule.moduleCode;
-        const { year: toYear, semester: toSem } = parseSemesterKey(toYearSem);
-        const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
-        if (!isValidSemester) {
-            toast.error(`${moduleCode} is not available in this semester!`);
-            return;
+        const { year: toYear, semester: toSem } = parseSemesterKey(toKey);
+        if (!isUnvalidatedSemester(toKey)) {
+            const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
+            if (!isValidSemester) {
+                toast.error(`${moduleCode} is not available in this semester!`);
+                return;
+            }
         }
 
         // Optimistic update of module
-        moveModule(fromYearSem, toYearSem, fromIndex, toIndex);
+        moveModule(fromKey, toKey, fromIndex, toIndex);
 
         const updatedBoard = usePlannerStore.getState().board;
 
         const successInUpdatingDestColDB = await massUpdatePlannerModulesDB(
-            updatedBoard[toYearSem],
+            updatedBoard[toKey],
             toYear,
             toSem
         );
 
         // If the columns are the same, the previous update already suffices
         let successInUpdatingSourceColDB = true;
-        if (fromYearSem !== toYearSem) {
-            const { year: fromYear, semester: fromSem } = parseSemesterKey(fromYearSem);
+        if (fromKey !== toKey) {
+            const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
             successInUpdatingSourceColDB = await massUpdatePlannerModulesDB(
-                updatedBoard[fromYearSem],
+                updatedBoard[fromKey],
                 fromYear,
                 fromSem
             );
@@ -156,6 +163,8 @@ export default function Planner() {
                         <YearBlock key={yearNum} yearNum={yearNum} />
                     ))}
                 </div>
+
+                <ExemptionRow />
             </div>
         </DragDropContext>
     );

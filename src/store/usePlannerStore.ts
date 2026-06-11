@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { PlannerModule } from "@/types";
 import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
+import { isExemptionKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 interface PlannerState {
     //board key format: "Y1S1"
@@ -13,7 +14,8 @@ interface PlannerState {
     addModule: (semesterKey: string, module: PlannerModule) => void;
     removeModule: (semesterKey: string, moduleId: string) => void;
     moveModule: (fromSem: string, toSem: string, fromIndex: number, toIndex: number) => void;
-    
+    toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) => void;
+
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
@@ -58,6 +60,10 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             const [movedModule] = sourceColumn.splice(fromIndex, 1);
             destColumn.splice(toIndex, 0, movedModule);
 
+            // Update if the moved module is now an exemption
+            movedModule.isExemption = isExemptionKey(toSem);
+            if (!isExemptionKey(toSem)) movedModule.excludeFromTotal = false;
+
             // Update the displayOrder for every module in these columns
             sourceColumn.forEach((mod, index) => (mod.displayOrder = index));
             destColumn.forEach((mod, index) => (mod.displayOrder = index));
@@ -67,4 +73,16 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             newBoard[toSem] = destColumn;
             return { board: newBoard };
         }),
+    
+    toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) =>
+        set((state) => ({
+            board: {
+                ...state.board,
+                [semesterKey]: state.board[semesterKey].map((mod) =>
+                    mod.moduleCode === moduleCode
+                        ? { ...mod, excludeFromTotal: !mod.excludeFromTotal }
+                        : mod
+                ),
+            },
+        })),
 }));

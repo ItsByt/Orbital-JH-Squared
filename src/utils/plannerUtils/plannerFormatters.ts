@@ -1,8 +1,9 @@
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import type { ModuleDetails, PlannerModule, SavedPlannerRow } from "@/types";
+import { isExemptionKey } from "./semesterKeyUtils";
 
 // Formats NUSMods API information into PlannerModule
-export function buildPlannerModule(details: ModuleDetails, displayOrder: number): PlannerModule {
+export function buildPlannerModule(details: ModuleDetails, displayOrder: number, semesterKey: string): PlannerModule {
     const availableSemesters = details.semesterData.map((s) => s.semester);
 
     return {
@@ -10,7 +11,9 @@ export function buildPlannerModule(details: ModuleDetails, displayOrder: number)
         title: details.title,
         moduleCredit: Number(details.moduleCredit) || 0,
         displayOrder: displayOrder,
-        availableSemesters: availableSemesters
+        availableSemesters: availableSemesters,
+        isExemption: isExemptionKey(semesterKey),
+        excludeFromTotal: false,
     };
 }
 
@@ -23,7 +26,9 @@ export function formatForPlannerDatabase(
     year: number,
     semester: number,
     displayOrder: number,
-    availableSemesters: number[]
+    availableSemesters: number[],
+    isExemption: boolean,
+    excludeFromTotal: boolean
 ) {
     return {
         user_id: userId,
@@ -34,6 +39,8 @@ export function formatForPlannerDatabase(
         semester: semester,
         display_order: displayOrder,
         available_semesters: availableSemesters,
+        is_exemption: isExemption,
+        exclude_from_total: excludeFromTotal
     };
 }
 
@@ -44,7 +51,9 @@ export function formatSavedPlannerModules(savedRows: SavedPlannerRow[]): Planner
         title: row.title,
         moduleCredit: row.module_credit,
         displayOrder: row.display_order,
-        availableSemesters: row.available_semesters
+        availableSemesters: row.available_semesters,
+        isExemption: row.is_exemption,
+        excludeFromTotal: row.exclude_from_total,
     }));
 }
 
@@ -56,6 +65,8 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
         board[`Y${year}S2`] = [];
     }
 
+    board["EXEMPTIONS"] = [];
+
     return board;
 }
 
@@ -63,7 +74,7 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
 export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string, PlannerModule[]> {
     const board = generateEmptyBoard();
     savedRows.forEach((row) => {
-        const key = `Y${row.year}S${row.semester}`;
+        const key = row.is_exemption ? "EXEMPTIONS" : `Y${row.year}S${row.semester}`;
         if (board[key]) {
             board[key].push({
                 moduleCode: row.module_code,
@@ -71,6 +82,8 @@ export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string,
                 moduleCredit: row.module_credit,
                 displayOrder: row.display_order,
                 availableSemesters: row.available_semesters,
+                isExemption: row.is_exemption,
+                excludeFromTotal: row.exclude_from_total,
             });
         }
     });
@@ -80,21 +93,6 @@ export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string,
     }
 
     return board;
-}
-
-// Extracts Year and Semester number from SemesterKeys: "Y1S2"
-export function parseSemesterKey(key: string) {
-    const match = key.match(/Y(\d+)S(\d+)/);
-
-    if (!match) {
-        console.log("Developer Error: Invalid semesterKey format");
-        throw new Error(`Invalid semesterKey format "${key}". Expected format like "Y1S1".`);
-    }
-
-    return {
-        year: parseInt(match[1], 10),
-        semester: parseInt(match[2], 10),
-    };
 }
 
 // Get the next Display Order for showing on Planner

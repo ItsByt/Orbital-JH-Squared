@@ -1,8 +1,8 @@
-import { ChevronDown, Trash2 } from "lucide-react";
+import { Ban, ChevronDown, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import type { PlannerModule } from "@/types";
 import { usePlannerStore } from "@/store/usePlannerStore";
-import { removeFromPlannerModuleDB } from "@/services/plannerDB";
+import { removeFromPlannerModuleDB, toggleExcludeInPlannerModuleDB } from "@/services/plannerDB";
 
 import {
     DropdownMenu,
@@ -21,9 +21,10 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     const dragState = usePlannerStore((state) => state.dragState);
     const isBeingDraggedInvalidly =
         dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
-        
+    
     const removeModule = usePlannerStore((state) => state.removeModule);
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
+    const toggleExclude = usePlannerStore((state) => state.toggleExcludeFromTotal);
 
     const handleDelete = async () => {
         const previousSemesterSnapshot = [...usePlannerStore.getState().board[semesterKey]];
@@ -35,6 +36,16 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
 
         if (!success) {
             setSemesterData(semesterKey, previousSemesterSnapshot);
+        }
+    };
+
+    const handleToggle = async () => {
+        toggleExclude("EXEMPTIONS", module.moduleCode);
+        
+        const success = await toggleExcludeInPlannerModuleDB(module.moduleCode);
+
+        if (!success) {
+            toggleExclude("EXEMPTIONS", module.moduleCode);
         }
     };
 
@@ -54,6 +65,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 : "bg-[#3070b3] hover:bg-[#28619e]"
                         }
                             ${snapshot.isDragging && !isBeingDraggedInvalidly ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
+                            ${module.excludeFromTotal ? "bg-zinc-700 hover:bg-zinc-600" : "bg-[#3070b3] hover:bg-[#28619e]"}
                     `}
                     style={{ ...provided.draggableProps.style }}
                 >
@@ -81,6 +93,20 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                     <Trash2 className="mr-2 h-3.5 w-3.5" />
                                     <span>Remove Module</span>
                                 </DropdownMenuItem>
+
+                                {module.isExemption && (
+                                    <DropdownMenuItem
+                                        onClick={handleToggle}
+                                        className="cursor-pointer"
+                                    >
+                                        <Ban className="mr-2 h-3.5 w-3.5" />
+                                        <span>
+                                            {module.excludeFromTotal
+                                                ? "Include in Totals"
+                                                : "Exclude from Totals"}
+                                        </span>
+                                    </DropdownMenuItem>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
