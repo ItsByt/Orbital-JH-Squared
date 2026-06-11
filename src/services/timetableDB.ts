@@ -86,7 +86,7 @@ export async function addToTimetable(
     }
 }
 
-export async function removeFromTimetable(moduleCode: string, year: number, semester: number) {
+export async function removeFromTimetable(moduleCode: string, year: number, semester: number, id?: string) {
     try {
         const userId = await getUserId();
         if (!userId) {
@@ -94,14 +94,21 @@ export async function removeFromTimetable(moduleCode: string, year: number, seme
             return false;
         }
 
-        const { data, error: deletionError } = await supabase
+        let query = supabase
             .from("timetable_modules")
             .delete()
             .eq("user_id", userId)
-            .eq("module_code", moduleCode)
             .eq("year", year)
-            .eq("semester", semester)
-            .select();
+            .eq("semester", semester);
+
+        if (id) {
+            const targetId = id.startsWith("custom-") ? id : Number(id);
+            query = query.eq("id", targetId);
+        } else {
+            query = query.eq("module_code", moduleCode);
+        }
+
+        const { data, error: deletionError } = await query.select();
 
         if (deletionError) throw deletionError;
 
@@ -157,6 +164,43 @@ export async function swapLessonInTimetable(
         return true;
     } catch (error) {
         console.error("Failed to swap lesson in DB:", error);
-        throw error; // Throw to trigger React Query's onError rollback
+        throw error; 
     }
 }
+
+
+export async function addCustomEventToDB(
+    customLesson: DisplayLesson,
+    year: number,
+    semester: number
+) {
+    try {
+        const userId = await getUserId();
+        if (!userId) {
+            toast.error("Authentication required. Please log in first.");
+            return false;
+        }
+
+        // Formats custom block into correct format for Supabase
+        const rowsToInsert = formatForTimetableDatabase(
+                [customLesson], 
+                userId,
+                year,
+                semester,
+                customLesson.moduleCode
+            );
+            // add it into database like any other row insertion
+            const { error: dbError } = await supabase
+                .from("timetable_modules")
+                .insert(rowsToInsert);
+
+            if (dbError) throw dbError;
+
+            toast.success(`Custom event "${customLesson.moduleCode}" added!`);
+            return true;
+        } catch (error) {
+            toast.error("Failed to save custom event", { description: getErrorMessage(error) });
+            return false;
+        }
+    }
+
