@@ -1,9 +1,7 @@
 import { supabase } from "./supabase";
-import { getUserId } from "./auth";
-import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import { getUserId, requireAuth } from "./auth";
 import { formatForPlannerDatabase } from "@/utils/plannerUtils/plannerFormatters";
 import type { PlannerModule } from "@/types";
-import { toast } from "sonner";
 
 export async function getPlannerModules() {
     const userId = await getUserId();
@@ -17,126 +15,54 @@ export async function getPlannerModules() {
 
     if (error) {
         console.error(error);
-        return [];
+        throw(error)
     }
 
     return data || [];
 }
 
+
 export async function addToPlannerModuleDB(
-    moduleCode: string,
-    title: string,
-    moduleCredit: number,
+    module: PlannerModule, 
     year: number,
-    semester: number,
-    displayOrder: number,
-    availableSemesters: number[],
-    isExemption: boolean = false, 
-    excludeFromTotal: boolean = false
+    semester: number
 ) {
-    try {
-        const userId = await getUserId();
-        if (!userId) {
-            toast.error("Authentication required. Please log in first.");
-            return false;
-        }
+    const userId = await requireAuth();
+    const rowToInsert = formatForPlannerDatabase(userId, module, year, semester);
 
-        const rowToInsert = formatForPlannerDatabase(
-            userId,
-            moduleCode,
-            title,
-            moduleCredit,
-            year,
-            semester,
-            displayOrder,
-            availableSemesters,
-            isExemption,
-            excludeFromTotal
-        );
-
-        const { error: dbError } = await supabase.from("planner_modules").insert(rowToInsert);
-
-        if (dbError) throw dbError;
-        toast.success(`${moduleCode} has been successfully added!`, {
-            description: "Please Check your Planner",
-        });
-
-        return true;
-    } catch (error) {
-        toast.error("Failed to update database", { description: getErrorMessage(error) });
-        return false;
-    }
+    const { error } = await supabase.from("planner_modules").insert(rowToInsert);
+    if (error) throw error;
 }
+
 
 export async function removeFromPlannerModuleDB(moduleCode: string) {
-    try {
-        const userId = await getUserId();
-        if (!userId) {
-            toast.error("Authentication required. Please log in first.");
-            return false;
-        }
+    const userId = await requireAuth();
 
-        const { data, error: deletionError } = await supabase
-            .from("planner_modules")
-            .delete()
-            .eq("user_id", userId)
-            .eq("module_code", moduleCode)
-            .select();
+    const { data, error } = await supabase
+        .from("planner_modules")
+        .delete()
+        .eq("user_id", userId)
+        .eq("module_code", moduleCode)
+        .select();
 
-        if (deletionError) throw deletionError;
-
-        if (!data) {
-            toast.error("Could not find that module in your database to delete.");
-            console.error(
-                "Delete failed for planner. Check if module matches exactly in Supabase."
-            );
-            return false;
-        }
-
-        toast.success(`${moduleCode} removed from your planner.`);
-        return true;
-    } catch (error) {
-        toast.error("Failed to remove", { description: getErrorMessage(error) });
-        return false;
+    if (error) throw error;
+    if (!data || data.length === 0) {
+        throw new Error("Could not find that module in your database to delete.");
     }
 }
 
+
 // Used to toggle Exclude From Total field for a specific module
-export async function toggleExcludeInPlannerModuleDB(moduleCode: string) {
-  try {
-    const userId = await getUserId();
-    if (!userId) {
-      toast.error("Authentication required. Please log in first.");
-      return false;
-    }
+export async function setExcludeInPlannerModuleDB(moduleCode: string, newValue: boolean) {
+    const userId = await requireAuth();
 
-    const { data: retrieveData, error: retrieveError } = await supabase
-      .from("planner_modules")
-      .select("exclude_from_total")
-      .eq("user_id", userId)
-      .eq("module_code", moduleCode)
-      .single();
+    const { error } = await supabase
+        .from("planner_modules")
+        .update({ exclude_from_total: newValue })
+        .eq("user_id", userId)
+        .eq("module_code", moduleCode);
 
-    if (retrieveError || !retrieveData) {
-      toast.error("Could not find that module in your database to update.");
-      return false;
-    }
-
-    const updatedExclusion = !retrieveData.exclude_from_total;
-
-    const { error: updateError } = await supabase
-      .from("planner_modules")
-      .update({ exclude_from_total: updatedExclusion })
-      .eq("user_id", userId)
-      .eq("module_code", moduleCode);
-
-    if (updateError) throw updateError;
-
-    return true;
-  } catch (error) {
-    toast.error("Failed to update", { description: getErrorMessage(error) });
-    return false;
-  }
+    if (error) throw error;
 }
 
 
@@ -146,34 +72,21 @@ export async function massUpdatePlannerModulesDB(
     year: number,
     semester: number
 ) {
-    try {
-        const userId = await getUserId();
-        if (!userId) return false;
+    if (modules.length === 0) return;
+    const userId = await requireAuth();
 
-        if (modules.length === 0) return true; 
+    const rowsToUpsert = modules.map((mod) =>
+        formatForPlannerDatabase(
+            userId,
+            mod,
+            year,
+            semester
+        )
+    );
 
-        const rowsToUpsert = modules.map((mod) =>
-            formatForPlannerDatabase(
-                userId,
-                mod.moduleCode,
-                mod.title,
-                mod.moduleCredit,
-                year,
-                semester,
-                mod.displayOrder,
-                mod.availableSemesters,
-                mod.isExemption ?? false,
-                mod.excludeFromTotal ?? false
-            )
-        );
-
-        const { error } = await supabase.from("planner_modules").upsert(rowsToUpsert, { onConflict: "user_id, module_code" });
-        if (error) throw error;
-
-        return true;
-    } catch (error) {
-        toast.error("Failed to mass update", { description: getErrorMessage(error) });
-        console.log(error);
-        return false;
-    }
+    const { error } = await supabase
+        .from("planner_modules")
+        .upsert(rowsToUpsert, { onConflict: "user_id, module_code" });
+    
+    if (error) throw error;
 }

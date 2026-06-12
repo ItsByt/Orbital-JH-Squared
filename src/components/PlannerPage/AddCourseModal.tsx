@@ -3,15 +3,13 @@ import { Search, Loader2 } from "lucide-react";
 import AutoCompleteSearch from "@/hooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
-import {
-    getNextDisplayOrder,
-    buildPlannerModule,
-} from "@/utils/plannerUtils/plannerFormatters";
+import { getNextDisplayOrder, buildPlannerModule } from "@/utils/plannerUtils/plannerFormatters";
 import { addToPlannerModuleDB } from "@/services/plannerDB";
 import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { isExemptionKey, isUnvalidatedSemester, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import { isUnvalidatedSemester, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 export default function AddCourseModal({
     open,
@@ -36,58 +34,57 @@ export default function AddCourseModal({
         const isDuplicate = Object.values(board).some((semesterArray) =>
             semesterArray.some((mod) => mod.moduleCode == moduleCode)
         );
+
         if (isDuplicate) {
             toast.error(`${moduleCode} is already in your planner!`);
             return;
         }
 
-        setIsAdding(true);
-        const moduleDetails = await getModule(moduleCode);
-        if (!moduleDetails) {
-            setIsAdding(false);
-            return;
-        }
-
-        // Check if valid semester for module
-        const { year, semester } = parseSemesterKey(semesterKey);
-        if (!isUnvalidatedSemester(semesterKey)) {
-            const isValidSemester = checkValidSemesterUsingModuleDetails(moduleDetails, semester);
-            if (!isValidSemester) {
-                toast.error(`${moduleCode} is not available in this semester!`);
-                setIsAdding(false);
+        try {
+            const moduleDetails = await getModule(moduleCode);
+            if (!moduleDetails) {
+                toast.error("Module details could not be found.");
                 return;
             }
-        }
 
-        // Optimistic addition of module
-        const nextOrder = getNextDisplayOrder(currentSemModules);
-        const newModule = buildPlannerModule(moduleDetails, nextOrder, semesterKey); 
-        const isExemption = isExemptionKey(semesterKey);
-        addModule(semesterKey, newModule);
-        onOpenChange(false);
-        setSearchTerm("");
-        setIsAdding(false);
+            const { year, semester } = parseSemesterKey(semesterKey);
 
-        const success = await addToPlannerModuleDB(
-            moduleDetails.moduleCode,
-            moduleDetails.title,
-            Number(moduleDetails.moduleCredit),
-            year,
-            semester,
-            nextOrder,
-            newModule.availableSemesters,
-            isExemption
-        );
+            if (!isUnvalidatedSemester(semesterKey)) {
+                const isValidSemester = checkValidSemesterUsingModuleDetails(
+                    moduleDetails,
+                    semester
+                );
 
-        if (!success) {
+                if (!isValidSemester) {
+                    toast.error(`${moduleCode} is not available in this semester!`);
+                    return;
+                }
+            }
+
+            const nextOrder = getNextDisplayOrder(currentSemModules);
+            const newModule = buildPlannerModule(moduleDetails, nextOrder, semesterKey);
+
+            // Optimistic addition of module
+            addModule(semesterKey, newModule);
+            onOpenChange(false);
+            setSearchTerm("");
+
+            await addToPlannerModuleDB(newModule, year, semester);
+
+            toast.success(`${moduleCode} has been successfully added!`);
+        } catch (error) {
+            // Rollback if error
             removeModule(semesterKey, moduleCode);
+            toast.error("Failed to add module to database", {
+                description: getErrorMessage(error),
+            });
+        } finally {
+            setIsAdding(false);
         }
     };
 
     const handleOpenChange = (newOpen: boolean) => {
-        if (!newOpen) {
-            setSearchTerm("");
-        }
+        if (!newOpen) setSearchTerm("");
 
         onOpenChange(newOpen);
     };

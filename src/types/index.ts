@@ -73,8 +73,8 @@ export interface PlannerModule {
     moduleCredit: number;
     displayOrder: number;
     availableSemesters: number[];
-    isExemption?: boolean;
-    excludeFromTotal?: boolean;
+    isExemption: boolean;
+    excludeFromTotal: boolean;
 }
 
 //Details for Planner modules stored in supabase

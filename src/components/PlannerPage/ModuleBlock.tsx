@@ -1,8 +1,12 @@
 import { Ban, ChevronDown, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type { PlannerModule } from "@/types";
 import { usePlannerStore } from "@/store/usePlannerStore";
-import { removeFromPlannerModuleDB, toggleExcludeInPlannerModuleDB } from "@/services/plannerDB";
+import { removeFromPlannerModuleDB, setExcludeInPlannerModuleDB } from "@/services/plannerDB";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+
 
 import {
     DropdownMenu,
@@ -19,33 +23,40 @@ interface ModuleBlockProps {
 
 export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockProps) {
     const dragState = usePlannerStore((state) => state.dragState);
-    const isBeingDraggedInvalidly =
-        dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
-    
     const removeModule = usePlannerStore((state) => state.removeModule);
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
     const toggleExclude = usePlannerStore((state) => state.toggleExcludeFromTotal);
 
+    const isBeingDraggedInvalidly =
+        dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
+
     const handleDelete = async () => {
         const previousSemesterSnapshot = [...usePlannerStore.getState().board[semesterKey]];
 
-        // Optimistic removal of module
-        removeModule(semesterKey, module.moduleCode);
+        try {
+            // Optimistic removal of module
+            removeModule(semesterKey, module.moduleCode);
 
-        const success = await removeFromPlannerModuleDB(module.moduleCode);
-
-        if (!success) {
+            await removeFromPlannerModuleDB(module.moduleCode);
+            toast.success(`${module.moduleCode} removed from your planner.`);
+        } catch (error) {
+            // Rollback on error 
             setSemesterData(semesterKey, previousSemesterSnapshot);
+            toast.error("Failed to remove module", { description: getErrorMessage(error) });
         }
     };
 
     const handleToggle = async () => {
-        toggleExclude("EXEMPTIONS", module.moduleCode);
-        
-        const success = await toggleExcludeInPlannerModuleDB(module.moduleCode);
+        const targetValue = !module.excludeFromTotal;
 
-        if (!success) {
-            toggleExclude("EXEMPTIONS", module.moduleCode);
+        try {
+            toggleExclude(semesterKey, module.moduleCode);
+
+            await setExcludeInPlannerModuleDB(module.moduleCode, targetValue);
+        } catch (error) {
+            // Rollback on error
+            toggleExclude(semesterKey, module.moduleCode);
+            toast.error("Failed to update module status", { description: getErrorMessage(error) });
         }
     };
 
@@ -58,15 +69,18 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`relative group bg-[#3070b3] hover:bg-[#28619e] text-white p-2.5 rounded-md shadow-sm flex flex-col transition-colors duration-150
-                        ${
-                            snapshot.isDragging && isBeingDraggedInvalidly
-                                ? "bg-red-600 animate-pulse ring-2 ring-red-400"
-                                : "bg-[#3070b3] hover:bg-[#28619e]"
-                        }
-                            ${snapshot.isDragging && !isBeingDraggedInvalidly ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
-                            ${module.excludeFromTotal ? "bg-zinc-700 hover:bg-zinc-600" : "bg-[#3070b3] hover:bg-[#28619e]"}
-                    `}
+                    className={cn(
+                        "relative group p-2.5 rounded-md shadow-sm flex flex-col transition-colors duration-150 text-white",
+                        module.excludeFromTotal
+                            ? "bg-zinc-700 hover:bg-zinc-600"
+                            : "bg-[#3070b3] hover:bg-[#28619e]",
+                        snapshot.isDragging &&
+                            !isBeingDraggedInvalidly &&
+                            "shadow-xl opacity-90 ring-2 ring-white/50",
+                        snapshot.isDragging &&
+                            isBeingDraggedInvalidly &&
+                            "bg-red-600 animate-pulse ring-2 ring-red-400"
+                    )}
                     style={{ ...provided.draggableProps.style }}
                 >
                     <div className="flex justify-between items-start mb-1">
@@ -94,6 +108,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                     <span>Remove Module</span>
                                 </DropdownMenuItem>
 
+                                {/* For toggling Excluding From Total*/}
                                 {module.isExemption && (
                                     <DropdownMenuItem
                                         onClick={handleToggle}

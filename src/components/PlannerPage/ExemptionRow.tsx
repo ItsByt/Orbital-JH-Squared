@@ -4,11 +4,12 @@ import { Droppable } from "@hello-pangea/dnd";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
+import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
+import { cn } from "@/lib/utils";
 
 export default function ExemptionRow() {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const rawModules = usePlannerStore((state) => state.board["EXEMPTIONS"]);
-    const modules = rawModules || [];
+    const modules = usePlannerStore((state) => state.board[EXEMPTION_KEY]) || [];
 
     // For counting modules and units that are included
     const includedModules = modules.filter((mod) => !mod.excludeFromTotal);
@@ -29,21 +30,24 @@ export default function ExemptionRow() {
             </div>
 
             {/* The Row of Cards */}
-            <Droppable droppableId="EXEMPTIONS" direction="horizontal">
+            <Droppable droppableId={EXEMPTION_KEY} direction="horizontal">
                 {/* Draggable snapshot properties -> isDraggingOver, draggingOverWith */}
                 {(provided, snapshot) => (
                     <div
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
-                        className={`flex flex-row flex-wrap gap-2 min-h-[70px] p-2 rounded-md border border-dashed
-                            ${snapshot.isDraggingOver ? "border-zinc-500 bg-zinc-800/30" : "border-zinc-700"}
-                        `}
+                        className={cn(
+                            "flex flex-row flex-wrap gap-2 min-h-[70px] p-2 rounded-md border border-dashed",
+                            snapshot.isDraggingOver
+                                ? "border-zinc-500 bg-zinc-800/30"
+                                : "border-zinc-700"
+                        )}
                     >
                         {modules.map((mod, index) => (
                             <ModuleBlock
                                 key={mod.moduleCode}
                                 module={mod}
-                                semesterKey="EXEMPTIONS"
+                                semesterKey={EXEMPTION_KEY}
                                 index={index}
                             />
                         ))}
@@ -67,7 +71,7 @@ export default function ExemptionRow() {
             <AddCourseModal
                 open={isSearchOpen}
                 onOpenChange={setIsSearchOpen}
-                semesterKey="EXEMPTIONS"
+                semesterKey={EXEMPTION_KEY}
             />
         </div>
     );

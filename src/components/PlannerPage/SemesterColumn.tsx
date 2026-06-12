@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
+import { cn } from "@/lib/utils";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
@@ -17,8 +18,7 @@ export default function SemesterColumn({
     isInvalidDropTarget,
 }: SemesterColumnProps) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const rawModules = usePlannerStore((state) => state.board[semesterKey]);
-    const modules = rawModules || [];
+    const modules = usePlannerStore((state) => state.board[semesterKey]) || [];
     const semUnits = modules.reduce((sum, mod) => sum + mod.moduleCredit, 0);
 
     return (
@@ -35,12 +35,17 @@ export default function SemesterColumn({
                 {/* Draggable snapshot properties -> isDraggingOver, draggingOverWith */}
                 {(provided, snapshot) => (
                     <div
-                        className={`flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px] 
-                            ${snapshot.isDraggingOver && !isInvalidDropTarget ? "shadow-xl opacity-90 ring-2 ring-white/50" : ""}
-                            ${snapshot.isDraggingOver && isInvalidDropTarget ? "ring-2 ring-red-500/70 bg-red-950/20" : ""}
-                        `}
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
+                        className={cn(
+                            "flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px]",
+                            snapshot.isDraggingOver &&
+                                !isInvalidDropTarget &&
+                                "shadow-xl opacity-90 ring-2 ring-white/50",
+                            snapshot.isDraggingOver &&
+                                isInvalidDropTarget &&
+                                "ring-2 ring-red-500/70 bg-red-950/20"
+                        )}
                     >
                         {modules.map((mod, index) => (
                             <ModuleBlock
@@ -50,7 +55,7 @@ export default function SemesterColumn({
                                 index={index}
                             />
                         ))}
-                        {provided.placeholder}{" "}
+                        {provided.placeholder}
                         {/* Required by DnD to increase the space during a drag when needed*/}
                     </div>
                 )}

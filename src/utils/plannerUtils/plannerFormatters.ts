@@ -1,6 +1,6 @@
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import type { ModuleDetails, PlannerModule, SavedPlannerRow } from "@/types";
-import { isExemptionKey } from "./semesterKeyUtils";
+import { EXEMPTION_KEY, isExemptionKey } from "./semesterKeyUtils";
 
 // Formats NUSMods API information into PlannerModule
 export function buildPlannerModule(details: ModuleDetails, displayOrder: number, semesterKey: string): PlannerModule {
@@ -17,32 +17,28 @@ export function buildPlannerModule(details: ModuleDetails, displayOrder: number,
     };
 }
 
+
 // Formats PlannerModule information to be stored in Supabase
 export function formatForPlannerDatabase(
     userId: string,
-    moduleCode: string,
-    title: string,
-    moduleCredit: number,
+    module: PlannerModule,
     year: number,
-    semester: number,
-    displayOrder: number,
-    availableSemesters: number[],
-    isExemption: boolean,
-    excludeFromTotal: boolean
+    semester: number
 ) {
     return {
         user_id: userId,
-        module_code: moduleCode,
-        title: title,
-        module_credit: moduleCredit,
+        module_code: module.moduleCode,
+        title: module.title,
+        module_credit: module.moduleCredit,
         year: year,
         semester: semester,
-        display_order: displayOrder,
-        available_semesters: availableSemesters,
-        is_exemption: isExemption,
-        exclude_from_total: excludeFromTotal
+        display_order: module.displayOrder,
+        available_semesters: module.availableSemesters,
+        is_exemption: module.isExemption,
+        exclude_from_total: module.excludeFromTotal
     };
 }
+
 
 // Formats Supabase data into PlannerModules
 export function formatSavedPlannerModules(savedRows: SavedPlannerRow[]): PlannerModule[] {
@@ -65,8 +61,7 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
         board[`Y${year}S2`] = [];
     }
 
-    board["EXEMPTIONS"] = [];
-
+    board[EXEMPTION_KEY] = [];
     return board;
 }
 
@@ -74,7 +69,7 @@ export function generateEmptyBoard(): Record<string, PlannerModule[]> {
 export function formatPlannerBoard(savedRows: SavedPlannerRow[]): Record<string, PlannerModule[]> {
     const board = generateEmptyBoard();
     savedRows.forEach((row) => {
-        const key = row.is_exemption ? "EXEMPTIONS" : `Y${row.year}S${row.semester}`;
+        const key = row.is_exemption ? EXEMPTION_KEY: `Y${row.year}S${row.semester}`;
         if (board[key]) {
             board[key].push({
                 moduleCode: row.module_code,
