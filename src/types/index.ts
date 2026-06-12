@@ -58,7 +58,6 @@ export interface DisplayLesson {
     isAlternative?: boolean;
     startMins: number;
     endMins: number;
-
     // We store each week using a corresponding bit (0 or 1),
     // where the ith week corresponds to the (i + 1)th bit from the right
     // So the number 101010 means the lesson is on weeks 1, 3 and 5

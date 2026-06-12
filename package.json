@@ -1,13 +1,13 @@
 {
-    "name": "nusmods-planner",
-    "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "test": "vitest",
-        "test:ui": "vitest --ui",
+  "name": "nusmods-planner",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
         "coverage": "vitest run --coverage"
     },
     "dependencies": {

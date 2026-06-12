@@ -1,6 +1,6 @@
 import type { SavedTimetableModule, DisplayLesson, NUSModsRawLesson } from "@/types";
 import { timeToMins } from "@/utils/timetableUtils/timeFormat";
-import { calculateWeekBitmask } from "@/utils/timetableUtils/lessonClashDetection";
+import { weeksToBitmask } from "./weekFormat";
 
 // Formatting for Timetable Database
 export function formatForTimetableDatabase(
@@ -28,7 +28,14 @@ export function formatForTimetableDatabase(
 // Formats data coming from Supabase
 export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLesson[] {
     return savedList.map((saved) => {
-        const parsedWeeks = saved.weeks ? JSON.parse(saved.weeks) : null;
+        let parsedWeeks: number[] = [];
+        if (saved.weeks) {
+            try {
+                parsedWeeks = JSON.parse(saved.weeks);
+            } catch {
+                parsedWeeks = [];
+            }
+        }
         return {
             id: saved.id,
             moduleCode: saved.module_code,
@@ -41,33 +48,38 @@ export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLe
             weeks: parsedWeeks,
             startMins: timeToMins(saved.start_time),
             endMins: timeToMins(saved.end_time),
-            weekBitmask: calculateWeekBitmask(parsedWeeks),
+            weekBitmask: weeksToBitmask(parsedWeeks),
+            isAlternative: false
         };
     });
 }
 
+
+// Formats data for UI viewing
 export function buildDisplayLesson(
     moduleCode: string,
     slot: NUSModsRawLesson,
-    idPrefix: string,
-    isAlternative: boolean = false
+    id: string,
+    isAlternative: boolean
 ): DisplayLesson {
-    const finalClassNo = slot.classNo || "";
+
+    const rawWeeks = slot.weeks ?? [];
+    const weekBitmask = weeksToBitmask(rawWeeks);
 
     return {
-        id: `${idPrefix}-${moduleCode}-${slot.lessonType}-${finalClassNo}`,
-        moduleCode: moduleCode,
+        id,
+        moduleCode,
         lessonType: slot.lessonType,
-        classNo: finalClassNo,
+        classNo: slot.classNo,
         day: slot.day,
         startTime: slot.startTime,
         endTime: slot.endTime,
-        venue: slot.venue || "No Venue",
-        weeks: slot.weeks,
-        isAlternative: isAlternative,
+        venue: slot.venue,
         startMins: timeToMins(slot.startTime),
         endMins: timeToMins(slot.endTime),
-        weekBitmask: calculateWeekBitmask(slot.weeks),
+        isAlternative,
+        weeks: rawWeeks,
+        weekBitmask,
     };
 }
 
@@ -76,7 +88,7 @@ export function formatAlternativeLessons(
     rawTimetable: NUSModsRawLesson[],
     currentLesson: DisplayLesson
 ): DisplayLesson[] {
-    // 1. Filter out lessons that don't match the type, or are the exact same class
+    // Filter out lessons that don't match the type, or are the exact same class
     const alternativesFiltered = rawTimetable.filter((slot) => {
         const apiLessonType = (slot.lessonType || "").toUpperCase();
         const currentLessonType = (currentLesson.lessonType || "").toUpperCase();
