@@ -26,7 +26,7 @@ export function formatForTimetableDatabase(
 }
 
 // Formats data coming from Supabase
-export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLesson[] {
+export function formatSavedTimetableModules(savedList: SavedTimetableModule[]): DisplayLesson[] {
     return savedList.map((saved) => {
         let parsedWeeks: number[] = [];
         if (saved.weeks) {
@@ -49,11 +49,10 @@ export function formatSavedModules(savedList: SavedTimetableModule[]): DisplayLe
             startMins: timeToMins(saved.start_time),
             endMins: timeToMins(saved.end_time),
             weekBitmask: weeksToBitmask(parsedWeeks),
-            isAlternative: false
+            isAlternative: false,
         };
     });
 }
-
 
 // Formats data for UI viewing
 export function buildDisplayLesson(
@@ -62,7 +61,6 @@ export function buildDisplayLesson(
     id: string,
     isAlternative: boolean
 ): DisplayLesson {
-
     const rawWeeks = slot.weeks ?? [];
     const weekBitmask = weeksToBitmask(rawWeeks);
 

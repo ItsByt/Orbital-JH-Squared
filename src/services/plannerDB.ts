@@ -15,15 +15,14 @@ export async function getPlannerModules() {
 
     if (error) {
         console.error(error);
-        throw(error)
+        throw error;
     }
 
     return data || [];
 }
 
-
-export async function addToPlannerModuleDB(
-    module: PlannerModule, 
+export async function addbuildPlannerModuleDB(
+    module: PlannerModule,
     year: number,
     semester: number
 ) {
@@ -33,7 +32,6 @@ export async function addToPlannerModuleDB(
     const { error } = await supabase.from("planner_modules").insert(rowToInsert);
     if (error) throw error;
 }
-
 
 export async function removeFromPlannerModuleDB(moduleCode: string) {
     const userId = await requireAuth();
@@ -51,7 +49,6 @@ export async function removeFromPlannerModuleDB(moduleCode: string) {
     }
 }
 
-
 // Used to toggle Exclude From Total field for a specific module
 export async function setExcludeInPlannerModuleDB(moduleCode: string, newValue: boolean) {
     const userId = await requireAuth();
@@ -65,7 +62,6 @@ export async function setExcludeInPlannerModuleDB(moduleCode: string, newValue: 
     if (error) throw error;
 }
 
-
 // Used to update multiple modules in a specific year and semester
 export async function massUpdatePlannerModulesDB(
     modules: PlannerModule[],
@@ -76,17 +72,12 @@ export async function massUpdatePlannerModulesDB(
     const userId = await requireAuth();
 
     const rowsToUpsert = modules.map((mod) =>
-        formatForPlannerDatabase(
-            userId,
-            mod,
-            year,
-            semester
-        )
+        formatForPlannerDatabase(userId, mod, year, semester)
     );
 
     const { error } = await supabase
         .from("planner_modules")
         .upsert(rowsToUpsert, { onConflict: "user_id, module_code" });
-    
+
     if (error) throw error;
 }

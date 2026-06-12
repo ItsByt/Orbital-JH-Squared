@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 import type { DisplayLesson } from "@/types";
 
-export function useTimetableView( modules: DisplayLesson[], alternatives: DisplayLesson[]) {
-
+export function useTimetableView(modules: DisplayLesson[], alternatives: DisplayLesson[]) {
     // Optimisation:
     // Group lessons by day only when modules or alternatives change.
     // and process all logic here once
@@ -32,14 +31,13 @@ export function useTimetableView( modules: DisplayLesson[], alternatives: Displa
                 grouped[alt.day].push({
                     ...alt,
                     isAlternative: true,
-                    weekBitmask: alt.weekBitmask, 
+                    weekBitmask: alt.weekBitmask,
                 });
             }
         });
 
         return grouped;
     }, [modules, alternatives]);
-
 
     // Ensures single instance of module represented in Active Container
     // instead of duplicates (different class types) obtained from useTimetableData
@@ -63,20 +61,20 @@ export function useTimetableView( modules: DisplayLesson[], alternatives: Displa
     // Tracks number of custom block names active using Dictionary (Record)
     const customNameCounts = useMemo(() => {
         const counts: Record<string, number> = {};
-        
+
         uniqueActiveModules.forEach((mod) => {
             if (mod && mod.lessonType === "Personal Block") {
                 const nameKey = mod.moduleCode.toUpperCase();
                 counts[nameKey] = (counts[nameKey] || 0) + 1;
             }
         });
-        
+
         return counts;
     }, [uniqueActiveModules]);
 
     return {
         lessonsByDay,
         uniqueActiveModules,
-        customNameCounts
+        customNameCounts,
     };
 }

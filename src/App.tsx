@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
-import { Theme } from "@/components/Theme";
+import { Theme } from "@/components/ThemeComponents/Theme";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Welcome from "@/pages/authentication/Welcome";
 import Register from "@/pages/authentication/Register";
 import Login from "@/pages/authentication/Login";
-import Layout from "@/components/Layout";
+import Layout from "@/components/GeneralComponents/Layout";
 import TimetablePage from "@/pages/webpages/Timetable";
 import Planner from "@/pages/webpages/Planner";
 import Courses from "@/pages/webpages/Courses";
@@ -87,7 +87,8 @@ export default function App() {
                             classNames: {
                                 toast: "bg-background border border-border text-foreground rounded-xl p-4 shadow-xl flex items-center",
                                 title: "text-foreground font-semibold text-sm",
-                                description: "text-muted-foreground dark:!text-[#e4e4e7] text-xs font-normal mt-1 block leading-relaxed",
+                                description:
+                                    "text-muted-foreground dark:!text-[#e4e4e7] text-xs font-normal mt-1 block leading-relaxed",
                             },
                         }}
                     />

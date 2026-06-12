@@ -2,7 +2,7 @@ export const EXEMPTION_KEY = "EXEMPTIONS";
 
 // as const to derive union types
 export const SPECIAL_SEMESTER_KEYS = [EXEMPTION_KEY, "SUMMER", "WINTER"] as const;
-export type SpecialSemesterKey = typeof SPECIAL_SEMESTER_KEYS[number];
+export type SpecialSemesterKey = (typeof SPECIAL_SEMESTER_KEYS)[number];
 
 // Keys where semester validation doesn't apply
 export function isUnvalidatedSemester(semesterKey: string): boolean {
@@ -14,10 +14,10 @@ export function isExemptionKey(semesterKey: string): boolean {
     return semesterKey === EXEMPTION_KEY;
 }
 
-// Extracts Year and Semester number from SemesterKeys: "Y1S2" 
+// Extracts Year and Semester number from SemesterKeys: "Y1S2"
 export function parseSemesterKey(key: string): { year: number; semester: number } {
     if (isUnvalidatedSemester(key)) return { year: 0, semester: 0 };
-    
+
     const match = key.match(/Y(\d+)S(\d+)/);
 
     if (!match) {

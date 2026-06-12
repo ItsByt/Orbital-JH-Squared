@@ -5,7 +5,7 @@ import { getUserModules, swapLessonInTimetable } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
 import type { DisplayLesson, ModuleDetails, NUSModsRawLesson, SavedTimetableModule } from "@/types";
 import {
-    formatSavedModules,
+    formatSavedTimetableModules,
     formatAlternativeLessons,
     buildDisplayLesson,
 } from "@/utils/timetableUtils/lessonFormatters";
@@ -21,7 +21,7 @@ export function useTimetableData(year: number, semester: number) {
             if (!userId) return [];
             const { myModules } = await getUserModules(userId, year, semester);
             const savedList = (myModules as SavedTimetableModule[]) || [];
-            const compiledLessons: DisplayLesson[] = formatSavedModules(savedList);
+            const compiledLessons: DisplayLesson[] = formatSavedTimetableModules(savedList);
             return compiledLessons;
         },
         staleTime: 1000 * 60 * 5, //Cache time of 5 minutes

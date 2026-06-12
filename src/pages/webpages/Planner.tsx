@@ -4,8 +4,8 @@ import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea
 import { toast } from "sonner";
 
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
-import YearBlock from "@/components/PlannerPage/YearBlock";
-import ExemptionRow from "@/components/PlannerPage/ExemptionRow";
+import YearBlock from "@/components/PlannerComponents/YearBlock";
+import ExemptionRow from "@/components/PlannerComponents/ExemptionRow";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
@@ -115,7 +115,11 @@ export default function Planner() {
             // If the columns are the same, the previous update already suffices
             if (fromKey !== toKey) {
                 const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
-                const updatedFromSem = massUpdatePlannerModulesDB(updatedBoard[fromKey], fromYear, fromSem);
+                const updatedFromSem = massUpdatePlannerModulesDB(
+                    updatedBoard[fromKey],
+                    fromYear,
+                    fromSem
+                );
                 dbUpdates.push(updatedFromSem);
             }
 
@@ -125,7 +129,7 @@ export default function Planner() {
             toast.error("Failed to move module. Restoring previous state.", {
                 description: getErrorMessage(error),
             });
-        }    
+        }
     };
 
     // Loading

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Search, Loader2 } from "lucide-react";
-import AutoCompleteSearch from "@/hooks/useModuleSearch";
+import AutoCompleteSearch from "@/hooks/GeneralHooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
 import { getNextDisplayOrder, buildPlannerModule } from "@/utils/plannerUtils/plannerFormatters";
-import { addToPlannerModuleDB } from "@/services/plannerDB";
+import { addbuildPlannerModuleDB } from "@/services/plannerDB";
 import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -69,7 +69,7 @@ export default function AddCourseModal({
             onOpenChange(false);
             setSearchTerm("");
 
-            await addToPlannerModuleDB(newModule, year, semester);
+            await addbuildPlannerModuleDB(newModule, year, semester);
 
             toast.success(`${moduleCode} has been successfully added!`);
         } catch (error) {

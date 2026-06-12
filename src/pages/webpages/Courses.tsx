@@ -1,9 +1,11 @@
-import SearchBar from "@/components/SearchBar";
+import SearchBar from "@/components/GeneralComponents/SearchBar";
 import { useState } from "react";
 import { getModule } from "@/services/nusmods";
 import type { ModuleDetails } from "@/types";
 import { Loader2 } from "lucide-react";
-import ModuleDetailsCard from "@/components/ModuleDetailsCard";
+import ModuleDetailsCard from "@/components/CoursesComponents/ModuleDetailsCard";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
 export default function Courses() {
     // Initialize variable with state to store description state (or null)
@@ -17,20 +19,26 @@ export default function Courses() {
         // reset previous selection
         setSelectedModule(null);
 
-        const desc = await getModule(moduleCode);
-        setSelectedModule(desc);
-        setIsFetchingDetails(false);
+        try {
+            const details = await getModule(moduleCode);
+            if (details) {
+                setSelectedModule(details);
+            } else {
+                toast.error(`Could not find details for ${moduleCode}`);
+            }
+        } catch (error) {
+            toast.error("Failed to load module", { description: getErrorMessage(error) });
+        } finally {
+            setIsFetchingDetails(false);
+        }
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col px-6 pt-4 h-full">
             <div>
                 <h1
                     className="text-4xl font-bold"
-                    style={{
-                        fontFamily: "Bahnschrift, sans-serif",
-                        color: "#56A58B",
-                    }}
+                    style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
                 >
                     Course Information
                 </h1>
@@ -42,7 +50,7 @@ export default function Courses() {
 
             {isFetchingDetails && (
                 <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                    <Loader2 className="h-8 w-8 animate-spin text-[#749c83]" />
                 </div>
             )}
 

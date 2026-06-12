@@ -7,7 +7,6 @@ import { usePlannerStore } from "@/store/usePlannerStore";
 import { removeFromPlannerModuleDB, setExcludeInPlannerModuleDB } from "@/services/plannerDB";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -40,7 +39,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
             await removeFromPlannerModuleDB(module.moduleCode);
             toast.success(`${module.moduleCode} removed from your planner.`);
         } catch (error) {
-            // Rollback on error 
+            // Rollback on error
             setSemesterData(semesterKey, previousSemesterSnapshot);
             toast.error("Failed to remove module", { description: getErrorMessage(error) });
         }

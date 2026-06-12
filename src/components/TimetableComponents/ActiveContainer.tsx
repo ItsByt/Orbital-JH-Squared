@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { formatWeeksDisplay } from "@/utils/timetableUtils/weekFormat";
-import SearchBar from "@/components/SearchBar";
+import SearchBar from "@/components/GeneralComponents/SearchBar";
+import type { DisplayLesson } from "@/types";
 
 interface ActiveContainerProps {
-    uniqueActiveModules: any[];
+    uniqueActiveModules: DisplayLesson[];
     customNameCounts: Record<string, number>;
-    handleAddModule: (moduleCode: string, uniqueModules: any[]) => Promise<any>;
+    handleAddModule: (moduleCode: string, uniqueModules: DisplayLesson[]) => Promise<void>;
     handleRemoveModule: (moduleCode: string, id?: string, lessonType?: string) => void;
 }
 
@@ -24,7 +25,7 @@ export default function ActiveContainer({
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto mt-6 space-y-4">
+        <div className="w-full max-w-4xl mx-auto mt-6 space-y-4 pb-10">
             <SearchBar key={searchResetKey} onSelect={handleAddWithReset} />
 
             {uniqueActiveModules.length > 0 && (
@@ -35,7 +36,8 @@ export default function ActiveContainer({
                     <div className="flex flex-wrap gap-2.5 items-center">
                         {uniqueActiveModules.map((mod) => {
                             const isCustom = mod.lessonType === "Personal Block";
-                            const hasDuplicateName = isCustom && (customNameCounts[mod.moduleCode.toUpperCase()] > 1);
+                            const hasDuplicateName =
+                                isCustom && customNameCounts[mod.moduleCode.toUpperCase()] > 1;
 
                             return (
                                 <div
@@ -55,13 +57,19 @@ export default function ActiveContainer({
                                             </span>
                                             <span className="opacity-40">|</span>
                                             <span className="text-amber-500 dark:text-amber-400/90 font-medium">
-                                                {formatWeeksDisplay(mod.weeks || (mod as any).selectedWeeks || [])}
+                                                {formatWeeksDisplay((mod.weeks || []).map(Number))}
                                             </span>
                                         </div>
                                     )}
 
                                     <button
-                                        onClick={() => handleRemoveModule(mod.moduleCode, mod.id, mod.lessonType)}
+                                        onClick={() =>
+                                            handleRemoveModule(
+                                                mod.moduleCode,
+                                                mod.id,
+                                                mod.lessonType
+                                            )
+                                        }
                                         className="text-muted-foreground hover:text-destructive rounded-full p-1 hover:bg-muted transition-colors cursor-pointer"
                                         aria-label={`Remove ${mod.moduleCode}`}
                                     >

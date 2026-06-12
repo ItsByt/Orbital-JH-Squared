@@ -15,7 +15,6 @@ interface PlannerState {
     removeModule: (semesterKey: string, moduleId: string) => void;
     moveModule: (fromSem: string, toSem: string, fromIndex: number, toIndex: number) => void;
     toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) => void;
-
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
@@ -73,7 +72,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             newBoard[toSem] = destColumn;
             return { board: newBoard };
         }),
-    
+
     toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) =>
         set((state) => ({
             board: {
