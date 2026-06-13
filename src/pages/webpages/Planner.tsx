@@ -11,7 +11,7 @@ import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
 import { getPlannerModules, massUpdatePlannerModulesDB } from "@/services/plannerDB";
 import {
-    isUnvalidatedSemester,
+    isUnvalidatedSemesterKey,
     parseSemesterKey,
     EXEMPTION_KEY,
 } from "@/utils/plannerUtils/semesterKeyUtils";
@@ -58,7 +58,7 @@ export default function Planner() {
     // Handle while-dragging updates
     const handleDragUpdate = (update: DragUpdate) => {
         const { draggableId, destination } = update;
-        if (!destination || isUnvalidatedSemester(destination.droppableId)) {
+        if (!destination || isUnvalidatedSemesterKey(destination.droppableId)) {
             setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: false });
             return;
         }
@@ -95,7 +95,7 @@ export default function Planner() {
         // Checking if new semester moved to is valid
         const draggedModule = boardSnapshot[fromKey][fromIndex];
         const { year: toYear, semester: toSem } = parseSemesterKey(toKey);
-        if (!isUnvalidatedSemester(toKey)) {
+        if (!isUnvalidatedSemesterKey(toKey)) {
             const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
             if (!isValidSemester) {
                 toast.error(`${draggedModule.moduleCode} is not available in this semester!`);

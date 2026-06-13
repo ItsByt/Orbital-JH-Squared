@@ -88,6 +88,5 @@ export interface SavedPlannerRow {
     module_credit: number;
     display_order: number;
     available_semesters: number[];
-    is_exemption: boolean;
     exclude_from_total: boolean;
 }

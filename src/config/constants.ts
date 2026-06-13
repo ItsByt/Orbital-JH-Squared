@@ -1,5 +1,7 @@
+// Planner constants
 export const TOTAL_PLANNER_YEARS = 5;
 
+// Timetable constants
 export const TIMETABLE_WEEKS = Array.from({ length: 13 }, (_, i) => i + 1);
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 export const TIMETABLE_START_HOUR = 8; // 0800

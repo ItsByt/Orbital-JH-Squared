@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Search, Loader2 } from "lucide-react";
 import AutoCompleteSearch from "@/hooks/GeneralHooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
@@ -9,7 +9,7 @@ import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/valid
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
-import { isUnvalidatedSemester, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
+import { isUnvalidatedSemesterKey, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 export default function AddCourseModal({
     open,
@@ -24,9 +24,10 @@ export default function AddCourseModal({
     const addModule = usePlannerStore((state) => state.addModule);
     const removeModule = usePlannerStore((state) => state.removeModule);
     const [isAdding, setIsAdding] = useState(false);
+    const lockRef = useRef(false); // Used to lock adding state
 
     const handleSelectModule = async (moduleCode: string) => {
-        if (isAdding) return;
+        if (lockRef.current) return;
 
         const board = usePlannerStore.getState().board;
         const currentSemModules = board[semesterKey] || [];
@@ -41,6 +42,9 @@ export default function AddCourseModal({
         }
 
         try {
+            lockRef.current = true;
+            setIsAdding(true);
+
             const moduleDetails = await getModule(moduleCode);
             if (!moduleDetails) {
                 toast.error("Module details could not be found.");
@@ -49,7 +53,7 @@ export default function AddCourseModal({
 
             const { year, semester } = parseSemesterKey(semesterKey);
 
-            if (!isUnvalidatedSemester(semesterKey)) {
+            if (!isUnvalidatedSemesterKey(semesterKey)) {
                 const isValidSemester = checkValidSemesterUsingModuleDetails(
                     moduleDetails,
                     semester
@@ -79,6 +83,7 @@ export default function AddCourseModal({
                 description: getErrorMessage(error),
             });
         } finally {
+            lockRef.current = false;
             setIsAdding(false);
         }
     };

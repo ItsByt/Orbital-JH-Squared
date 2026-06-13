@@ -1,27 +1,41 @@
 import { create } from "zustand";
 import type { PlannerModule } from "@/types";
 import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
-import { isExemptionKey } from "@/utils/plannerUtils/semesterKeyUtils";
+import { isExemptionKey, isCustomSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 interface PlannerState {
-    //board key format: "Y1S1"
+    // board key format: "Y1S1"
     board: Record<string, PlannerModule[]>;
     dragState: { draggingModuleCode: string | null; isOverInvalidSem: boolean };
+    visibleCustomColumns: string[];
 
     setBoard: (board: Record<string, PlannerModule[]>) => void;
     setDragState: (state: { draggingModuleCode: string | null; isOverInvalidSem: boolean }) => void;
     setSemesterData: (semesterKey: string, modules: PlannerModule[]) => void;
+
     addModule: (semesterKey: string, module: PlannerModule) => void;
     removeModule: (semesterKey: string, moduleId: string) => void;
     moveModule: (fromSem: string, toSem: string, fromIndex: number, toIndex: number) => void;
+
     toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) => void;
+    showCustomColumn: (semesterKey: string) => void;
+    clearColumn: (semesterKey: string) => void;
+    clearAndHideColumn: (semesterKey: string) => void;
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
     board: generateEmptyBoard(),
     dragState: { draggingModuleCode: null, isOverInvalidSem: false },
+    visibleCustomColumns: [],
 
-    setBoard: (board) => set({ board }),
+    setBoard: (board) =>
+        set(() => {
+            const loadedCustomCols = Object.keys(board).filter(
+                (key) => isCustomSemesterKey(key) && board[key].length > 0
+            );
+
+            return { board, visibleCustomColumns: loadedCustomCols };
+        }),
 
     setDragState: (dragState) => set({ dragState }),
 
@@ -31,12 +45,20 @@ export const usePlannerStore = create<PlannerState>((set) => ({
         })),
 
     addModule: (semesterKey, module) =>
-        set((state) => ({
-            board: {
-                ...state.board,
-                [semesterKey]: [...state.board[semesterKey], module],
-            },
-        })),
+        set((state) => {
+            const isDuplicate = Object.values(state.board).some((sem) =>
+                sem.some((m) => m.moduleCode === module.moduleCode)
+            );
+
+            if (isDuplicate) return state;
+
+            return {
+                board: {
+                    ...state.board,
+                    [semesterKey]: [...(state.board[semesterKey] || []), module],
+                },
+            };
+        }),
 
     removeModule: (semesterKey, moduleCode) =>
         set((state) => ({
@@ -83,5 +105,21 @@ export const usePlannerStore = create<PlannerState>((set) => ({
                         : mod
                 ),
             },
+        })),
+
+    showCustomColumn: (semesterKey) =>
+        set((state) => ({
+            visibleCustomColumns: [...new Set([...state.visibleCustomColumns, semesterKey])],
+        })),
+
+    clearColumn: (semesterKey) =>
+        set((state) => ({
+            board: { ...state.board, [semesterKey]: [] },
+        })),
+
+    clearAndHideColumn: (semesterKey) =>
+        set((state) => ({
+            board: { ...state.board, [semesterKey]: [] },
+            visibleCustomColumns: state.visibleCustomColumns.filter((k) => k !== semesterKey),
         })),
 }));

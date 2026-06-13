@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { Ban, ChevronDown, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
@@ -26,13 +27,21 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
     const toggleExclude = usePlannerStore((state) => state.toggleExcludeFromTotal);
 
+    const [isDeleting, setIsDeleting] = useState(false);
+    const lockRef = useRef(false); // Used to lock removal state
+
     const isBeingDraggedInvalidly =
         dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
 
     const handleDelete = async () => {
+        if (lockRef.current) return;
+
         const previousSemesterSnapshot = [...usePlannerStore.getState().board[semesterKey]];
 
         try {
+            lockRef.current = true;
+            setIsDeleting(true);
+
             // Optimistic removal of module
             removeModule(semesterKey, module.moduleCode);
 
@@ -42,6 +51,9 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
             // Rollback on error
             setSemesterData(semesterKey, previousSemesterSnapshot);
             toast.error("Failed to remove module", { description: getErrorMessage(error) });
+        } finally {
+            lockRef.current = false;
+            setIsDeleting(false);
         }
     };
 
@@ -101,10 +113,14 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 {/* Removing a module */}
                                 <DropdownMenuItem
                                     onClick={handleDelete}
-                                    className="text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer"
+                                    disabled={isDeleting}
+                                    className={cn(
+                                        "text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer",
+                                        isDeleting && "opacity-50 cursor-not-allowed"
+                                    )}
                                 >
                                     <Trash2 className="mr-2 h-3.5 w-3.5" />
-                                    <span>Remove Module</span>
+                                    <span>{isDeleting ? "Removing..." : "Remove Module"}</span>
                                 </DropdownMenuItem>
 
                                 {/* For toggling Excluding From Total*/}

@@ -135,4 +135,3 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
         </div>
     );
 }
-
