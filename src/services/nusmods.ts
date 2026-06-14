@@ -14,7 +14,7 @@ export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSumma
     }
 }
 
-//Includes Timetable and Pre-Requisite Tree Data
+// Get Module's specifics only
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
         const response = await fetch(
@@ -28,5 +28,22 @@ export async function getModule(moduleCode: string): Promise<ModuleDetails | nul
     } catch (error) {
         console.error("Failed to fetch module", error);
         return null;
+    }
+}
+
+// Gets a list of all modules in NUS, only codes
+// Note: Thought about using getModulesList directly and then do the mapping elsewhere
+// but memorywise its not efficient so here it is.
+export async function getModuleCodes(acadYear = "2025-2026"): Promise<string[]> {
+    try {
+        const response = await fetch(`https://api.nusmods.com/v2/${acadYear}/moduleList.json`);
+
+        if (!response.ok) return [];
+
+        const data: { moduleCode: string; title: string }[] = await response.json();
+        return data.map(item => item.moduleCode);
+    } catch (error) {
+        console.error("Failed to fetch module list", error);
+        return [];
     }
 }

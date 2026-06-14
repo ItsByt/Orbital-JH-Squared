@@ -1,11 +1,14 @@
-//Basic Summary of each NUS Module
+// Basic Summary of each NUS Module
 export interface ModuleSummary {
     moduleCode: string;
     title: string;
     semesters: number[];
 }
 
-//All Details for a Searched NUS Module
+// Handles raw PreReqTree data from API (unformatted)
+export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
+
+// All Details for a Searched NUS Module
 export interface ModuleDetails {
     moduleCode: string;
     title: string;
@@ -15,9 +18,12 @@ export interface ModuleDetails {
         semester: number;
         timetable: NUSModsRawLesson[];
     }[];
+    prerequisite?: string;   
+    preclusion?: string;
+    prereqTree?: string | { and?: PreReqNode[]; or?: PreReqNode[] }
 }
 
-//Details about just a lesson itself
+// Details about just a lesson itself
 export interface NUSModsRawLesson {
     classNo: string;
     lessonType: string;

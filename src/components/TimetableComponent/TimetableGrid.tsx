@@ -31,7 +31,7 @@ export default function TimetableGrid({
                 ))}
             </div>
 
-            {/* Day Rows */}
+            {/* Day Rows - Java indexing 0-indexed, CSS are 1-indexed so +1 discrepancy */}
             <div className="divide-y divide-border">
                 {DAYS.map((day) => {
                     const allVisibleLessons = lessonsByDay[day] || [];
