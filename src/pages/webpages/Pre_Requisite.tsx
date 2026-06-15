@@ -7,16 +7,17 @@ import { formatTree } from "@/utils/prereqUtils/treeFormatter";
 
 
 export default function Pre_Requisite() {
+
     const [selectedModule, setSelectedModule] = useState<string | null>(null);
 
-    // Fetch and cache array of all valid NUS codes once
+    // Fetch array of all NUS codes once for prefix searching
     const { data: moduleCodes = [] } = useQuery({
         queryKey: ["allModuleCodes"],
         queryFn: () => getModuleCodes(),
         staleTime: 1000 * 60 * 60 * 24, 
     });
 
-    // Fetch target prerequisite structures for the searched module
+    // For SearchBar's module, fetch pre-req raw tree data
     const { data: moduleDetails, isLoading, isError } = useQuery({
         queryKey: ["module", selectedModule],
         queryFn: () => getModule(selectedModule!), 
@@ -24,38 +25,45 @@ export default function Pre_Requisite() {
         staleTime: 1000 * 60 * 5,
     });
 
-    // Memoize tree formatting for efficiency rather than compute every render
+    // Raw tree data from API formatted for use, 
+    // memoized to avoid unnecessary repeated formatting inside HTML
     const cleanExtendedTree = useMemo(() => {
         if (!moduleDetails?.prereqTree || moduleCodes.length === 0) return null;
         return formatTree(moduleDetails.prereqTree, moduleCodes);
     }, [moduleDetails?.prereqTree, moduleCodes]);
 
+
 return (
         <div className="space-y-6">
             <div>
+                {/*  Header */}
                 <h1 className="text-4xl font-bold" style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}>
                     Pre-Requisite Tree
                 </h1>
-                {/*  Color Legend Reference  */}
+                {/*  Color Legend Reference */}
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-medium font-sans text-muted-foreground">
                     <span className="text-foreground font-bold tracking-wider text-sm normal-case mr-1">
                         Legend:
                     </span>
+                    
                     <div className="flex items-center gap-2">
                         <div className="w-3.5 h-3.5 bg-[#E8A753] border border-[#cf9043] rounded-sm shadow-xs" />
-                        <span>User Selected Path</span>
+                        <span>Chosen Path</span>
                     </div>
+                    
                     <div className="flex items-center gap-2">
                         <div className="w-3.5 h-3.5 bg-[#719E8E] border border-[#5d8275] rounded-sm shadow-xs" />
-                        <span>Unbranched, must Select</span>
+                        <span>Unbranched Options</span>
                     </div>
+                    
                     <div className="flex items-center gap-2">
-                        <div className="w-3.5 h-3.5 bg-white dark:bg-zinc-800 border border-zinc-400 dark:border-zinc-600 rounded-sm shadow-xs" />
-                        <span className="text-foreground/80">User Hidden Branches</span>
+                        <div className="w-3.5 h-3.5 bg-card border border-border rounded-sm shadow-xs" />
+                        <span> Hidden Modules</span>
                     </div>
                 </div>
             </div>
 
+            {/*  SearchBar */}
             <div className="w-full mt-6">
                 <SearchBar onSelect={(code) => setSelectedModule(code)} />
             </div>
@@ -83,7 +91,7 @@ return (
                     </p>
                 )}
 
-                {/* Otherwise, render PreReqTree using formatted tree with fallback guard */}
+                {/* Otherwise, render formatted tree component with fallback guard */}
                 {!isLoading && selectedModule && moduleDetails?.prereqTree && (
                     <div className="w-full overflow-x-auto py-4">
                         <div className="flex flex-col items-center min-w-max w-full">
@@ -91,7 +99,7 @@ return (
                                 {selectedModule.toUpperCase()}
                             </div>
                             {cleanExtendedTree ? (
-                                <PreReqTree node={cleanExtendedTree} />
+                                <PreReqTree node={cleanExtendedTree}  isRoot={false} />
                             ) : (
                                 <p className="text-xs text-muted-foreground mt-4 animate-pulse">Processing tree dependencies...</p>
                             )}
