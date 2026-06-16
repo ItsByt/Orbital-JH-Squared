@@ -1,12 +1,17 @@
-import { useState, useRef } from "react";
-import { Ban, ChevronDown, Trash2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Ban, BellOff, BellRing, ChevronDown, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+
 import type { PlannerModule } from "@/types";
 import { usePlannerStore } from "@/store/usePlannerStore";
-import { removeFromPlannerModuleDB, setExcludeInPlannerModuleDB } from "@/services/plannerDB";
-import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import {
+    removeFromPlannerModuleDB,
+    setExcludeInPlannerModuleDB,
+    setPrereqWarningInPlannerModuleDB,
+} from "@/services/plannerDB";
 
 import {
     DropdownMenu,
@@ -14,6 +19,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
+import ModuleWarningTooltip from "./ModuleWarningTooltip";
+import { usePrereqEvaluator } from "@/hooks/PlannerHooks/usePrereqEvaluator";
 
 interface ModuleBlockProps {
     module: PlannerModule;
@@ -25,7 +34,9 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     const dragState = usePlannerStore((state) => state.dragState);
     const removeModule = usePlannerStore((state) => state.removeModule);
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
+
     const toggleExclude = usePlannerStore((state) => state.toggleExcludeFromTotal);
+    const toggleWarning = usePlannerStore((state) => state.togglePrereqWarning);
 
     const [isDeleting, setIsDeleting] = useState(false);
     const lockRef = useRef(false); // Used to lock removal state
@@ -71,6 +82,49 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
         }
     };
 
+    const {
+        filteredBoardMap,
+        targetTime,
+        takenTooEarlyIssues,
+        takenTooLateIssues,
+        hasAnyPreReqWarning,
+    } = usePrereqEvaluator(module.moduleCode, semesterKey);
+
+    const handleToggleWarning = async () => {
+        const targetValue = !module.hidePreReqWarning;
+        try {
+            toggleWarning(semesterKey, module.moduleCode);
+            await setPrereqWarningInPlannerModuleDB(module.moduleCode, targetValue);
+        } catch (error) {
+            // Rollback if error
+            toggleWarning(semesterKey, module.moduleCode);
+            toast.error("Failed to update Pre-requisite warning", {
+                description: getErrorMessage(error),
+            });
+        }
+    };
+
+    // Used to reset Pre-requisite warning when the requirements have been fully met
+    useEffect(() => {
+        if (!hasAnyPreReqWarning && module.hidePreReqWarning) {
+            toggleWarning(semesterKey, module.moduleCode);
+            const setWarningTrueInPlannerDB = async () => {
+                try {
+                    await setPrereqWarningInPlannerModuleDB(module.moduleCode, false);
+                } catch (error) {
+                    console.error("Failed to auto-reset warning", error);
+                }
+            };
+            setWarningTrueInPlannerDB();
+        }
+    }, [
+        hasAnyPreReqWarning,
+        module.hidePreReqWarning,
+        module.moduleCode,
+        semesterKey,
+        toggleWarning,
+    ]);
+
     return (
         <Draggable draggableId={module.moduleCode} index={index}>
             {/* Draggable snapshot properties -> isDragging, draggingOver */}
@@ -94,6 +148,16 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     )}
                     style={{ ...provided.draggableProps.style }}
                 >
+                    {/* Pre-req Warning */}
+                    {!snapshot.isDragging && !module.hidePreReqWarning && (
+                        <ModuleWarningTooltip
+                            takenTooEarlyIssues={takenTooEarlyIssues}
+                            boardMap={filteredBoardMap}
+                            targetTime={targetTime}
+                            takenTooLateIssues={takenTooLateIssues}
+                        />
+                    )}
+
                     <div className="flex justify-between items-start mb-1">
                         <span className="text-[12px] font-bold tracking-tight leading-none">
                             {module.moduleCode}
@@ -122,6 +186,26 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                     <Trash2 className="mr-2 h-3.5 w-3.5" />
                                     <span>{isDeleting ? "Removing..." : "Remove Module"}</span>
                                 </DropdownMenuItem>
+
+                                {/* To toggle Pre-requisite Warning */}
+                                {hasAnyPreReqWarning && semesterKey !== EXEMPTION_KEY && (
+                                    <DropdownMenuItem
+                                        onClick={handleToggleWarning}
+                                        className="cursor-pointer"
+                                    >
+                                        {module.hidePreReqWarning ? (
+                                            <>
+                                                <BellRing className="mr-2 h-3.5 w-3.5 text-amber-500" />{" "}
+                                                Show Pre-req Warning
+                                            </>
+                                        ) : (
+                                            <>
+                                                <BellOff className="mr-2 h-3.5 w-3.5 text-zinc-500" />{" "}
+                                                Hide Pre-req Warning
+                                            </>
+                                        )}
+                                    </DropdownMenuItem>
+                                )}
 
                                 {/* For toggling Excluding From Total*/}
                                 {module.isExemption && (

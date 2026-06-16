@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { PlannerModule } from "@/types";
+import type { PlannerModule, PrereqTree } from "@/types";
 import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { isExemptionKey, isCustomSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
@@ -7,7 +7,6 @@ interface PlannerState {
     // board key format: "Y1S1"
     board: Record<string, PlannerModule[]>;
     dragState: { draggingModuleCode: string | null; isOverInvalidSem: boolean };
-    visibleCustomColumns: string[];
 
     setBoard: (board: Record<string, PlannerModule[]>) => void;
     setDragState: (state: { draggingModuleCode: string | null; isOverInvalidSem: boolean }) => void;
@@ -18,15 +17,22 @@ interface PlannerState {
     moveModule: (fromSem: string, toSem: string, fromIndex: number, toIndex: number) => void;
 
     toggleExcludeFromTotal: (semesterKey: string, moduleCode: string) => void;
+
+    visibleCustomColumns: string[];
     showCustomColumn: (semesterKey: string) => void;
     clearColumn: (semesterKey: string) => void;
     clearAndHideColumn: (semesterKey: string) => void;
+
+    prereqCache: Record<string, PrereqTree | null>;
+    setPrereqCache: (moduleCode: string, tree: PrereqTree | null) => void;
+    togglePrereqWarning: (semesterKey: string, moduleCode: string) => void;
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
     board: generateEmptyBoard(),
     dragState: { draggingModuleCode: null, isOverInvalidSem: false },
     visibleCustomColumns: [],
+    prereqCache: {},
 
     setBoard: (board) =>
         set(() => {
@@ -121,5 +127,22 @@ export const usePlannerStore = create<PlannerState>((set) => ({
         set((state) => ({
             board: { ...state.board, [semesterKey]: [] },
             visibleCustomColumns: state.visibleCustomColumns.filter((k) => k !== semesterKey),
+        })),
+
+    setPrereqCache: (moduleCode, tree) =>
+        set((state) => ({
+            prereqCache: { ...state.prereqCache, [moduleCode]: tree },
+        })),
+
+    togglePrereqWarning: (semesterKey, moduleCode) =>
+        set((state) => ({
+            board: {
+                ...state.board,
+                [semesterKey]: state.board[semesterKey].map((mod) =>
+                    mod.moduleCode === moduleCode
+                        ? { ...mod, hidePreReqWarning: !mod.hidePreReqWarning }
+                        : mod
+                ),
+            },
         })),
 }));

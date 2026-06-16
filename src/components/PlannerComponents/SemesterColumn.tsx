@@ -3,9 +3,9 @@ import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { clearPlannerColumnDBBySemesterKey } from "@/services/plannerDB";
-import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
 
@@ -52,7 +52,9 @@ export default function SemesterColumn({
             setIsDeleting(true);
 
             // Pessimistic update
-            await clearPlannerColumnDBBySemesterKey(semesterKey);
+            if (modules.length > 0) {
+                await clearPlannerColumnDBBySemesterKey(semesterKey);
+            }
 
             // Only if DB update succeeds, update visual state
             if (isCustom) {
@@ -77,11 +79,11 @@ export default function SemesterColumn({
     const showClearButton = modules.length > 0 || isCustom;
 
     return (
-        <div className={cn("flex flex-col h-full overflow-hidden group w-[230px] shrink-0")}>
+        <div className={cn("flex flex-col group w-[230px] shrink-0 h-max")}>
             <div className="mb-3 px-1 min-h-[44px] flex flex-col justify-start">
                 {/* Top Row: Title & Actions */}
                 <div className="flex justify-between items-center gap-2 min-h-[24px]">
-                    <h3 className="font-bold text-zinc-100 text-[15px] leading-none shrink-0 truncate">
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-[15px] leading-none shrink-0 truncate">
                         {title}
                     </h3>
 
@@ -135,7 +137,7 @@ export default function SemesterColumn({
                 {/* Bottom Row: Units */}
                 {modules.length > 0 && !isConfirming && !isDeleting && (
                     <div className="mt-1">
-                        <span className="text-xs text-zinc-400 font-medium">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {moduleCount} Courses / {semUnits} Units
                         </span>
                     </div>
@@ -150,7 +152,7 @@ export default function SemesterColumn({
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
                         className={cn(
-                            "flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px]",
+                            "flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px] min-h-0",
                             snapshot.isDraggingOver &&
                                 !dragState.isOverInvalidSem &&
                                 "shadow-xl opacity-90 ring-2 ring-white/50",

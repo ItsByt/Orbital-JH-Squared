@@ -5,8 +5,9 @@ import { usePlannerStore } from "@/store/usePlannerStore";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
 import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
-import { cn } from "@/lib/utils";
 import { clearPlannerColumnDBBySemesterKey } from "@/services/plannerDB";
+
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
@@ -57,21 +58,21 @@ export default function ExemptionRow() {
     };
 
     return (
-        <div className="shrink-0 border-t border-zinc-800 pt-3 px-6 pb-3 group">
+        <div className="shrink-0 border-t border-zinc-200 dark:border-zinc-800 pt-5 px-6 pb-4 group">
             <div className="mb-4 min-h-[44px] flex flex-col justify-start">
                 {/* Top Row: Title & Actions */}
                 <div className="flex justify-start gap-4 items-center min-h-[24px]">
-                    <h3 className="font-bold text-zinc-100 text-[15px] uppercase tracking-wider leading-none">
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-[15px] uppercase tracking-wider leading-none">
                         Exemptions
                     </h3>
 
-                    {modules.length > 0 && (
+                    {exemptionCount > 0 && (
                         <div
                             className={cn(
                                 "flex items-center transition-all duration-200",
                                 isConfirming || isDeleting
                                     ? "opacity-100 visible"
-                                    : "text-zinc-500 hover:text-red-400 opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                                    : "text-zinc-500 hover:text-red-400 dark:hover:text-red-400 opacity-0 invisible group-hover:opacity-100 group-hover:visible"
                             )}
                         >
                             {isDeleting ? (
@@ -106,7 +107,7 @@ export default function ExemptionRow() {
                 {/* Bottom Row: Units */}
                 {exemptionCount > 0 && !isConfirming && !isDeleting && (
                     <div className="mt-1">
-                        <span className="text-xs text-zinc-400 font-medium">
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {exemptionCount} Courses / {exemptionUnits} Units
                         </span>
                     </div>
@@ -123,8 +124,8 @@ export default function ExemptionRow() {
                         className={cn(
                             "flex flex-nowrap overflow-x-auto gap-4 min-h-[110px] w-max min-w-[500px] max-w-full p-4 rounded-md border border-dashed pb-4 scrollbar-thin scrollbar-thumb-zinc-700",
                             snapshot.isDraggingOver
-                                ? "border-zinc-500 bg-zinc-800/30"
-                                : "border-zinc-700"
+                                ? "border-zinc-400 bg-zinc-100 dark:border-zinc-500 dark:bg-zinc-800/30"
+                                : "border-zinc-300 dark:border-zinc-700"
                         )}
                     >
                         {modules.map((mod, index) => (

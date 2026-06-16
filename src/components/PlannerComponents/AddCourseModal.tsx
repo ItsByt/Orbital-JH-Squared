@@ -4,12 +4,13 @@ import AutoCompleteSearch from "@/hooks/GeneralHooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
 import { getNextDisplayOrder, buildPlannerModule } from "@/utils/plannerUtils/plannerFormatters";
-import { addbuildPlannerModuleDB } from "@/services/plannerDB";
+import { addToPlannerModuleDB } from "@/services/plannerDB";
 import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
+import { isUnvalidatedSemesterKey, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
-import { isUnvalidatedSemesterKey, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
 export default function AddCourseModal({
     open,
@@ -73,7 +74,7 @@ export default function AddCourseModal({
             onOpenChange(false);
             setSearchTerm("");
 
-            await addbuildPlannerModuleDB(newModule, year, semester);
+            await addToPlannerModuleDB(newModule, year, semester);
 
             toast.success(`${moduleCode} has been successfully added!`);
         } catch (error) {

@@ -15,6 +15,7 @@ export interface ModuleDetails {
         semester: number;
         timetable: NUSModsRawLesson[];
     }[];
+    prereqTree?: PrereqTree; // Modules with no pre-requisites default to undefined or null
 }
 
 //Details about just a lesson itself
@@ -74,6 +75,7 @@ export interface PlannerModule {
     availableSemesters: number[];
     isExemption: boolean;
     excludeFromTotal: boolean;
+    hidePreReqWarning?: boolean;
 }
 
 //Details for Planner modules stored in supabase
@@ -89,4 +91,14 @@ export interface SavedPlannerRow {
     display_order: number;
     available_semesters: number[];
     exclude_from_total: boolean;
+    hide_pre_req_warning?: boolean;
 }
+
+// Details for Pre-requisite Tree
+// Either a string, an object with key of "and"/"or", value of array of PrereqTree,
+// or key of "nOf" and value [number of modules needed, specific type of module needed]
+export type PrereqTree =
+    | string
+    | { and: PrereqTree[] }
+    | { or: PrereqTree[] }
+    | { nOf: [number, PrereqTree[]] };

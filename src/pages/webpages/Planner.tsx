@@ -9,7 +9,7 @@ import ExemptionRow from "@/components/PlannerComponents/ExemptionRow";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
-import { getPlannerModules, massUpdatePlannerModulesDB } from "@/services/plannerDB";
+import { getPlannerModules, massUpdatePlannerModuleDB } from "@/services/plannerDB";
 import {
     isUnvalidatedSemesterKey,
     parseSemesterKey,
@@ -109,13 +109,13 @@ export default function Planner() {
 
         try {
             const dbUpdates = [];
-            const updatedToSem = massUpdatePlannerModulesDB(updatedBoard[toKey], toYear, toSem);
+            const updatedToSem = massUpdatePlannerModuleDB(updatedBoard[toKey], toYear, toSem);
             dbUpdates.push(updatedToSem);
 
             // If the columns are the same, the previous update already suffices
             if (fromKey !== toKey) {
                 const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
-                const updatedFromSem = massUpdatePlannerModulesDB(
+                const updatedFromSem = massUpdatePlannerModuleDB(
                     updatedBoard[fromKey],
                     fromYear,
                     fromSem
@@ -148,7 +148,7 @@ export default function Planner() {
         // Also available to use: onDragStart
         // onDragEnd is the only one required
         <DragDropContext onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
-            <div className="flex flex-col flex-1 min-h-0 min-w-0 overflow-hidden space-y-4 pt-1 px-6 pb-2 w-full">
+            <div className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4 pt-1 px-6 pb-2 w-full">
                 <div className="flex justify-between items-end shrink-0 border-b border-border/50 pb-2">
                     <h1
                         className="text-3xl font-bold tracking-tight"
@@ -158,9 +158,15 @@ export default function Planner() {
                     </h1>
 
                     {/* Global Totals */}
-                    <div className="text-right text-xl uppercase tracking-wider text-zinc-400 font-bold">
-                        <span className="text-zinc-200">{globalTotals.count}</span> Courses /{" "}
-                        <span className="text-zinc-200">{globalTotals.units}</span> Units
+                    <div className="text-right text-xl uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold">
+                        <span className="text-zinc-900 dark:text-zinc-200">
+                            {globalTotals.count}
+                        </span>{" "}
+                        Courses /{" "}
+                        <span className="text-zinc-900 dark:text-zinc-200">
+                            {globalTotals.units}
+                        </span>{" "}
+                        Units
                     </div>
                 </div>
 

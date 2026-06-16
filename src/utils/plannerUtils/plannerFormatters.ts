@@ -24,6 +24,7 @@ export function buildPlannerModule(
         availableSemesters: availableSemesters,
         isExemption: isExemptionKey(semesterKey),
         excludeFromTotal: false,
+        hidePreReqWarning: false,
     };
 }
 
@@ -39,6 +40,7 @@ export function formatToPlannerModule(row: SavedPlannerRow): PlannerModule {
         availableSemesters: row.available_semesters,
         isExemption: isExemption,
         excludeFromTotal: row.exclude_from_total,
+        hidePreReqWarning: row.hide_pre_req_warning,
     };
 }
 
@@ -59,13 +61,14 @@ export function formatForPlannerDatabase(
         display_order: module.displayOrder,
         available_semesters: module.availableSemesters,
         exclude_from_total: module.excludeFromTotal,
+        hide_pre_req_warning: module.hidePreReqWarning,
     };
 }
 
 // Formats an Empty Planner Data Board
 export function generateEmptyBoard(): Record<string, PlannerModule[]> {
     const board: Record<string, PlannerModule[]> = {};
-    const suffixes = Object.keys(SEMESTER_CODE_MAP);
+    const suffixes = Object.keys(SEMESTER_CODE_MAP).filter((key) => key !== "EXEMPTIONS");
 
     for (let year = 1; year <= TOTAL_PLANNER_YEARS; year++) {
         suffixes.forEach((suffix) => {

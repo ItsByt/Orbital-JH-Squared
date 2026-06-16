@@ -65,7 +65,7 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
 
     return (
         <div
-            className={`flex-shrink-0 w-max min-w-[500px] ${bgColor} rounded-xl p-5 flex flex-col snap-start shadow-md h-full overflow-hidden border border-zinc-200 dark:border-zinc-800 relative`}
+            className={`flex-shrink-0 w-max min-w-[500px] ${bgColor} rounded-xl p-5 flex flex-col snap-start shadow-md h-max border border-zinc-200 dark:border-zinc-800 relative`}
         >
             {/* Header: Year Info & Totals */}
             <div className="flex justify-between items-start mb-6 px-1">
@@ -86,7 +86,7 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="flex items-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-100/50 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2.5 py-1.5 transition-all">
-                                    <Plus size={14} className="mr-1" /> Add Term
+                                    <Plus size={14} className="mr-1" /> Add Special Term
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
@@ -108,8 +108,8 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                 </div>
             </div>
 
-            {/* Semester Columns for Semester 1 and Winter Break*/}
             <div className="flex gap-4 items-stretch flex-1 px-1">
+                {/* Semester Columns for Semester 1 and Winter Break*/}
                 <SemesterColumn title={`Semester 1`} semesterKey={`Y${yearNum}${SEMESTER_1}`} />
 
                 {isVisible(WINTER_BREAK) && (

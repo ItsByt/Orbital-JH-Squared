@@ -22,11 +22,7 @@ export async function getPlannerModules() {
     return data || [];
 }
 
-export async function addbuildPlannerModuleDB(
-    module: PlannerModule,
-    year: number,
-    semester: number
-) {
+export async function addToPlannerModuleDB(module: PlannerModule, year: number, semester: number) {
     const userId = await requireAuth();
     const rowToInsert = formatForPlannerDatabase(userId, module, year, semester);
 
@@ -64,7 +60,7 @@ export async function setExcludeInPlannerModuleDB(moduleCode: string, newValue: 
 }
 
 // Used to update multiple modules in a specific year and semester
-export async function massUpdatePlannerModulesDB(
+export async function massUpdatePlannerModuleDB(
     modules: PlannerModule[],
     year: number,
     semester: number
@@ -99,5 +95,17 @@ export async function clearPlannerColumnDB(year: number, semester: number) {
 
 export async function clearPlannerColumnDBBySemesterKey(semesterKey: string) {
     const { year, semester } = parseSemesterKey(semesterKey);
-    clearPlannerColumnDB(year, semester);
+    await clearPlannerColumnDB(year, semester);
+}
+
+export async function setPrereqWarningInPlannerModuleDB(moduleCode: string, newValue: boolean) {
+    const userId = await requireAuth();
+
+    const { error } = await supabase
+        .from("planner_modules")
+        .update({ hide_pre_req_warning: newValue })
+        .eq("user_id", userId)
+        .eq("module_code", moduleCode);
+
+    if (error) throw error;
 }

@@ -109,3 +109,20 @@ export function isCustomSemesterKey(key: string): boolean {
     // If it doesn't end with Sem 1 or Sem 2, it is a custom column
     return !key.endsWith(sem1Suffix) && !key.endsWith(sem2Suffix);
 }
+
+// Formats a semester key into its long version
+// E.g. Y1S1 => Year 1 Semester 1
+export function formatSemesterKeyReadable(semesterKey: string): string {
+    if (semesterKey === EXEMPTION_KEY) return "Exemptions";
+
+    const { year, semester } = parseSemesterKey(semesterKey);
+    const termMap: Record<number, string> = {
+        [SEMESTER_CODES.SEM_1]: "Semester 1",
+        [SEMESTER_CODES.SEM_2]: "Semester 2",
+        [SEMESTER_CODES.SPECIAL_TERM_1]: "Special Term I",
+        [SEMESTER_CODES.SPECIAL_TERM_2]: "Special Term II",
+        [SEMESTER_CODES.WINTER_BREAK]: "Winter Break",
+        [SEMESTER_CODES.SUMMER_BREAK]: "Summer Break",
+    };
+    return `Year ${year} ${termMap[semester] || ""}`;
+}
