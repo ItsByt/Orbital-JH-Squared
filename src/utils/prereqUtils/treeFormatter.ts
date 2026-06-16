@@ -5,7 +5,7 @@ import { createPrefixBranch, parseStringRule } from "./prefix&Parse";
 
 // G U I D E:
 // Transforms raw and potentially rule-heavy NUSMods prerequisite tree data structure
-// into a cleaned formatted version via recursive rebuild.
+// into a cleaned formatted version via recursive rebuild with provided labels.
 // Accepts arguments of the raw tree and the fetched list of NUS codes
 
 //--------------------------------------------------------------------------------

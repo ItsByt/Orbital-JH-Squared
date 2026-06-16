@@ -75,7 +75,7 @@ export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
 export interface FormattedPreReqNode {
     type: "leaf" | "prefix-branch" | "branch"; // possible representations
     moduleCode?: string;       // e.g., "NM4102" if leaf OR
-    prefixLabel?: string;      // e.g. "NM1% Modules"if prefix-branch
+    prefixLabel?: string;      // e.g. "Courses beginning with ..NM1" if prefix-branch
     and?: FormattedPreReqNode[]; // "and" recursive branch
     or?: FormattedPreReqNode[];  // "or" recursive branch
     allPossibleMatches?: string[]; // all possible matches satisfying if prefix

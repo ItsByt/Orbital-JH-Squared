@@ -1,7 +1,6 @@
 const LEGEND_ITEMS = [
   { label: "Chosen Path", colorClass: "bg-[#E8A753]", borderClass: "border-[#cf9043]" },
   { label: "Unbranched Options", colorClass: "bg-[#719E8E]", borderClass: "border-[#5d8275]" },
-  { label: "Hidden Modules", colorClass: "bg-card", borderClass: "border-border" },
 ] as const;
 
 export const Legend = () => (
