@@ -5,9 +5,6 @@ export interface ModuleSummary {
     semesters: number[];
 }
 
-// Handles raw PreReqTree data from API (unformatted)
-export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
-
 // All Details for a Searched NUS Module
 export interface ModuleDetails {
     moduleCode: string;
@@ -34,7 +31,7 @@ export interface NUSModsRawLesson {
     weeks: number[] | string[];
 }
 
-//Details for Saved Timetable Modules
+// Details for Saved Timetable Modules
 export interface SavedTimetableModule {
     id: string;
     user_id: string;
@@ -50,7 +47,7 @@ export interface SavedTimetableModule {
     weeks: string | null;
 }
 
-//Details for class BLOCKS
+// Details for class BLOCKS
 export interface DisplayLesson {
     id: string;
     moduleCode: string;
@@ -69,4 +66,18 @@ export interface DisplayLesson {
     // So the number 101010 means the lesson is on weeks 1, 3 and 5
     // Yes this means that the rightmost bit is always technically useless (it is always 0)
     weekBitmask: number;
+}
+
+// Handles raw PreReqTree data from API (unformatted)
+export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
+
+// Formatted Pre-Req Tree Node
+export interface FormattedPreReqNode {
+    type: "leaf" | "prefix-branch" | "branch"; // possible representations
+    moduleCode?: string;       // e.g., "NM4102" if leaf OR
+    prefixLabel?: string;      // e.g. "NM1% Modules"if prefix-branch
+    and?: FormattedPreReqNode[]; // "and" recursive branch
+    or?: FormattedPreReqNode[];  // "or" recursive branch
+    allPossibleMatches?: string[]; // all possible matches satisfying if prefix
+    label?: string; // e.g. "at least 7 of" rule
 }
