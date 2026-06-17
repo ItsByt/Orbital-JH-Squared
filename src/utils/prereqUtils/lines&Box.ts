@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------
 // G U I D E:
-// Helper to Assign correct horizontal connector to the module based on index
+// Helper to assign correct horizontal connector to module based on relative index
 // Constants for box colors dependent on is_Expanded
 // Constant for all line connectors' colour
 //--------------------------------------------------------------------------------
