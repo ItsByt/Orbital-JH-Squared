@@ -10,7 +10,7 @@ export default function Pre_Requisite() {
         useModulePrerequisites(selectedModule);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 w-full">
             <div>
                 {/* Header */}
                 <h1
@@ -24,21 +24,23 @@ export default function Pre_Requisite() {
             </div>
 
             {/* SearchBar */}
-            <div className="w-full mt-6">
+            <div className="w-full mt-6 relative z-50">
                 <SearchBar onSelect={(code) => setSelectedModule(code)} />
             </div>
 
-            <div className="w-full mt-8">
+            {/* 'grid grid-cols-1 min-w-0' forms a strict layout perimeter around the tree content. */}
+            {/* Preventing global page overflow (double scrollbars) and clipping when the sidebar closes. */}
+    
+            <div className="w-full mt-8 grid grid-cols-1 min-w-0">
                 {/* if Loading/Error/NoPreReq */}
                 {isLoading && <p>Fetching pre-requisite details...</p>}
                 {isError && <p> An unknown error has occurred.</p>}
                 {hasNoPrereqs && <p>This module has no prerequisites.</p>}
 
                 {/* Otherwise, render formatted tree component with fallback guard */}
-                {/* render with remaining space accounting sidebar to prevent overflow using calc()*/}
                 {!isLoading && selectedModule && moduleDetails?.prereqTree && (
-                    <div className="w-full max-w-[calc(100vw-var(--sidebar-width,16rem)-4rem)] overflow-x-auto custom-scrollbar py-4">
-                        <div className="flex flex-col items-center min-w-max w-full">
+                    <div className="w-full overflow-x-auto custom-scrollbar py-4">
+                        <div className="flex flex-col items-center min-w-max mx-auto px-4">
                             <div className="px-5 py-2.5 bg-[#E8A753] text-black border border-[#cf9043] text-base font-bold font-mono rounded-xl shadow-md min-w-[120px] text-center z-10">
                                 {selectedModule.toUpperCase()}
                             </div>
