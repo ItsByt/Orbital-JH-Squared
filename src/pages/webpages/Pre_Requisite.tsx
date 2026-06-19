@@ -32,6 +32,7 @@ export default function Pre_Requisite() {
             {/* Preventing global page overflow (double scrollbars) and clipping when the sidebar closes. */}
     
             <div className="w-full mt-8 grid grid-cols-1 min-w-0">
+                
                 {/* if Loading/Error/NoPreReq */}
                 {isLoading && <p>Fetching pre-requisite details...</p>}
                 {isError && <p> An unknown error has occurred.</p>}

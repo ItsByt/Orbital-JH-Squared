@@ -3,6 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getModule, getModuleCodes } from "@/services/nusmods";
 import { formatTree } from "@/utils/prereqUtils/treeFormatter";
 
+//------------------------------------------
+// G U I D E:
+// retrieves formatted tree with memoization, 
+// loading implementation, error handling
+// boolean on whether pre-reqs exist,
+// as well as details of the module
+//------------------------------------------
+
 export const useModulePrerequisites = (selectedModule: string | null) => {
     // Fetch array of all NUS codes once for prefix searching
     const { data: moduleCodes = [] } = useQuery({
