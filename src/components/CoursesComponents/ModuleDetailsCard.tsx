@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import type { ModuleDetails } from "@/types";
 import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
 export default function ModuleDetailsCard({ module }: { module: ModuleDetails }) {
     const queryClient = useQueryClient();
@@ -19,11 +21,16 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
     useEffect(() => {
         async function checkStatus() {
             setIsInitializing(true);
-            const savedSem1 = await isInTimetable(module.moduleCode, currentYear, 1);
-            const savedSem2 = await isInTimetable(module.moduleCode, currentYear, 2);
-            setIsAddedSem1(savedSem1);
-            setIsAddedSem2(savedSem2);
-            setIsInitializing(false);
+            try {
+                const savedSem1 = await isInTimetable(module.moduleCode, currentYear, 1);
+                const savedSem2 = await isInTimetable(module.moduleCode, currentYear, 2);
+                setIsAddedSem1(savedSem1);
+                setIsAddedSem2(savedSem2);
+            } catch (error) {
+                console.error("Failed to fetch timetable status", error);
+            } finally {
+                setIsInitializing(false);
+            }
         }
         checkStatus();
     }, [module.moduleCode, currentYear]);
@@ -31,7 +38,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
     const handleToggle = async (semester: number) => {
         const semData = module.semesterData?.find((s) => s.semester === semester);
         if (!semData || !semData.timetable) {
-            alert(`This module is not offered in Semester ${semester}.`);
+            toast.error(`This module is not offered in Semester ${semester}.`);
             return;
         }
 
@@ -41,22 +48,26 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
 
         setProcessing(true);
 
-        if (isAdded) {
-            const success = await removeFromTimetable(module.moduleCode, currentYear, semester);
-            if (success) setAdded(false);
-            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
-        } else {
-            const success = await addToTimetable(
-                module.moduleCode,
-                semData.timetable,
-                currentYear,
-                semester
-            );
-            if (success) setAdded(true);
-            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
-        }
+        try {
+            if (isAdded) {
+                await removeFromTimetable(module.moduleCode, currentYear, semester);
+                setAdded(false);
+                toast.success(`Removed from Semester ${semester}`);
+            } else {
+                await addToTimetable(module.moduleCode, semData.timetable, currentYear, semester);
+                setAdded(true);
+                toast.success(`Added to Semester ${semester}`);
+            }
 
-        setProcessing(false);
+            // Invalidate queries to sync other pages
+            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
+        } catch (error) {
+            toast.error(`Failed to update Semester ${semester}`, {
+                description: getErrorMessage(error),
+            });
+        } finally {
+            setProcessing(false);
+        }
     };
 
     const offeredSem1 = module.semesterData?.some((s) => s.semester === 1);
@@ -64,7 +75,6 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
 
     return (
         <div className="p-6 bg-card border border-border rounded-xl shadow-sm space-y-4 text-sm text-muted-foreground leading-relaxed transition-colors duration-200">
-            {/* Header section wrapper */}
             <div className="flex justify-between items-start border-b border-border pb-3">
                 <div>
                     <span className="font-bold text-foreground tracking-wide">
@@ -76,24 +86,20 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                     {module.moduleCredit} MCs
                 </span>
             </div>
-            
+
             {/* Semester Action Buttons */}
             <div className="flex gap-2">
                 {offeredSem1 && (
                     <button
                         onClick={() => handleToggle(1)}
-                        // 1. Disable button if processing OR initializing
                         disabled={isProcessingSem1 || isInitializing}
                         className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition 
                             ${isProcessingSem1 || isInitializing ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}
-                            ${isAddedSem1 ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}`}
+                            ${isAddedSem1 ? "bg-red-500 hover:bg-red-600" : "bg-[#749c83] hover:bg-[#638570]"}`}
                     >
-                        {/* 2. Show spinner if processing OR initializing */}
                         {(isProcessingSem1 || isInitializing) && (
                             <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                         )}
-
-                        {/* 3. Show "Checking..." text while loading */}
                         {isInitializing
                             ? "Checking..."
                             : isAddedSem1
@@ -108,7 +114,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                         disabled={isProcessingSem2 || isInitializing}
                         className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-white transition 
                             ${isProcessingSem2 || isInitializing ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}
-                            ${isAddedSem2 ? "bg-red-500 hover:bg-red-600" : "bg-green-600 hover:bg-green-700"}`}
+                            ${isAddedSem2 ? "bg-red-500 hover:bg-red-600" : "bg-[#749c83] hover:bg-[#638570]"}`}
                     >
                         {(isProcessingSem2 || isInitializing) && (
                             <Loader2 className="mr-2 h-3 w-3 animate-spin" />
