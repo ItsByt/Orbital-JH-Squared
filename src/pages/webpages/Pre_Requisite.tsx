@@ -12,18 +12,18 @@ export default function Pre_Requisite() {
     return (
         <div className="space-y-6">
             <div>
-                {/*  Header */}
+                {/* Header */}
                 <h1
                     className="text-4xl font-bold"
                     style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
                 >
                     Pre-Requisite Tree
                 </h1>
-                {/*  Color Legend */}
+                {/* Color Legend */}
                 <Legend />
             </div>
 
-            {/*  SearchBar */}
+            {/* SearchBar */}
             <div className="w-full mt-6">
                 <SearchBar onSelect={(code) => setSelectedModule(code)} />
             </div>
@@ -35,8 +35,9 @@ export default function Pre_Requisite() {
                 {hasNoPrereqs && <p>This module has no prerequisites.</p>}
 
                 {/* Otherwise, render formatted tree component with fallback guard */}
+                {/* render with remaining space accounting sidebar to prevent overflow using calc()*/}
                 {!isLoading && selectedModule && moduleDetails?.prereqTree && (
-                    <div className="w-full overflow-x-auto py-4">
+                    <div className="w-full max-w-[calc(100vw-var(--sidebar-width,16rem)-4rem)] overflow-x-auto custom-scrollbar py-4">
                         <div className="flex flex-col items-center min-w-max w-full">
                             <div className="px-5 py-2.5 bg-[#E8A753] text-black border border-[#cf9043] text-base font-bold font-mono rounded-xl shadow-md min-w-[120px] text-center z-10">
                                 {selectedModule.toUpperCase()}

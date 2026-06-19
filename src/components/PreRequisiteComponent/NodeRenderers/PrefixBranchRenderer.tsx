@@ -40,11 +40,11 @@ export default function PrefixBranchRenderer({ node, onToggleExpand }: PrefixBra
     // into the children via handleToggle's flip of isExpanded.
     // no need for handleChildToggle since child expansion disabled.
     return (
-        <div className="flex flex-col items-center w-full">
+        <div className="flex flex-row flex-wrap justify-center gap-x-12 gap-y-4 px-4">
             <button
                 type="button"
                 onClick={handleToggle}
-                className={`px-4 py-2 text-xs font-mono font-bold rounded-xl border shadow-md min-w-[140px] transition-all duration-150 select-none ${boxColorClass} hover:scale-105 active:scale-95 cursor-pointer`}
+                className={`px-4 py-2 text-xs font-mono font-bold rounded-xl border shadow-md min-w-[140px] transition-all duration-150 select-none ${boxColorClass} hover:scale-105 active:scale-95 cursor-pointer relative z-10`}
             >
                 <div className="flex items-center gap-1.5 justify-center">
                     <span>{node.prefixLabel}</span>
@@ -55,7 +55,7 @@ export default function PrefixBranchRenderer({ node, onToggleExpand }: PrefixBra
             </button>
 
             {isExpanded && renderedChildren.length > 0 && (
-                <div className="flex flex-col items-center w-full mt-2">
+                <div className="flex flex-col items-center w-full -mt-4">
                     <div className={`w-0.5 h-6 ${connectorStyle}`} />
                     <div className="bg-background px-2 text-xs text-muted-foreground -my-1 z-10">
                         matches
