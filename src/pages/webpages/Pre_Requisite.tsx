@@ -4,16 +4,19 @@ import PreReqTree from "@/components/PreRequisiteComponent/PreReqTree";
 import { Legend } from "@/components/PreRequisiteComponent/Legend";
 import { useModulePrerequisites } from "@/hooks/PreReqHooks/useModulePrerequisites";
 
-
 export default function Pre_Requisite() {
     const [selectedModule, setSelectedModule] = useState<string | null>(null);
-    const { formatted_tree, isLoading, isError,  moduleDetails, hasNoPrereqs } = useModulePrerequisites(selectedModule)
+    const { formatted_tree, isLoading, isError, moduleDetails, hasNoPrereqs } =
+        useModulePrerequisites(selectedModule);
 
-return (
+    return (
         <div className="space-y-6">
             <div>
                 {/*  Header */}
-                <h1 className="text-4xl font-bold" style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}>
+                <h1
+                    className="text-4xl font-bold"
+                    style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
+                >
                     Pre-Requisite Tree
                 </h1>
                 {/*  Color Legend */}
@@ -26,7 +29,6 @@ return (
             </div>
 
             <div className="w-full mt-8">
-
                 {/* if Loading/Error/NoPreReq */}
                 {isLoading && <p>Fetching pre-requisite details...</p>}
                 {isError && <p> An unknown error has occurred.</p>}
@@ -40,9 +42,11 @@ return (
                                 {selectedModule.toUpperCase()}
                             </div>
                             {formatted_tree ? (
-                                <PreReqTree node={formatted_tree}  isRoot={false} />
+                                <PreReqTree node={formatted_tree} isRoot={false} />
                             ) : (
-                                <p className="text-xs text-muted-foreground mt-4 animate-pulse">Processing tree dependencies...</p>
+                                <p className="text-xs text-muted-foreground mt-4 animate-pulse">
+                                    Processing tree dependencies...
+                                </p>
                             )}
                         </div>
                     </div>

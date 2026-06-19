@@ -1,14 +1,18 @@
 import ClassCard from "./ClassCard";
 import { calculateDayLayout } from "@/utils/timetableUtils/subrowAllocation";
 import { convertTimeToColumn } from "@/utils/timetableUtils/timeFormat";
+import type { DisplayLesson } from "@/types";
 
 interface TimetableGridProps {
     DAYS: string[];
     HOURS: string[];
-    lessonsByDay: Record<string, any[]>;
-    selectedLesson: any;
-    handleSelectClass: (lesson: any) => void;
-    handleSwapClass: (oldLesson: any, chosenAlternative: any) => Promise<void> | void;
+    lessonsByDay: Record<string, DisplayLesson[]>;
+    selectedLesson: DisplayLesson | null;
+    handleSelectClass: (lesson: DisplayLesson) => void;
+    handleSwapClass: (
+        oldLesson: DisplayLesson | null,
+        chosenAlternative: DisplayLesson
+    ) => Promise<void> | void;
 }
 
 export default function TimetableGrid({
@@ -17,15 +21,20 @@ export default function TimetableGrid({
     lessonsByDay,
     selectedLesson,
     handleSelectClass,
-    handleSwapClass
+    handleSwapClass,
 }: TimetableGridProps) {
     return (
         <div className="w-full border border-border rounded-xl overflow-hidden bg-card shadow-sm relative">
             {/* Hour Markings */}
             <div className="grid grid-cols-[80px_repeat(22,1fr)] border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none">
-                <div className="p-3 border-r border-border text-left text-foreground font-bold">Day</div>
+                <div className="p-3 border-r border-border text-left text-foreground font-bold">
+                    Day
+                </div>
                 {HOURS.map((hour) => (
-                    <div key={hour} className="p-3 col-span-2 text-left pl-2 border-r border-border/40">
+                    <div
+                        key={hour}
+                        className="p-3 col-span-2 text-left pl-2 border-r border-border/40"
+                    >
                         {hour}
                     </div>
                 ))}
@@ -41,7 +50,9 @@ export default function TimetableGrid({
                         <div
                             key={day}
                             className="grid grid-cols-[80px_repeat(22,1fr)] relative"
-                            style={{ gridTemplateRows: `repeat(${totalRowsForDay}, minmax(112px, auto))` }}
+                            style={{
+                                gridTemplateRows: `repeat(${totalRowsForDay}, minmax(112px, auto))`,
+                            }}
                         >
                             <div className="p-3 font-bold text-xs border-r border-border bg-muted/20 flex items-center justify-start row-span-full z-10 sticky left-0 backdrop-blur-sm select-none">
                                 {day.substring(0, 3)}

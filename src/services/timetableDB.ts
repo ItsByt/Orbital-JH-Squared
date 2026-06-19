@@ -86,7 +86,12 @@ export async function addToTimetable(
     }
 }
 
-export async function removeFromTimetable(moduleCode: string, year: number, semester: number, id?: string) {
+export async function removeFromTimetable(
+    moduleCode: string,
+    year: number,
+    semester: number,
+    id?: string
+) {
     try {
         const userId = await getUserId();
         if (!userId) {
@@ -164,10 +169,9 @@ export async function swapLessonInTimetable(
         return true;
     } catch (error) {
         console.error("Failed to swap lesson in DB:", error);
-        throw error; 
+        throw error;
     }
 }
-
 
 export async function addCustomEventToDB(
     customLesson: DisplayLesson,
@@ -183,24 +187,21 @@ export async function addCustomEventToDB(
 
         // Formats custom block into correct format for Supabase
         const rowsToInsert = formatForTimetableDatabase(
-                [customLesson], 
-                userId,
-                year,
-                semester,
-                customLesson.moduleCode
-            );
-            // add it into database like any other row insertion
-            const { error: dbError } = await supabase
-                .from("timetable_modules")
-                .insert(rowsToInsert);
+            [customLesson],
+            userId,
+            year,
+            semester,
+            customLesson.moduleCode
+        );
+        // add it into database like any other row insertion
+        const { error: dbError } = await supabase.from("timetable_modules").insert(rowsToInsert);
 
-            if (dbError) throw dbError;
+        if (dbError) throw dbError;
 
-            toast.success(`Custom event "${customLesson.moduleCode}" added!`);
-            return true;
-        } catch (error) {
-            toast.error("Failed to save custom event", { description: getErrorMessage(error) });
-            return false;
-        }
+        toast.success(`Custom event "${customLesson.moduleCode}" added!`);
+        return true;
+    } catch (error) {
+        toast.error("Failed to save custom event", { description: getErrorMessage(error) });
+        return false;
     }
-
+}

@@ -4,7 +4,6 @@ import { getModule, getModuleCodes } from "@/services/nusmods";
 import { formatTree } from "@/utils/prereqUtils/treeFormatter";
 
 export const useModulePrerequisites = (selectedModule: string | null) => {
-
     // Fetch array of all NUS codes once for prefix searching
     const { data: moduleCodes = [] } = useQuery({
         queryKey: ["allModuleCodes"],
@@ -13,25 +12,29 @@ export const useModulePrerequisites = (selectedModule: string | null) => {
     });
 
     // For SearchBar's module, fetch pre-req raw tree data
-    const { data: moduleDetails, isLoading, isError } = useQuery({
+    const {
+        data: moduleDetails,
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ["module", selectedModule],
         queryFn: () => getModule(selectedModule!),
         enabled: !!selectedModule,
         staleTime: 1000 * 60 * 5,
     });
 
-    // Raw tree data from API formatted for use, 
+    // Raw tree data from API formatted for use,
     // memoized to avoid unnecessary repeated formatting inside HTML
     const formatted_tree = useMemo(() => {
         if (!moduleDetails?.prereqTree || moduleCodes.length === 0) return null;
         return formatTree(moduleDetails.prereqTree, moduleCodes);
     }, [moduleDetails?.prereqTree, moduleCodes]);
 
-    return { 
-        formatted_tree, 
-        isLoading, 
-        isError, 
+    return {
+        formatted_tree,
+        isLoading,
+        isError,
         moduleDetails,
-        hasNoPrereqs: !!(selectedModule && moduleDetails && !moduleDetails.prereqTree)
+        hasNoPrereqs: !!(selectedModule && moduleDetails && !moduleDetails.prereqTree),
     };
 };

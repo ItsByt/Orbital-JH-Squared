@@ -41,11 +41,10 @@ export function useTimetableActions(
 
     // Handle adding a module from SearchBar
     const handleAddModule = async (moduleCode: string, currentlyActive: any[] = []) => {
-        
         // Ensure that module cannot be added twice (unless its a custom)
         const isDuplicate = currentlyActive.some((mod) => {
             const isCustom = mod?.id && typeof mod.id === "string" && mod.id.startsWith("custom-");
-            if (isCustom) return false; 
+            if (isCustom) return false;
             return mod?.moduleCode?.toUpperCase() === moduleCode.toUpperCase();
         });
 
@@ -53,14 +52,12 @@ export function useTimetableActions(
             toast.error("Failed to Add Module", {
                 description: `${moduleCode} is already added to your timetable!`,
             });
-            return false; 
+            return false;
         }
-                
+
         const module = await getModule(moduleCode);
 
-        const semData = module?.semesterData?.find(
-            (s) => s.semester === semester
-        );
+        const semData = module?.semesterData?.find((s) => s.semester === semester);
 
         if (!semData?.timetable) {
             toast.error("Failed to Add Module", {
@@ -70,12 +67,7 @@ export function useTimetableActions(
             return;
         }
 
-        await addToTimetable(
-            moduleCode,
-            semData.timetable,
-            currentYear,
-            semester
-        );
+        await addToTimetable(moduleCode, semData.timetable, currentYear, semester);
 
         await queryClient.invalidateQueries({
             queryKey: ["timetable", currentYear, semester],
@@ -83,7 +75,11 @@ export function useTimetableActions(
     };
 
     // Handle removing a module from Active Modules Container
-    const handleRemoveModule = async (moduleCode: string, id?: string | number, lessonType?: string) => {
+    const handleRemoveModule = async (
+        moduleCode: string,
+        id?: string | number,
+        lessonType?: string
+    ) => {
         if (!moduleCode) return;
 
         if (lessonType === "Personal Block" && id) {
@@ -97,36 +93,35 @@ export function useTimetableActions(
         });
     };
 
-
     // Handle addition of customized events
     const handleCustomEvent = async (eventData: {
-            name: string;
-            day: string;
-            startTime: string;
-            endTime: string;
-            venue: string;
-            selectedWeeks: number[];
-            weekBitmask: number
-            classNo: string;
-        }) => {
+        name: string;
+        day: string;
+        startTime: string;
+        endTime: string;
+        venue: string;
+        selectedWeeks: number[];
+        weekBitmask: number;
+        classNo: string;
+    }) => {
         const newCustomCard: DisplayLesson = {
             id: `custom-${Date.now()}`,
             moduleCode: eventData.name.trim(),
             lessonType: "Personal Block",
             classNo: eventData.classNo,
             day: eventData.day,
-            startTime: eventData.startTime, 
-            endTime: eventData.endTime,     
+            startTime: eventData.startTime,
+            endTime: eventData.endTime,
             venue: eventData.venue.trim() || "No Venue Assigned",
-            weeks: eventData.selectedWeeks, 
-            weekBitmask: eventData.weekBitmask,           
+            weeks: eventData.selectedWeeks,
+            weekBitmask: eventData.weekBitmask,
             isAlternative: false,
             startMins: timeToMins(eventData.startTime),
-            endMins: timeToMins(eventData.endTime)
+            endMins: timeToMins(eventData.endTime),
         };
 
         const success = await addCustomEventToDB(newCustomCard, currentYear, semester);
-        
+
         if (success) {
             await queryClient.invalidateQueries({
                 queryKey: ["timetable", currentYear, semester],
@@ -139,6 +134,6 @@ export function useTimetableActions(
         handleSwapClass,
         handleAddModule,
         handleRemoveModule,
-        handleCustomEvent
+        handleCustomEvent,
     };
 }

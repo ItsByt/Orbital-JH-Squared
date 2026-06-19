@@ -76,7 +76,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                     {module.moduleCredit} MCs
                 </span>
             </div>
-            
+
             {/* Semester Action Buttons */}
             <div className="flex gap-2">
                 {offeredSem1 && (

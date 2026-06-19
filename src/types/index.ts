@@ -15,9 +15,9 @@ export interface ModuleDetails {
         semester: number;
         timetable: NUSModsRawLesson[];
     }[];
-    prerequisite?: string;   
+    prerequisite?: string;
     preclusion?: string;
-    prereqTree?: string | { and?: PreReqNode[]; or?: PreReqNode[] }
+    prereqTree?: string | { and?: PreReqNode[]; or?: PreReqNode[] };
 }
 
 // Details about just a lesson itself
@@ -74,10 +74,10 @@ export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
 // Formatted Pre-Req Tree Node
 export interface FormattedPreReqNode {
     type: "leaf" | "prefix-branch" | "branch"; // possible representations
-    moduleCode?: string;       // e.g., "NM4102" if leaf OR
-    prefixLabel?: string;      // e.g. "Courses beginning with ..NM1" if prefix-branch
+    moduleCode?: string; // e.g., "NM4102" if leaf OR
+    prefixLabel?: string; // e.g. "Courses beginning with ..NM1" if prefix-branch
     and?: FormattedPreReqNode[]; // "and" recursive branch
-    or?: FormattedPreReqNode[];  // "or" recursive branch
+    or?: FormattedPreReqNode[]; // "or" recursive branch
     allPossibleMatches?: string[]; // all possible matches satisfying if prefix
     label?: string; // e.g. "at least 7 of" rule
 }

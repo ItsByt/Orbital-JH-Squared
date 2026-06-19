@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +24,12 @@ interface CustomSlotDialogProps {
     onCustomEvent: (eventData: any) => Promise<void>;
 }
 
-export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: CustomSlotDialogProps) {
+export default function CustomSlotDialog({
+    DAYS,
+    HOURS,
+    WEEKS,
+    onCustomEvent,
+}: CustomSlotDialogProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formName, setFormName] = useState("");
     const [formDay, setFormDay] = useState("Monday");
@@ -29,14 +42,16 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
 
     const handleWeekToggle = (week: number) => {
         setFormWeeks((prev) =>
-            prev.includes(week) ? prev.filter((w) => w !== week) : [...prev, week].sort((a, b) => a - b)
+            prev.includes(week)
+                ? prev.filter((w) => w !== week)
+                : [...prev, week].sort((a, b) => a - b)
         );
     };
 
     const handleCreateCustomSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (isSubmitting) return; 
-            setIsSubmitting(true); // Debug: stop em from spamming insert
+        if (isSubmitting) return;
+        setIsSubmitting(true); // Debug: stop em from spamming insert
 
         try {
             if (!formName.trim()) return;
@@ -70,9 +85,8 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                 if (matchingModule && matchingModule.moduleCode) {
                     toast.error("Name conflicts with an existing module", {
                         description: `"${normalizedName}" already exists as an official module.`,
-                        
                     });
-                    return; 
+                    return;
                 }
             } catch (error) {
                 console.error("Failed to validate module name compatibility:", error);
@@ -88,7 +102,7 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                 venue: formVenue,
                 selectedWeeks: formWeeks,
                 weekBitmask: computedBitmask,
-                classNo: formCheckOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG"
+                classNo: formCheckOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG",
             });
 
             setIsDialogOpen(false);
@@ -104,7 +118,7 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-                <Button 
+                <Button
                     size="icon"
                     className="h-12 w-12 rounded-full bg-[#56A58B] hover:bg-[#458570] text-white shadow-lg cursor-pointer transition-transform duration-200 hover:scale-105"
                 >
@@ -119,10 +133,10 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                 <form onSubmit={handleCreateCustomSubmit} className="space-y-4 pt-2">
                     <div className="space-y-1">
                         <Label htmlFor="custom-name">Activity Name</Label>
-                        <Input 
-                            id="custom-name" 
-                            placeholder="e.g. CCAs, Mealtime, Gym" 
-                            value={formName} 
+                        <Input
+                            id="custom-name"
+                            placeholder="e.g. CCAs, Mealtime, Gym"
+                            value={formName}
                             onChange={(e) => setFormName(e.target.value)}
                             required
                         />
@@ -131,21 +145,25 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="custom-day">Day</Label>
-                            <select 
+                            <select
                                 id="custom-day"
                                 value={formDay}
                                 onChange={(e) => setFormDay(e.target.value)}
                                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             >
-                                {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                                {DAYS.map((d) => (
+                                    <option key={d} value={d}>
+                                        {d}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="space-y-1">
                             <Label htmlFor="custom-venue">Venue</Label>
-                            <Input 
-                                id="custom-venue" 
-                                placeholder="e.g. University Town" 
-                                value={formVenue} 
+                            <Input
+                                id="custom-venue"
+                                placeholder="e.g. University Town"
+                                value={formVenue}
                                 onChange={(e) => setFormVenue(e.target.value)}
                             />
                         </div>
@@ -154,24 +172,32 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="custom-start">Start Time</Label>
-                            <select 
+                            <select
                                 id="custom-start"
                                 value={formStart}
                                 onChange={(e) => setFormStart(e.target.value)}
                                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             >
-                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                {HOURS.map((h) => (
+                                    <option key={h} value={h}>
+                                        {h}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                         <div className="space-y-1">
                             <Label htmlFor="custom-end">End Time</Label>
-                            <select 
+                            <select
                                 id="custom-end"
                                 value={formEnd}
                                 onChange={(e) => setFormEnd(e.target.value)}
                                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                             >
-                                {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                                {HOURS.map((h) => (
+                                    <option key={h} value={h}>
+                                        {h}
+                                    </option>
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -187,12 +213,12 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                         <div className="grid grid-cols-5 gap-2 p-3 border border-border rounded-lg bg-muted/20">
                             {WEEKS.map((w) => (
                                 <div key={w} className="flex items-center space-x-1.5">
-                                    <Checkbox 
-                                        id={`week-${w}`} 
+                                    <Checkbox
+                                        id={`week-${w}`}
                                         checked={formWeeks.includes(w)}
                                         onCheckedChange={() => handleWeekToggle(w)}
                                     />
-                                    <label 
+                                    <label
                                         htmlFor={`week-${w}`}
                                         className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                                     >
@@ -205,15 +231,15 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
 
                     {/* Flag Enabler/Disabler */}
                     <div className="flex items-start space-x-2 pt-2 border-t border-border/60">
-                        <input 
+                        <input
                             type="checkbox"
-                            id="custom-overlap" 
+                            id="custom-overlap"
                             checked={formCheckOverlap}
                             onChange={(e) => setFormCheckOverlap(e.target.checked)}
                             className="h-4 w-4 mt-0.5 rounded border-input text-[#56A58B] focus:ring-[#56A58B] accent-[#56A58B] cursor-pointer"
                         />
                         <div className="grid gap-1 leading-none">
-                            <label 
+                            <label
                                 htmlFor="custom-overlap"
                                 className="text-xs font-semibold cursor-pointer select-none text-foreground"
                             >
@@ -226,16 +252,22 @@ export default function CustomSlotDialog({ DAYS, HOURS, WEEKS, onCustomEvent }: 
                     </div>
 
                     <DialogFooter className="pt-2">
-                        <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsDialogOpen(false)}
+                        >
                             Cancel
                         </Button>
-                        <Button type="submit" className="bg-[#749c83] hover:bg-[#638570] text-white">
+                        <Button
+                            type="submit"
+                            className="bg-[#749c83] hover:bg-[#638570] text-white"
+                        >
                             Insert into Schedule
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>
-
     );
 }

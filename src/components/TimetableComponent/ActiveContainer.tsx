@@ -35,7 +35,8 @@ export default function ActiveContainer({
                     <div className="flex flex-wrap gap-2.5 items-center">
                         {uniqueActiveModules.map((mod) => {
                             const isCustom = mod.lessonType === "Personal Block";
-                            const hasDuplicateName = isCustom && (customNameCounts[mod.moduleCode.toUpperCase()] > 1);
+                            const hasDuplicateName =
+                                isCustom && customNameCounts[mod.moduleCode.toUpperCase()] > 1;
 
                             return (
                                 <div
@@ -55,13 +56,21 @@ export default function ActiveContainer({
                                             </span>
                                             <span className="opacity-40">|</span>
                                             <span className="text-amber-500 dark:text-amber-400/90 font-medium">
-                                                {formatWeeksDisplay(mod.weeks || (mod as any).selectedWeeks || [])}
+                                                {formatWeeksDisplay(
+                                                    mod.weeks || (mod as any).selectedWeeks || []
+                                                )}
                                             </span>
                                         </div>
                                     )}
 
                                     <button
-                                        onClick={() => handleRemoveModule(mod.moduleCode, mod.id, mod.lessonType)}
+                                        onClick={() =>
+                                            handleRemoveModule(
+                                                mod.moduleCode,
+                                                mod.id,
+                                                mod.lessonType
+                                            )
+                                        }
                                         className="text-muted-foreground hover:text-destructive rounded-full p-1 hover:bg-muted transition-colors cursor-pointer"
                                         aria-label={`Remove ${mod.moduleCode}`}
                                     >

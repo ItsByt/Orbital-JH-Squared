@@ -7,7 +7,6 @@ export function weeksToBitmask(weeks: Array<number | string>): number {
     }, 0);
 }
 
-
 // Convert bitmask to weeks array
 export function bitmaskToWeeks(bitmask: number): number[] {
     const weeks: number[] = [];
@@ -26,7 +25,7 @@ export function parseSavedWeeks(weeks: string | null): number[] {
     try {
         const parsed = JSON.parse(weeks);
         if (!Array.isArray(parsed)) return [];
-        return parsed.map(w => Number(w)).filter(Boolean);
+        return parsed.map((w) => Number(w)).filter(Boolean);
     } catch {
         return [];
     }

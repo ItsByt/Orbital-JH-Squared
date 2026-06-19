@@ -10,15 +10,12 @@ import { createPrefixBranch, parseStringRule } from "./prefix&Parse";
 
 //--------------------------------------------------------------------------------
 
-export function formatTree(
-    node: PreReqNode, 
-    allValidCodes: string[]
-): FormattedPreReqNode {
-    // Edge case 
+export function formatTree(node: PreReqNode, allValidCodes: string[]): FormattedPreReqNode {
+    // Edge case
     if (!node) return { type: "leaf", moduleCode: "" };
 
     // -----------------------------------------------------------------------
-    // BASE CASE: THE NODE IS A STRING 
+    // BASE CASE: THE NODE IS A STRING
     // -----------------------------------------------------------------------
     if (typeof node === "string") {
         return parseStringRule(node, allValidCodes);
@@ -28,17 +25,16 @@ export function formatTree(
     // RECURSIVE CASE: THE NODE HAS A TREE STRUCTURE
     // -----------------------------------------------------------------------
     if (typeof node === "object" && node !== null) {
-        
         // Because of potentially optional fields in the unknown raw tree,
         // cast node as a Record if not it cannot bypass Typescript compilation checks
         // compilation checks
         const structure = node as Record<string, unknown>;
-                
-                // 3 FIELDS TO INTERPRET RECURSIVELY IN A NON-STRING NODE:
-                // CASE 1: "nOf" present
-                // CASE 2: "AND" present
-                // CASE 3: "OR" present
-                // Either of the cases must exist and be intercepted
+
+        // 3 FIELDS TO INTERPRET RECURSIVELY IN A NON-STRING NODE:
+        // CASE 1: "nOf" present
+        // CASE 2: "AND" present
+        // CASE 3: "OR" present
+        // Either of the cases must exist and be intercepted
 
         // CASE 1:
         if ("nOf" in structure && Array.isArray(structure.nOf)) {
@@ -54,16 +50,12 @@ export function formatTree(
 
         // CASE 2:
         if ("and" in structure && Array.isArray(structure.and)) {
-            mutatedNode.and = structure.and.map(child => 
-                formatTree(child, allValidCodes)
-            );
+            mutatedNode.and = structure.and.map((child) => formatTree(child, allValidCodes));
         }
 
         // CASE 3:
         if ("or" in structure && Array.isArray(structure.or)) {
-            mutatedNode.or = structure.or.map(child => 
-                formatTree(child, allValidCodes)
-            );
+            mutatedNode.or = structure.or.map((child) => formatTree(child, allValidCodes));
         }
 
         // Retain labels if present for the cleaned node for UI use later
@@ -76,5 +68,3 @@ export function formatTree(
 
     return { type: "leaf", moduleCode: "" };
 }
-
-

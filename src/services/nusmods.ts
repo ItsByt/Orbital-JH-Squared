@@ -41,7 +41,7 @@ export async function getModuleCodes(acadYear = "2025-2026"): Promise<string[]> 
         if (!response.ok) return [];
 
         const data: { moduleCode: string; title: string }[] = await response.json();
-        return data.map(item => item.moduleCode);
+        return data.map((item) => item.moduleCode);
     } catch (error) {
         console.error("Failed to fetch module list", error);
         return [];
