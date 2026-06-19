@@ -7,9 +7,8 @@ import PrefixBranchRenderer from "./NodeRenderers/PrefixBranchRenderer";
 // G U I D E:
 // Accepts the node of a formatted tree, and renders everything recursively
 // depending on the type of node encountered (leaf/prefixbranch/branch)
-// Acts like a switchboard to start traversal. 
+// Acts like a switchboard to do any traversal. PRT -> Node -> PRT -> Node etc.
 //--------------------------------------------------------------------------------
-
 
 
 // Props to expect (will need to mandatorily provide node)
