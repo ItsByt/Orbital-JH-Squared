@@ -28,20 +28,20 @@ export function formatTree(node: PrereqTree, allValidCodes: string[]): Formatted
         const structure = node as Record<string, unknown>;
 
         // 3 FIELDS TO INTERPRET RECURSIVELY IN A NON-STRING NODE:
-        // CASE 1: "nOf" present
+        // CASE 1: "nOf" present (prefix or exact)
         // CASE 2: "AND" present
         // CASE 3: "OR" present
         // Either of the cases must exist and be intercepted
 
         // CASE 1:
         if ("nOf" in structure && Array.isArray(structure.nOf)) {
-            // Cast elements as PrereqTree[] instead of string[] to handle 
-            // both wildcard strings and exact exact module strings/objects 
+            // Cast elements as PrereqTree[] instead of string[] to handle
+            // both wildcard strings and exact exact module strings/objects
             const [count, elements] = structure.nOf as [number, PrereqTree[]];
-            
+
             return {
                 type: "branch",
-                label: `needs at least ${count} of`, 
+                label: `needs at least ${count} of`,
                 or: elements.map((elem) => {
                     // Prefix % TYPE
                     if (typeof elem === "string" && elem.includes("%")) {

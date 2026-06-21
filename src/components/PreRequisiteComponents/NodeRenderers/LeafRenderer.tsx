@@ -31,7 +31,7 @@ export default function LeafRenderer({
         formatted_tree: subTree,
         isLoading,
         hasNoPrereqs,
-    } = useModulePrerequisites(isExpanded && cleanModuleCode? cleanModuleCode : null);
+    } = useModulePrerequisites(isExpanded && cleanModuleCode ? cleanModuleCode : null);
 
     // function to handle toggle. Ignores click if disableExpansion is true.
     // IsExpanded criteria will dictate what will render.
