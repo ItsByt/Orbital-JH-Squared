@@ -5,7 +5,7 @@ import { formatTree } from "@/utils/prereqUtils/treeFormatter";
 
 //------------------------------------------
 // G U I D E:
-// retrieves formatted tree with memoization, 
+// retrieves formatted tree with memoization,
 // loading implementation, error handling
 // boolean on whether pre-reqs exist,
 // as well as details of the module

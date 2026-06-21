@@ -30,9 +30,8 @@ export default function Pre_Requisite() {
 
             {/* 'grid grid-cols-1 min-w-0' forms a strict layout perimeter around the tree content. */}
             {/* Preventing global page overflow (double scrollbars) and clipping when the sidebar closes. */}
-    
+
             <div className="w-full mt-8 grid grid-cols-1 min-w-0">
-                
                 {/* if Loading/Error/NoPreReq */}
                 {isLoading && <p>Fetching pre-requisite details...</p>}
                 {isError && <p> An unknown error has occurred.</p>}
@@ -59,9 +58,3 @@ export default function Pre_Requisite() {
         </div>
     );
 }
-
-// EDGE CASES:
-// NM4260, NM4102, DAO2702, ACC3706, ADS5201, XFA4401
-
-// LABELS TO CONSIDER FOR EXPANSION LOGIC
-// any of, all of, at least N of
