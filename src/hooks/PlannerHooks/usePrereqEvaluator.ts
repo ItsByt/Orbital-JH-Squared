@@ -48,7 +48,7 @@ export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
             // result contains { tree, status, hasMisplaced }
             return result;
         } catch (error) {
-            console.error(`Pre-req forward evaluation failed for ${moduleCode}:`, error);
+            console.error(`Pre-req too early check failed for ${moduleCode}:`, error);
             return null;
         }
     }, [prereqTree, filteredBoardMap, targetTime, semesterKey, moduleCode]);
@@ -97,6 +97,7 @@ export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
             });
             return issues;
         } catch (error) {
+            console.error(`Pre-req too late check failed for ${moduleCode}:`, error);
             return [];
         }
     }, [board, prereqCache, boardMap, targetTime, moduleCode, semesterKey]);
