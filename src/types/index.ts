@@ -1,11 +1,11 @@
-//Basic Summary of each NUS Module
+// Basic Summary of each NUS Module
 export interface ModuleSummary {
     moduleCode: string;
     title: string;
     semesters: number[];
 }
 
-//All Details for a Searched NUS Module
+// All Details for a Searched NUS Module
 export interface ModuleDetails {
     moduleCode: string;
     title: string;
@@ -16,9 +16,10 @@ export interface ModuleDetails {
         timetable: NUSModsRawLesson[];
     }[];
     prereqTree?: PrereqTree; // Modules with no pre-requisites default to undefined or null
+    prerequisite?: string;
 }
 
-//Details about just a lesson itself
+// Details about just a lesson itself
 export interface NUSModsRawLesson {
     classNo: string;
     lessonType: string;
@@ -29,7 +30,7 @@ export interface NUSModsRawLesson {
     weeks: number[];
 }
 
-//Details for Saved Timetable Modules
+// Details for Saved Timetable Modules
 export interface SavedTimetableModule {
     id: string;
     user_id: string;
@@ -45,7 +46,7 @@ export interface SavedTimetableModule {
     weeks: string | null;
 }
 
-//Details for class BLOCKS
+// Details for class BLOCKS
 export interface DisplayLesson {
     id: string;
     moduleCode: string;
@@ -102,3 +103,14 @@ export type PrereqTree =
     | { and: PrereqTree[] }
     | { or: PrereqTree[] }
     | { nOf: [number, PrereqTree[]] };
+
+// Formatted Pre-Req Tree Node
+export interface FormattedPreReqNode {
+    type: "leaf" | "prefix-branch" | "branch"; // possible representations
+    moduleCode?: string; // e.g., "NM4102" if leaf OR
+    prefixLabel?: string; // e.g. "Courses beginning with ..NM1" if prefix-branch
+    and?: FormattedPreReqNode[]; // "and" recursive branch
+    or?: FormattedPreReqNode[]; // "or" recursive branch
+    allPossibleMatches?: string[]; // all possible matches satisfying if prefix
+    label?: string; // e.g. "at least 7 of" rule
+}

@@ -14,7 +14,8 @@ export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSumma
     }
 }
 
-//Includes Timetable and Pre-Requisite Tree Data
+// Get only one Module's specific details
+// Includes Timetable and Pre-Requisite Tree Data
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
         const response = await fetch(
@@ -28,5 +29,16 @@ export async function getModule(moduleCode: string): Promise<ModuleDetails | nul
     } catch (error) {
         console.error("Failed to fetch module", error);
         return null;
+    }
+}
+
+// Gets a list of all modules in NUS, only codes
+export async function getModuleCodes(acadYear = "2025-2026"): Promise<string[]> {
+    try {
+        const data: { moduleCode: string; title: string }[] = await getModuleList(acadYear);
+        return data.map((item) => item.moduleCode);
+    } catch (error) {
+        console.error("Failed to fetch module list", error);
+        return [];
     }
 }
