@@ -20,14 +20,14 @@ export function createPrefixBranch(prefix: string, allValidCodes: string[]): For
 // If exact module code, return string as a regular leaf node, otherwise for rule based strings,
 // find matching codes to the prefix set by rule and returns a node containing the matches
 export function parseStringRule(node: string, allValidCodes: string[]): FormattedPreReqNode {
-    const formattedText = node.split(":")[0].replace(/\\"/g, '"').trim();
-    const extractedPrefixes = node.match(/[A-Z]{2,4}\d{4}%?/); // hard coded might want to expand??
+    const textForRegex = node.split(":")[0].replace(/\\"/g, '"').trim();
+    const extractedPrefixes = textForRegex.match(/[A-Z]{2,4}\d{1,4}%?/g); 
     const hasWildcardPrefix = extractedPrefixes?.some((p) => p.includes("%"));
 
     if (hasWildcardPrefix && extractedPrefixes) {
         let requiredCount: string | null = null;
-        const coursesMatch = formattedText.match(/COURSES\s*\((\d+)\)/i);
-        const atLeastMatch = formattedText.match(/at least\s*(\d+)/i);
+        const coursesMatch = textForRegex.match(/COURSES\s*\((\d+)\)/i);
+        const atLeastMatch = textForRegex.match(/at least\s*(\d+)/i);
 
         if (coursesMatch) requiredCount = coursesMatch[1];
         else if (atLeastMatch) requiredCount = atLeastMatch[1];
@@ -38,10 +38,11 @@ export function parseStringRule(node: string, allValidCodes: string[]): Formatte
             label: requiredCount ? `needs at least ${requiredCount} modules from` : `needs any of`,
         };
     }
+    const exactModuleText = node.replace(/\\"/g, '"').trim();
 
     return {
         type: "branch",
         label: " ",
-        and: [{ type: "leaf", moduleCode: formattedText }],
+        and: [{ type: "leaf", moduleCode: exactModuleText }], // This now passes "EC3101:B-" safely to the leaf renderer!
     };
 }

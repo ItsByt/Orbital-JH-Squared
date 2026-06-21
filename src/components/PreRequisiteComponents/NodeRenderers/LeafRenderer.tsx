@@ -21,13 +21,17 @@ export default function LeafRenderer({
     // State to track click expansion. Naturally default to false yet to expand
     const [isExpanded, setIsExpanded] = useState(false);
 
+    // Grab the grade if present
+    const rawCode = node.moduleCode || "";
+    const [cleanModuleCode, gradeRequirement] = rawCode.split(":");
+
     // Only retrieve node's formatted subtree structure if it is expanded and has a valid module code
     // Also get the isLoading and hasNoPrereqs for conditional rendering on retrieving tree
     const {
         formatted_tree: subTree,
         isLoading,
         hasNoPrereqs,
-    } = useModulePrerequisites(isExpanded && node.moduleCode ? node.moduleCode : null);
+    } = useModulePrerequisites(isExpanded && cleanModuleCode? cleanModuleCode : null);
 
     // function to handle toggle. Ignores click if disableExpansion is true.
     // IsExpanded criteria will dictate what will render.
@@ -47,6 +51,13 @@ export default function LeafRenderer({
         ? "cursor-default select-none"
         : "hover:scale-105 active:scale-95 cursor-pointer select-none";
 
+    const isSpecialGrade = gradeRequirement && !["D", "S"].includes(gradeRequirement);
+
+    // Display grade ONLY if it's a special requirement (typically above D or S)
+    const displayText = isSpecialGrade
+        ? `Minimally ${gradeRequirement} for ${cleanModuleCode}`
+        : cleanModuleCode;
+
     // UI COMPONENT - Button handles toggle and isExpanded flip,
     // Expanded? Then consider conditional render cases, otherwise recurse on the subtree
     // and render the vertical line below to connect with it
@@ -54,13 +65,13 @@ export default function LeafRenderer({
     // Take note: NoPreReqs true means API confirmed 0 modules. False can mean either no data, or have pre reqs
     // To separate modules with subtree and dead modules, need to look at existence of subtree data itself.
     return (
-        <div className="flex flex-col items-center w-full min-w-[100px] shrink-0">
+        <div className="flex flex-col items-center w-full min-w-[100px] shrink-0 px-2">
             <button
                 type="button"
                 onClick={handleToggle}
                 className={`px-4 py-2 text-sm font-semibold font-mono rounded-xl border shadow-sm text-center transition-all duration-150 ${boxColor} ${interactionClasses}`}
             >
-                {node.moduleCode?.split(":")[0] || ""}
+                {displayText}
             </button>
 
             {isExpanded && !disableExpansion && (
