@@ -4,26 +4,12 @@ import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions"
 import { getCurrentAcadYear, getAcadYearString } from "@/utils/generalUtils/time";
 import { Loader2 } from "lucide-react";
 
-import CustomSlotDialog from "@/components/TimetableComponent/CustomSlotDialog";
-import SemesterNavigation from "@/components/TimetableComponent/SemesterNavigation";
-import ActiveContainer from "@/components/TimetableComponent/ActiveContainer";
-import TimetableGrid from "@/components/TimetableComponent/TimetableGrid";
+import CustomSlotDialog from "@/components/TimetableComponents/CustomSlotDialog";
+import SemesterNavigation from "@/components/TimetableComponents/SemesterNavigation";
+import ActiveContainer from "@/components/TimetableComponents/ActiveContainer";
+import TimetableGrid from "@/components/TimetableComponents/TimetableGrid";
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const HOURS = [
-    "0800",
-    "0900",
-    "1000",
-    "1100",
-    "1200",
-    "1300",
-    "1400",
-    "1500",
-    "1600",
-    "1700",
-    "1800",
-];
-const WEEKS = Array.from({ length: 13 }, (_, i) => i + 1);
+import { DAYS, TIMETABLE_HOURS, TIMETABLE_WEEKS } from "@/config/constants";
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
@@ -75,7 +61,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
 
     //_________________________________FRONTEND_________________________________________//
     return (
-        <div className="w-full min-h-screen flex flex-col items-start justify-start pt-1 px-6 pb-6 space-y-4 bg-background text-foreground relative">
+        <div className="w-full h-full overflow-y-auto flex flex-col items-start justify-start pt-4 px-6 pb-20 space-y-6 bg-background text-foreground">
             <h1
                 className="text-4xl font-bold"
                 style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
@@ -83,11 +69,11 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 {acadYearString} Semester {semester} Timetable
             </h1>
 
-            <div className="w-full relative">
+            <div className="w-full shrink-0">
                 {/* Scalable Timetable Grid (sem nav and custom anchored) */}
                 <TimetableGrid
                     DAYS={DAYS}
-                    HOURS={HOURS}
+                    HOURS={TIMETABLE_HOURS}
                     lessonsByDay={lessonsByDay}
                     selectedLesson={selectedLesson}
                     handleSelectClass={handleSelectClass}
@@ -101,8 +87,8 @@ export default function TimetablePage({ semester }: { semester: number }) {
                     {/* Add Custom Event PLUS */}
                     <CustomSlotDialog
                         DAYS={DAYS}
-                        HOURS={HOURS}
-                        WEEKS={WEEKS}
+                        HOURS={TIMETABLE_HOURS}
+                        WEEKS={TIMETABLE_WEEKS}
                         onCustomEvent={handleCustomEvent}
                     />
                 </div>

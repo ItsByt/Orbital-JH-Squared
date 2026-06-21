@@ -70,8 +70,11 @@ export default function ClassCard({
             title={warningTooltip}
             onClick={handleClick}
             style={{
-                gridColumnStart: colStart + 1,
-                gridColumnEnd: colEnd + 1,
+                // Moved + 1 from convertTimeToColumn to here.
+                // +2 since the grid is 1-indexed whereas hourDiff is "0-indexed" (so +1),
+                // and to account for "Day" Column (so another +1)
+                gridColumnStart: colStart + 2,
+                gridColumnEnd: colEnd + 2,
                 gridRowStart: rowIndex,
             }}
             className={`my-1 mx-0.5 p-2 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 z-20 border

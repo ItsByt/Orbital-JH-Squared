@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
-import { Theme } from "@/components/Theme";
+import { AppSidebar } from "@/components/GeneralComponents/AppSidebar";
+import { Theme } from "@/components/ThemeComponents/Theme";
 
 export default function Layout() {
     return (
@@ -9,7 +9,7 @@ export default function Layout() {
             <SidebarProvider>
                 <AppSidebar />
 
-                <main className="w-full p-8 min-h-screen bg-background text-foreground transition-colors duration-200">
+                <main className="w-full p-8 flex-1 h-screen overflow-y-auto bg-background text-foreground transition-colors duration-200">
                     {/* Opens and closes the sidebar */}
                     <SidebarTrigger className="mb-4" />
 

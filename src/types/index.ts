@@ -15,9 +15,9 @@ export interface ModuleDetails {
         semester: number;
         timetable: NUSModsRawLesson[];
     }[];
+    prereqTree?: PrereqTree; // Modules with no pre-requisites default to undefined or null
     prerequisite?: string;
     preclusion?: string;
-    prereqTree?: string | { and?: PreReqNode[]; or?: PreReqNode[] };
 }
 
 // Details about just a lesson itself
@@ -28,7 +28,7 @@ export interface NUSModsRawLesson {
     endTime: string;
     day: string;
     venue: string;
-    weeks: number[] | string[];
+    weeks: number[];
 }
 
 // Details for Saved Timetable Modules
@@ -57,19 +57,56 @@ export interface DisplayLesson {
     startTime: string;
     endTime: string;
     venue: string;
-    weeks?: number[] | string[];
+    weeks: number[];
     isAlternative?: boolean;
     startMins: number;
     endMins: number;
     // We store each week using a corresponding bit (0 or 1),
     // where the ith week corresponds to the (i + 1)th bit from the right
     // So the number 101010 means the lesson is on weeks 1, 3 and 5
-    // Yes this means that the rightmost bit is always technically useless (it is always 0)
+    // Yes this means that the rightmost bit represents week 0 (but it is always defaulted to 0)
     weekBitmask: number;
 }
 
+//Details for modules added to the Planner
+export interface PlannerModule {
+    moduleCode: string;
+    title: string;
+    moduleCredit: number;
+    displayOrder: number;
+    availableSemesters: number[];
+    isExemption: boolean;
+    excludeFromTotal: boolean;
+    hidePreReqWarning?: boolean;
+}
+
+//Details for Planner modules stored in supabase
+export interface SavedPlannerRow {
+    id: string;
+    user_id: string;
+    created_at: string;
+    year: number;
+    semester: number;
+    module_code: string;
+    title: string;
+    module_credit: number;
+    display_order: number;
+    available_semesters: number[];
+    exclude_from_total: boolean;
+    hide_pre_req_warning?: boolean;
+}
+
+// Details for Pre-requisite Tree
+// Either a string, an object with key of "and"/"or", value of array of PrereqTree,
+// or key of "nOf" and value [number of modules needed, specific type of module needed]
+export type PrereqTree =
+    | string
+    | { and: PrereqTree[] }
+    | { or: PrereqTree[] }
+    | { nOf: [number, PrereqTree[]] };
+
 // Handles raw PreReqTree data from API (unformatted)
-export type PreReqNode = string | { and?: PreReqNode[]; or?: PreReqNode[] };
+export type PreReqNode = PrereqTree;
 
 // Formatted Pre-Req Tree Node
 export interface FormattedPreReqNode {
