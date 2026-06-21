@@ -43,6 +43,6 @@ export function parseStringRule(node: string, allValidCodes: string[]): Formatte
     return {
         type: "branch",
         label: " ",
-        and: [{ type: "leaf", moduleCode: exactModuleText }], // This now passes "EC3101:B-" safely to the leaf renderer!
+        and: [{ type: "leaf", moduleCode: exactModuleText }], 
     };
 }

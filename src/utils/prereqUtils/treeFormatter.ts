@@ -25,7 +25,6 @@ export function formatTree(node: PrereqTree, allValidCodes: string[]): Formatted
     if (typeof node === "object" && node !== null) {
         // Because of potentially optional fields in the unknown raw tree,
         // cast node as a Record if not it cannot bypass Typescript compilation checks
-        // compilation checks
         const structure = node as Record<string, unknown>;
 
         // 3 FIELDS TO INTERPRET RECURSIVELY IN A NON-STRING NODE:
@@ -36,11 +35,21 @@ export function formatTree(node: PrereqTree, allValidCodes: string[]): Formatted
 
         // CASE 1:
         if ("nOf" in structure && Array.isArray(structure.nOf)) {
-            const [count, elements] = structure.nOf as [number, string[]];
+            // Cast elements as PrereqTree[] instead of string[] to handle 
+            // both wildcard strings and exact exact module strings/objects 
+            const [count, elements] = structure.nOf as [number, PrereqTree[]];
+            
             return {
                 type: "branch",
-                label: `needs at least ${count} modules from`,
-                or: elements.map((el) => createPrefixBranch(el, allValidCodes)),
+                label: `needs at least ${count} of`, 
+                or: elements.map((elem) => {
+                    // Prefix % TYPE
+                    if (typeof elem === "string" && elem.includes("%")) {
+                        return createPrefixBranch(elem, allValidCodes);
+                    }
+                    // EXACT MODULE TYPE
+                    return formatTree(elem, allValidCodes);
+                }),
             };
         }
 
