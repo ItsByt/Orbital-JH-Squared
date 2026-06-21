@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SearchBar from "@/components/GeneralComponents/SearchBar";
-import PreReqTree from "@/components/PreRequisiteComponent/PreReqTree";
-import { Legend } from "@/components/PreRequisiteComponent/Legend";
+import PreReqTree from "@/components/PreRequisiteComponents/PreReqTree";
+import { Legend } from "@/components/PreRequisiteComponents/Legend";
 import { useModulePrerequisites } from "@/hooks/PreReqHooks/useModulePrerequisites";
 
 export default function Pre_Requisite() {
