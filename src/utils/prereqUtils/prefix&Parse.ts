@@ -21,7 +21,7 @@ export function createPrefixBranch(prefix: string, allValidCodes: string[]): For
 // find matching codes to the prefix set by rule and returns a node containing the matches
 export function parseStringRule(node: string, allValidCodes: string[]): FormattedPreReqNode {
     const formattedText = node.split(":")[0].replace(/\\"/g, '"').trim();
-    const extractedPrefixes = node.match(/[A-Z]{2,4}\d{4}%?/); // hard coded might want to expand??
+    const extractedPrefixes = node.match(/[A-Z]{2,4}\d{4}%?/);
     const hasWildcardPrefix = extractedPrefixes?.some((p) => p.includes("%"));
 
     if (hasWildcardPrefix && extractedPrefixes) {

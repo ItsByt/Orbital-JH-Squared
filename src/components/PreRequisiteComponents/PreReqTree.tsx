@@ -12,8 +12,8 @@ import PrefixBranchRenderer from "./NodeRenderers/PrefixBranchRenderer";
 
 // Props to expect (will need to mandatorily provide node)
 // 1. Node of Interest (changes every recursive call)
-// 2. is it a Root boolean
-// 3. callback function that carries isExpanded boolean to deal with hiding logic
+// 2. Whether it a Root boolean
+// 3. Callback function that carries isExpanded boolean to deal with hiding logic
 // 4. disableExpansion property to cater to the prefix matching modules
 export interface PreReqTreeProps {
     node: FormattedPreReqNode;
