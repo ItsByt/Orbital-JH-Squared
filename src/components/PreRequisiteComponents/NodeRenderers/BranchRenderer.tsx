@@ -21,8 +21,8 @@ export default function BranchRenderer({
     // make use of its properties to retrieve the list of children
     const children = (node.and || node.or || []) as FormattedPreReqNode[];
 
-    // The two  booleans that are dependent on the formatted node's label are
-    // needed to decide whether the hiding principle will be applied on children's leaf click
+    // The two booleans that are dependent on the formatted node's label are
+    // needed to decide whether the hiding principle will be applied on children's leaf click.
     // Also needed to simply render the correct label.
     const isAtLeastBranch = !!node.label?.toLowerCase().includes("at least");
     const isOrBranch =
