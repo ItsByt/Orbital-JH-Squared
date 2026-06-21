@@ -17,7 +17,6 @@ export interface ModuleDetails {
     }[];
     prereqTree?: PrereqTree; // Modules with no pre-requisites default to undefined or null
     prerequisite?: string;
-    preclusion?: string;
 }
 
 // Details about just a lesson itself
@@ -104,9 +103,6 @@ export type PrereqTree =
     | { and: PrereqTree[] }
     | { or: PrereqTree[] }
     | { nOf: [number, PrereqTree[]] };
-
-// Handles raw PreReqTree data from API (unformatted)
-export type PreReqNode = PrereqTree;
 
 // Formatted Pre-Req Tree Node
 export interface FormattedPreReqNode {

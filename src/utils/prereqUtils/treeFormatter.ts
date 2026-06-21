@@ -1,4 +1,4 @@
-import type { PreReqNode, FormattedPreReqNode } from "@/types";
+import type { PrereqTree, FormattedPreReqNode } from "@/types";
 import { createPrefixBranch, parseStringRule } from "./prefix&Parse";
 
 //--------------------------------------------------------------------------------
@@ -8,7 +8,7 @@ import { createPrefixBranch, parseStringRule } from "./prefix&Parse";
 // Accepts arguments of the raw tree and the fetched list of NUS codes
 //--------------------------------------------------------------------------------
 
-export function formatTree(node: PreReqNode, allValidCodes: string[]): FormattedPreReqNode {
+export function formatTree(node: PrereqTree, allValidCodes: string[]): FormattedPreReqNode {
     // Edge case
     if (!node) return { type: "leaf", moduleCode: "" };
 
