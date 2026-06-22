@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Loader2 } from "lucide-react";
+import type { PlannerModule } from "@/types";
 import AutoCompleteSearch from "@/hooks/GeneralHooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
@@ -12,6 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
+interface DBAddVariables {
+    newModule: PlannerModule;
+    year: number;
+    semester: number;
+    semesterKey: string;
+}
+
 export default function AddCourseModal({
     open,
     onOpenChange,
@@ -21,20 +30,41 @@ export default function AddCourseModal({
     onOpenChange: (open: boolean) => void;
     semesterKey: string;
 }) {
+    const queryClient = useQueryClient();
+
     const { searchTerm, setSearchTerm, searchResults, isLoading } = AutoCompleteSearch();
     const addModule = usePlannerStore((state) => state.addModule);
     const removeModule = usePlannerStore((state) => state.removeModule);
-    const [isAdding, setIsAdding] = useState(false);
-    const lockRef = useRef(false); // Used to lock adding state
+
+    const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+
+    const dbAddMutation = useMutation<void, Error, DBAddVariables>({
+        mutationFn: async ({ newModule, year, semester }) => {
+            await addToPlannerModuleDB(newModule, year, semester);
+        },
+        onMutate: ({ newModule, semesterKey }) => {
+            // Optimistic update of UI
+            addModule(semesterKey, newModule);
+            onOpenChange(false);
+            setSearchTerm("");
+            toast.success(`${newModule.moduleCode} has been successfully added!`);
+        },
+        onError: (error, variables) => {
+            // Rollback on error
+            removeModule(variables.semesterKey, variables.newModule.moduleCode);
+            toast.error("Failed to add module", { description: getErrorMessage(error) });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
 
     const handleSelectModule = async (moduleCode: string) => {
-        if (lockRef.current) return;
-
         const board = usePlannerStore.getState().board;
         const currentSemModules = board[semesterKey] || [];
 
         const isDuplicate = Object.values(board).some((semesterArray) =>
-            semesterArray.some((mod) => mod.moduleCode == moduleCode)
+            semesterArray.some((mod) => mod.moduleCode === moduleCode)
         );
 
         if (isDuplicate) {
@@ -43,8 +73,7 @@ export default function AddCourseModal({
         }
 
         try {
-            lockRef.current = true;
-            setIsAdding(true);
+            setIsFetchingDetails(true);
 
             const moduleDetails = await getModule(moduleCode);
             if (!moduleDetails) {
@@ -59,9 +88,8 @@ export default function AddCourseModal({
                     moduleDetails,
                     semester
                 );
-
                 if (!isValidSemester) {
-                    toast.error(`${moduleCode} is not available in this semester!`);
+                    toast.error(`${moduleCode} is not available in Semester ${semester}!`);
                     return;
                 }
             }
@@ -69,23 +97,11 @@ export default function AddCourseModal({
             const nextOrder = getNextDisplayOrder(currentSemModules);
             const newModule = buildPlannerModule(moduleDetails, nextOrder, semesterKey);
 
-            // Optimistic addition of module
-            addModule(semesterKey, newModule);
-            onOpenChange(false);
-            setSearchTerm("");
-
-            await addToPlannerModuleDB(newModule, year, semester);
-
-            toast.success(`${moduleCode} has been successfully added!`);
+            dbAddMutation.mutate({ newModule, year, semester, semesterKey });
         } catch (error) {
-            // Rollback if error
-            removeModule(semesterKey, moduleCode);
-            toast.error("Failed to add module to database", {
-                description: getErrorMessage(error),
-            });
+            toast.error("An error occurred.", { description: getErrorMessage(error) });
         } finally {
-            lockRef.current = false;
-            setIsAdding(false);
+            setIsFetchingDetails(false);
         }
     };
 
@@ -94,6 +110,8 @@ export default function AddCourseModal({
 
         onOpenChange(newOpen);
     };
+
+    const isProcessing = isFetchingDetails || dbAddMutation.isPending;
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -121,7 +139,7 @@ export default function AddCourseModal({
                         <button
                             key={mod.moduleCode}
                             onClick={() => handleSelectModule(mod.moduleCode)}
-                            disabled={isAdding}
+                            disabled={isProcessing}
                             className="w-full text-left p-3 hover:bg-zinc-800/50 rounded-md transition-colors flex flex-col group cursor-pointer"
                         >
                             <span className="text-xs font-bold text-[#56A58B]">

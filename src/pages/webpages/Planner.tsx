@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea/dnd";
 import { toast } from "sonner";
 
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
+import type { PlannerModule } from "@/types";
 import YearBlock from "@/components/PlannerComponents/YearBlock";
 import ExemptionRow from "@/components/PlannerComponents/ExemptionRow";
 import { usePlannerStore } from "@/store/usePlannerStore";
@@ -17,30 +19,71 @@ import {
 } from "@/utils/plannerUtils/semesterKeyUtils";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
+interface MoveModuleVariables {
+    fromKey: string;
+    toKey: string;
+    updatedBoard: Record<string, PlannerModule[]>;
+    boardSnapshot: Record<string, PlannerModule[]>;
+}
+
 const YEARS = Array.from({ length: TOTAL_PLANNER_YEARS }, (_, i) => i + 1);
 
 export default function Planner() {
+    const queryClient = useQueryClient();
+
     const board = usePlannerStore((state) => state.board);
     const setBoard = usePlannerStore((state) => state.setBoard);
     const setDragState = usePlannerStore((state) => state.setDragState);
     const moveModule = usePlannerStore((state) => state.moveModule);
-    const [isLoading, setIsLoading] = useState(true);
+    
+    // Loading the Planner Board
+     const { isLoading } = useQuery({
+         queryKey: ["plannerBoard"],
+         queryFn: async () => {
+             const rows = await getPlannerModules();
+             const formattedBoard = formatPlannerBoard(rows);
+             setBoard(formattedBoard); 
+             return formattedBoard;
+         },
+         staleTime: 1000 * 60 * 5, 
+     });
 
-    useEffect(() => {
-        async function loadBoard() {
-            try {
-                const rows = await getPlannerModules();
-                const formattedBoard = formatPlannerBoard(rows);
-                setBoard(formattedBoard);
-            } catch (error) {
-                toast.error("Failed to load planner data", { description: getErrorMessage(error) });
-            } finally {
-                setIsLoading(false);
+    const moveModuleMutation = useMutation<
+        void, // Return type of mutationFn
+        Error, // Type of error
+        MoveModuleVariables // Type of the variables passed into .mutate()
+    >({
+        mutationFn: async ({ fromKey, toKey, updatedBoard }) => {
+            const dbUpdates = [];
+
+            const { year: toYear, semester: toSem } = parseSemesterKey(toKey);
+            const updatedToSem = massUpdatePlannerModuleDB(updatedBoard[toKey], toYear, toSem);
+            dbUpdates.push(updatedToSem);
+
+            // If the columns are the same, the previous update already suffices
+            if (fromKey !== toKey) {
+                const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
+                const updatedFromSem = massUpdatePlannerModuleDB(
+                    updatedBoard[fromKey],
+                    fromYear,
+                    fromSem
+                );
+                dbUpdates.push(updatedFromSem);
+
+                await Promise.all(dbUpdates);
             }
-        }
-        loadBoard();
-    }, [setBoard]);
-
+        },
+        onError: (error, variables) => {
+            setBoard(variables.boardSnapshot); 
+            toast.error("Failed to move module.", {
+                description: getErrorMessage(error),
+            });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
+    
     // Calculate and memoise Global Totals for the header
     const globalTotals = useMemo(() => {
         let count = 0;
@@ -54,6 +97,7 @@ export default function Planner() {
         });
         return { count, units };
     }, [board]);
+
 
     // Handle while-dragging updates
     const handleDragUpdate = (update: DragUpdate) => {
@@ -94,7 +138,7 @@ export default function Planner() {
 
         // Checking if new semester moved to is valid
         const draggedModule = boardSnapshot[fromKey][fromIndex];
-        const { year: toYear, semester: toSem } = parseSemesterKey(toKey);
+        const { semester: toSem } = parseSemesterKey(toKey);
         if (!isUnvalidatedSemesterKey(toKey)) {
             const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
             if (!isValidSemester) {
@@ -107,29 +151,12 @@ export default function Planner() {
         moveModule(fromKey, toKey, fromIndex, toIndex);
         const updatedBoard = usePlannerStore.getState().board;
 
-        try {
-            const dbUpdates = [];
-            const updatedToSem = massUpdatePlannerModuleDB(updatedBoard[toKey], toYear, toSem);
-            dbUpdates.push(updatedToSem);
-
-            // If the columns are the same, the previous update already suffices
-            if (fromKey !== toKey) {
-                const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
-                const updatedFromSem = massUpdatePlannerModuleDB(
-                    updatedBoard[fromKey],
-                    fromYear,
-                    fromSem
-                );
-                dbUpdates.push(updatedFromSem);
-            }
-
-            await Promise.all(dbUpdates);
-        } catch (error) {
-            usePlannerStore.getState().setBoard(boardSnapshot);
-            toast.error("Failed to move module. Restoring previous state.", {
-                description: getErrorMessage(error),
-            });
-        }
+        moveModuleMutation.mutate({
+            fromKey,
+            toKey,
+            updatedBoard,
+            boardSnapshot,
+        });
     };
 
     // Loading

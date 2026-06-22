@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { PlannerModule, PrereqTree } from "@/types";
+import type { PlannerModule } from "@/types";
 import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { isExemptionKey, isCustomSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
@@ -23,8 +23,6 @@ interface PlannerState {
     clearColumn: (semesterKey: string) => void;
     clearAndHideColumn: (semesterKey: string) => void;
 
-    prereqCache: Record<string, PrereqTree | null>;
-    setPrereqCache: (moduleCode: string, tree: PrereqTree | null) => void;
     togglePrereqWarning: (semesterKey: string, moduleCode: string) => void;
 }
 
@@ -32,8 +30,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
     board: generateEmptyBoard(),
     dragState: { draggingModuleCode: null, isOverInvalidSem: false },
     visibleCustomColumns: [],
-    prereqCache: {},
-
+    
     setBoard: (board) =>
         set(() => {
             const loadedCustomCols = Object.keys(board).filter(
@@ -127,11 +124,6 @@ export const usePlannerStore = create<PlannerState>((set) => ({
         set((state) => ({
             board: { ...state.board, [semesterKey]: [] },
             visibleCustomColumns: state.visibleCustomColumns.filter((k) => k !== semesterKey),
-        })),
-
-    setPrereqCache: (moduleCode, tree) =>
-        set((state) => ({
-            prereqCache: { ...state.prereqCache, [moduleCode]: tree },
         })),
 
     togglePrereqWarning: (semesterKey, moduleCode) =>
