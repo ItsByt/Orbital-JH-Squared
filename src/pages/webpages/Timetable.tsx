@@ -1,7 +1,7 @@
 import { useTimetableData } from "@/hooks/TimetableHooks/useTimetableData";
 import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
-import { getCurrentAcadYear, getAcadYearString } from "@/utils/generalUtils/time";
+import { getCurrentAcadYear, getAcadYearStringSlash } from "@/utils/generalUtils/time";
 import { Loader2 } from "lucide-react";
 
 import CustomSlotDialog from "@/components/TimetableComponents/CustomSlotDialog";
@@ -13,7 +13,7 @@ import { DAYS, TIMETABLE_HOURS, TIMETABLE_WEEKS } from "@/config/constants";
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
-    const acadYearString = getAcadYearString();
+    const acadYearString = getAcadYearStringSlash();
 
     // TimetableData abstractions - retrieve, select and swap
     const {

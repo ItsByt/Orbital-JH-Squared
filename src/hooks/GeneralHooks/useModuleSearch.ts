@@ -1,22 +1,21 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getModuleList } from "@/services/nusmods";
 import type { ModuleSummary } from "@/types";
+import { getAcadYearStringDash } from "@/utils/generalUtils/time";
 
 export default function AutoCompleteSearch() {
-    const [allModules, setAllModules] = useState<ModuleSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<ModuleSummary[]>([]);
 
-    //"Downloads" all ModuleSummaries exactly once for quick searching
-    useEffect(() => {
-        async function fetchList() {
-            const data = await getModuleList("2025-2026");
-            setAllModules(data);
-            setIsLoading(false);
-        }
-        fetchList();
-    }, []);
+    const acadYearString = getAcadYearStringDash();
+
+    const { data: allModules = [], isLoading } = useQuery({
+        queryKey: ["moduleList", acadYearString],
+        queryFn: () => getModuleList(acadYearString),
+        staleTime: Infinity, 
+        gcTime: 1000 * 60 * 60 * 24, 
+    });
 
     //Autocomplete Logic for searching module codes
     useEffect(() => {
