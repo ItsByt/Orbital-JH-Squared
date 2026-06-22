@@ -1,9 +1,11 @@
 import type { ModuleSummary, ModuleDetails } from "@/types";
+import { getAcadYearStringDash } from "@/utils/generalUtils/time";
 
 //Gets a list of all the summaries of all modules in NUS
-export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSummary[]> {
+export async function getModuleList(): Promise<ModuleSummary[]> {
     try {
-        const response = await fetch(`https://api.nusmods.com/v2/${acadYear}/moduleList.json`);
+        const acadYearString = getAcadYearStringDash();
+        const response = await fetch(`https://api.nusmods.com/v2/${acadYearString}/moduleList.json`);
 
         if (!response.ok) return [];
 
@@ -18,8 +20,9 @@ export async function getModuleList(acadYear = "2025-2026"): Promise<ModuleSumma
 // Includes Timetable and Pre-Requisite Tree Data
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
+        const acadYearString = getAcadYearStringDash();
         const response = await fetch(
-            `https://api.nusmods.com/v2/2025-2026/modules/${moduleCode.toUpperCase()}.json`
+            `https://api.nusmods.com/v2/${acadYearString}/modules/${moduleCode.toUpperCase()}.json`
         );
 
         if (!response.ok) return null;
@@ -33,9 +36,9 @@ export async function getModule(moduleCode: string): Promise<ModuleDetails | nul
 }
 
 // Gets a list of all modules in NUS, only codes
-export async function getModuleCodes(acadYear = "2025-2026"): Promise<string[]> {
+export async function getModuleCodes(): Promise<string[]> {
     try {
-        const data: { moduleCode: string; title: string }[] = await getModuleList(acadYear);
+        const data: { moduleCode: string; title: string }[] = await getModuleList();
         return data.map((item) => item.moduleCode);
     } catch (error) {
         console.error("Failed to fetch module list", error);

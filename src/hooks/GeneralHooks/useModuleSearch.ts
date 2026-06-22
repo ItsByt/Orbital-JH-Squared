@@ -12,7 +12,7 @@ export default function AutoCompleteSearch() {
 
     const { data: allModules = [], isLoading } = useQuery({
         queryKey: ["moduleList", acadYearString],
-        queryFn: () => getModuleList(acadYearString),
+        queryFn: () => getModuleList(),
         staleTime: Infinity, 
         gcTime: 1000 * 60 * 60 * 24, 
     });
