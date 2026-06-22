@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ban, BellOff, BellRing, ChevronDown, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,21 @@ interface ModuleBlockProps {
     index: number;
 }
 
+interface DeleteVariables {
+    moduleCode: string;
+    semesterKey: string;
+    previousSnapshot: PlannerModule[];
+}
+
+interface ToggleVariables {
+    moduleCode: string;
+    semesterKey: string;
+    targetValue: boolean;
+}
+
 export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockProps) {
+    const queryClient = useQueryClient();
+
     const dragState = usePlannerStore((state) => state.dragState);
     const removeModule = usePlannerStore((state) => state.removeModule);
     const setSemesterData = usePlannerStore((state) => state.setSemesterData);
@@ -38,49 +53,66 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     const toggleExclude = usePlannerStore((state) => state.toggleExcludeFromTotal);
     const toggleWarning = usePlannerStore((state) => state.togglePrereqWarning);
 
-    const [isDeleting, setIsDeleting] = useState(false);
-    const lockRef = useRef(false); // Used to lock removal state
-
     const isBeingDraggedInvalidly =
         dragState.isOverInvalidSem && dragState.draggingModuleCode === module.moduleCode;
 
-    const handleDelete = async () => {
-        if (lockRef.current) return;
-
-        const previousSemesterSnapshot = [...usePlannerStore.getState().board[semesterKey]];
-
-        try {
-            lockRef.current = true;
-            setIsDeleting(true);
-
-            // Optimistic removal of module
-            removeModule(semesterKey, module.moduleCode);
-
-            await removeFromPlannerModuleDB(module.moduleCode);
-            toast.success(`${module.moduleCode} removed from your planner.`);
-        } catch (error) {
+    const deleteMutation = useMutation<void, Error, DeleteVariables>({
+        mutationFn: async ({ moduleCode }) => {
+            await removeFromPlannerModuleDB(moduleCode);
+        },
+        onError: (error, variables) => {
             // Rollback on error
-            setSemesterData(semesterKey, previousSemesterSnapshot);
+            setSemesterData(variables.semesterKey, variables.previousSnapshot);
             toast.error("Failed to remove module", { description: getErrorMessage(error) });
-        } finally {
-            lockRef.current = false;
-            setIsDeleting(false);
-        }
+        },
+        onSuccess: (_, variables) => {
+            toast.success(`${variables.moduleCode} removed from your planner.`);
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
+
+    const handleDelete = () => {
+        // Optimistic removal of module
+        const previousSnapshot = [...usePlannerStore.getState().board[semesterKey]];
+        removeModule(semesterKey, module.moduleCode);
+
+        deleteMutation.mutate({
+            moduleCode: module.moduleCode,
+            semesterKey,
+            previousSnapshot,
+        });
     };
 
-    const handleToggle = async () => {
-        const targetValue = !module.excludeFromTotal;
-
-        try {
-            toggleExclude(semesterKey, module.moduleCode);
-
-            await setExcludeInPlannerModuleDB(module.moduleCode, targetValue);
-        } catch (error) {
-            // Rollback on error
-            toggleExclude(semesterKey, module.moduleCode);
+    const toggleExcludeMutation = useMutation<void, Error, ToggleVariables>({
+        mutationFn: async({ moduleCode, targetValue }) => {
+            await setExcludeInPlannerModuleDB(moduleCode, targetValue);
+        },
+        onError: (error, variables) => {
+            toggleExclude(semesterKey, variables.moduleCode);
             toast.error("Failed to update module status", { description: getErrorMessage(error) });
-        }
-    };
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
+
+    const toggleWarningMutation = useMutation<void, Error, ToggleVariables>({
+        mutationFn: async ({ moduleCode, targetValue }) => {
+            await setPrereqWarningInPlannerModuleDB(moduleCode, targetValue);
+        },
+        onError: (error, variables) => {
+            // Rollback on error
+            toggleWarning(variables.semesterKey, variables.moduleCode);
+            toast.error("Failed to update Pre-requisite warning", {
+                description: getErrorMessage(error),
+            });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
 
     const {
         filteredBoardMap,
@@ -90,32 +122,15 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
         hasAnyPreReqWarning,
     } = usePrereqEvaluator(module.moduleCode, semesterKey);
 
-    const handleToggleWarning = async () => {
-        const targetValue = !module.hidePreReqWarning;
-        try {
-            toggleWarning(semesterKey, module.moduleCode);
-            await setPrereqWarningInPlannerModuleDB(module.moduleCode, targetValue);
-        } catch (error) {
-            // Rollback if error
-            toggleWarning(semesterKey, module.moduleCode);
-            toast.error("Failed to update Pre-requisite warning", {
-                description: getErrorMessage(error),
-            });
-        }
-    };
-
     // Used to reset Pre-requisite warning when the requirements have been fully met
     useEffect(() => {
-        if (!hasAnyPreReqWarning && module.hidePreReqWarning) {
+        if (!hasAnyPreReqWarning && module.hidePreReqWarning && !toggleWarningMutation.isPending) {
             toggleWarning(semesterKey, module.moduleCode);
-            const setWarningTrueInPlannerDB = async () => {
-                try {
-                    await setPrereqWarningInPlannerModuleDB(module.moduleCode, false);
-                } catch (error) {
-                    console.error("Failed to auto-reset warning", error);
-                }
-            };
-            setWarningTrueInPlannerDB();
+            toggleWarningMutation.mutate({
+                moduleCode: module.moduleCode,
+                semesterKey,
+                targetValue: false,
+            });
         }
     }, [
         hasAnyPreReqWarning,
@@ -123,7 +138,13 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
         module.moduleCode,
         semesterKey,
         toggleWarning,
+        toggleWarningMutation,
     ]);
+
+    const isProcessing =
+        deleteMutation.isPending ||
+        toggleExcludeMutation.isPending ||
+        toggleWarningMutation.isPending;
 
     return (
         <Draggable draggableId={module.moduleCode} index={index}>
@@ -177,20 +198,28 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 {/* Removing a module */}
                                 <DropdownMenuItem
                                     onClick={handleDelete}
-                                    disabled={isDeleting}
+                                    disabled={isProcessing}
                                     className={cn(
                                         "text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer",
-                                        isDeleting && "opacity-50 cursor-not-allowed"
+                                        isProcessing && "opacity-50 cursor-not-allowed"
                                     )}
                                 >
                                     <Trash2 className="mr-2 h-3.5 w-3.5" />
-                                    <span>{isDeleting ? "Removing..." : "Remove Module"}</span>
+                                    <span>{isProcessing ? "Removing..." : "Remove Module"}</span>
                                 </DropdownMenuItem>
 
                                 {/* To toggle Pre-requisite Warning */}
                                 {hasAnyPreReqWarning && semesterKey !== EXEMPTION_KEY && (
                                     <DropdownMenuItem
-                                        onClick={handleToggleWarning}
+                                        onClick={() => {
+                                            toggleWarning(semesterKey, module.moduleCode);
+                                            toggleWarningMutation.mutate({
+                                                moduleCode: module.moduleCode,
+                                                semesterKey,
+                                                targetValue: !module.hidePreReqWarning,
+                                            });
+                                        }}
+                                        disabled={isProcessing}
                                         className="cursor-pointer"
                                     >
                                         {module.hidePreReqWarning ? (
@@ -210,7 +239,15 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 {/* For toggling Excluding From Total*/}
                                 {module.isExemption && (
                                     <DropdownMenuItem
-                                        onClick={handleToggle}
+                                        onClick={() => {
+                                            toggleExclude(semesterKey, module.moduleCode);
+                                            toggleExcludeMutation.mutate({
+                                                moduleCode: module.moduleCode,
+                                                semesterKey,
+                                                targetValue: !module.excludeFromTotal,
+                                            });
+                                        }}
+                                        disabled={isProcessing}
                                         className="cursor-pointer"
                                     >
                                         <Ban className="mr-2 h-3.5 w-3.5" />

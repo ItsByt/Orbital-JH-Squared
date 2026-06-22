@@ -1,37 +1,40 @@
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import SearchBar from "@/components/GeneralComponents/SearchBar";
-import { useState } from "react";
 import { getModule } from "@/services/nusmods";
-import type { ModuleDetails } from "@/types";
-import { Loader2 } from "lucide-react";
 import ModuleDetailsCard from "@/components/CoursesComponents/ModuleDetailsCard";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
 export default function Courses() {
-    // Initialize variable with state to store description state (or null)
-    // Initialize state boolean for fetching status similar to loading
-    const [selectedModule, setSelectedModule] = useState<ModuleDetails | null>(null);
-    const [isFetchingDetails, setIsFetchingDetails] = useState(false);
+    // Initialize variable with state to store module code (or null)
+    const [selectedModuleCode, setSelectedModuleCode] = useState<string | null>(null);
+
+    const {
+        data: selectedModule,
+        isFetching,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["module", selectedModuleCode],
+        queryFn: () => getModule(selectedModuleCode!),
+
+        // Double Exclamation mark to convert it to boolean
+        // Only fetch data if a module is selected
+        enabled: !!selectedModuleCode,
+        staleTime: 1000 * 60 * 5,
+    });
 
     // Handle Selection logic
-    const handleModuleSelect = async (moduleCode: string) => {
-        setIsFetchingDetails(true);
-        // reset previous selection
-        setSelectedModule(null);
-
-        try {
-            const details = await getModule(moduleCode);
-            if (details) {
-                setSelectedModule(details);
-            } else {
-                toast.error(`Could not find details for ${moduleCode}`);
-            }
-        } catch (error) {
+    useEffect(() => {
+        if (isError) {
             toast.error("Failed to load module", { description: getErrorMessage(error) });
-        } finally {
-            setIsFetchingDetails(false);
+        } else if (selectedModuleCode && !isFetching && selectedModule === null) {
+            // Null means the fetch succeeded, but NUSMods couldn't find the module
+            toast.error(`Could not find details for ${selectedModuleCode}`);
         }
-    };
+    }, [isError, error, selectedModule, isFetching, selectedModuleCode]);
 
     return (
         <div className="space-y-6 flex flex-col px-6 pt-4 h-full">
@@ -45,17 +48,19 @@ export default function Courses() {
             </div>
 
             <div className="w-full max-w-4xl mx-auto mt-6">
-                <SearchBar onSelect={handleModuleSelect} />
+                <SearchBar onSelect={setSelectedModuleCode} />
             </div>
 
-            {isFetchingDetails && (
+            {isFetching && (
                 <div className="flex justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-[#749c83]" />
                 </div>
             )}
 
             {/* Using the ModuleDetailsCard component for displaying module details */}
-            {selectedModule && <ModuleDetailsCard module={selectedModule} />}
+            {selectedModule && !isFetching && (
+                <ModuleDetailsCard module={selectedModule} />
+            )}
         </div>
     );
 }

@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
 import { usePlannerStore } from "@/store/usePlannerStore";
@@ -12,50 +13,36 @@ import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 
 export default function ExemptionRow() {
+    const queryClient = useQueryClient();
+
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const clearColumn = usePlannerStore((state) => state.clearColumn);
 
+    const clearColumn = usePlannerStore((state) => state.clearColumn);
     const modules = usePlannerStore((state) => state.board[EXEMPTION_KEY]) || [];
+    const moduleCount = modules.length;
 
     // For counting modules and units that are included
     const includedModules = modules.filter((mod) => !mod.excludeFromTotal);
     const exemptionUnits = includedModules.reduce((sum, mod) => sum + mod.moduleCredit, 0);
     const exemptionCount = includedModules.length;
 
-    const isMounted = useRef(true);
-    useEffect(() => {
-        isMounted.current = true;
-        return () => {
-            isMounted.current = false;
-        };
-    }, []);
-
-    const handleClear = async () => {
-        if (isDeleting) return;
-
-        if (!isConfirming) {
-            setIsConfirming(true);
-            return;
-        }
-
-        try {
-            setIsDeleting(true);
+    const clearMutation = useMutation<void, Error>({
+        mutationFn: async () => {
             await clearPlannerColumnDBBySemesterKey(EXEMPTION_KEY);
+        },
+        onSuccess: () => {
             clearColumn(EXEMPTION_KEY);
             toast.success("Exemptions cleared");
-        } catch (error) {
-            toast.error("Failed to clear exemptions", {
-                description: getErrorMessage(error),
-            });
-        } finally {
-            if (isMounted.current) {
-                setIsConfirming(false);
-                setIsDeleting(false);
-            }
-        }
-    };
+            setIsConfirming(false);
+        },
+        onError: (error) => {
+            toast.error("Failed to clear exemptions", { description: getErrorMessage(error) });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
 
     return (
         <div className="shrink-0 border-t border-zinc-200 dark:border-zinc-800 pt-5 px-6 pb-4 group">
@@ -66,21 +53,21 @@ export default function ExemptionRow() {
                         Exemptions
                     </h3>
 
-                    {exemptionCount > 0 && (
+                    {moduleCount > 0 && (
                         <div
                             className={cn(
                                 "flex items-center transition-all duration-200",
-                                isConfirming || isDeleting
+                                isConfirming || clearMutation.isPending
                                     ? "opacity-100 visible"
                                     : "text-zinc-500 hover:text-red-400 dark:hover:text-red-400 opacity-0 invisible group-hover:opacity-100 group-hover:visible"
                             )}
                         >
-                            {isDeleting ? (
+                            {clearMutation.isPending ? (
                                 <Loader2 className="h-5 w-5 animate-spin text-red-500" />
                             ) : isConfirming ? (
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
                                     <span
-                                        onClick={handleClear}
+                                        onClick={() => clearMutation.mutate()}
                                         className="text-red-500 hover:text-red-400 hover:underline cursor-pointer"
                                     >
                                         Confirm?
@@ -94,7 +81,7 @@ export default function ExemptionRow() {
                                 </div>
                             ) : (
                                 <button
-                                    onClick={handleClear}
+                                    onClick={() => setIsConfirming(true)}
                                     className="outline-none flex items-center"
                                 >
                                     <Trash2 className="h-5 w-5 cursor-pointer" />
@@ -105,7 +92,7 @@ export default function ExemptionRow() {
                 </div>
 
                 {/* Bottom Row: Units */}
-                {exemptionCount > 0 && !isConfirming && !isDeleting && (
+                {exemptionCount > 0 && !isConfirming && !clearMutation.isPending && (
                     <div className="mt-1">
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {exemptionCount} Courses / {exemptionUnits} Units

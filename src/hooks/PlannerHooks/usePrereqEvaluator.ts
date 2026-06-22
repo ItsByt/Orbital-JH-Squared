@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { PrereqTree } from "@/types";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { useModulePrereq } from "./useModulePrereq";
 import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
@@ -10,8 +12,9 @@ import {
 } from "@/utils/plannerUtils/prereqUtils";
 
 export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
+    const queryClient = useQueryClient();
+
     const board = usePlannerStore((state) => state.board);
-    const prereqCache = usePlannerStore((state) => state.prereqCache);
     const prereqTree = useModulePrereq(moduleCode);
 
     // Map all modules on the board to their absolute time and semesterKey
@@ -67,7 +70,7 @@ export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
                     // Ignore checks against ourselves
                     if (dependentMod.moduleCode === moduleCode) return;
 
-                    const dependentTree = prereqCache[dependentMod.moduleCode];
+                    const dependentTree = queryClient.getQueryData<PrereqTree>(["prereq", dependentMod.moduleCode]);
                     if (!dependentTree) return;
 
                     // We check if the dependent (other) module's requirements are fulfilled
@@ -100,7 +103,7 @@ export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
             console.error(`Pre-req too late check failed for ${moduleCode}:`, error);
             return [];
         }
-    }, [board, prereqCache, boardMap, targetTime, moduleCode, semesterKey]);
+    }, [board, boardMap, targetTime, moduleCode, semesterKey, queryClient]);
 
     const hasAnyPreReqWarning = takenTooEarlyIssues !== null || takenTooLateIssues.length > 0;
 

@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
@@ -20,9 +21,10 @@ export default function SemesterColumn({
     semesterKey,
     isCustom = false,
 }: SemesterColumnProps) {
+    const queryClient = useQueryClient();
+
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false); // Used for when in confirmation
-    const [isDeleting, setIsDeleting] = useState(false); // Used for when actually clearing
 
     const modules = usePlannerStore((state) => state.board[semesterKey]) || [];
     const moduleCount = modules.length;
@@ -32,31 +34,14 @@ export default function SemesterColumn({
     const clearAndHideColumn = usePlannerStore((state) => state.clearAndHideColumn);
     const dragState = usePlannerStore((state) => state.dragState);
 
-    const isMounted = useRef(true);
-    useEffect(() => {
-        isMounted.current = true;
-        return () => {
-            isMounted.current = false;
-        };
-    }, []);
-
-    const handleClear = async () => {
-        if (isDeleting) return;
-
-        if (!isConfirming) {
-            setIsConfirming(true);
-            return;
-        }
-
-        try {
-            setIsDeleting(true);
-
-            // Pessimistic update
+    const clearMutation = useMutation<void, Error>({
+        mutationFn: async () => {
             if (modules.length > 0) {
                 await clearPlannerColumnDBBySemesterKey(semesterKey);
             }
-
-            // Only if DB update succeeds, update visual state
+        },
+        onSuccess: () => {
+            // Pessimistic UI update
             if (isCustom) {
                 clearAndHideColumn(semesterKey);
                 toast.success(`${title} cleared and hidden`);
@@ -64,17 +49,16 @@ export default function SemesterColumn({
                 clearColumn(semesterKey);
                 toast.success(`${title} cleared`);
             }
-        } catch (error) {
-            toast.error("Failed to clear modules", {
-                description: getErrorMessage(error),
-            });
-        } finally {
-            if (isMounted.current) {
-                setIsConfirming(false);
-                setIsDeleting(false);
-            }
-        }
-    };
+            
+            setIsConfirming(false); 
+        },
+        onError: (error) => {
+            toast.error("Failed to clear modules", { description: getErrorMessage(error) });
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
+        },
+    });
 
     const showClearButton = modules.length > 0 || isCustom;
 
@@ -91,7 +75,7 @@ export default function SemesterColumn({
                         <div
                             className={cn(
                                 "flex items-center transition-all duration-200 shrink-0",
-                                isConfirming || isDeleting
+                                isConfirming || clearMutation.isPending
                                     ? "opacity-100 visible"
                                     : cn(
                                           "text-zinc-500 hover:text-red-400",
@@ -101,12 +85,12 @@ export default function SemesterColumn({
                                       )
                             )}
                         >
-                            {isDeleting ? (
+                            {clearMutation.isPending ? (
                                 <Loader2 className="h-5 w-5 animate-spin text-red-500" />
                             ) : isConfirming ? (
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
                                     <span
-                                        onClick={handleClear}
+                                        onClick={() => clearMutation.mutate()}
                                         className="text-red-500 hover:text-red-400 hover:underline cursor-pointer"
                                     >
                                         Confirm?
@@ -124,7 +108,7 @@ export default function SemesterColumn({
                                 </div>
                             ) : (
                                 <button
-                                    onClick={handleClear}
+                                    onClick={() => setIsConfirming(true)}
                                     className="outline-none flex items-center"
                                 >
                                     <Trash2 className="h-5 w-5 cursor-pointer" />
@@ -135,7 +119,7 @@ export default function SemesterColumn({
                 </div>
 
                 {/* Bottom Row: Units */}
-                {modules.length > 0 && !isConfirming && !isDeleting && (
+                {modules.length > 0 && !isConfirming && !clearMutation.isPending && (
                     <div className="mt-1">
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {moduleCount} Courses / {semUnits} Units
