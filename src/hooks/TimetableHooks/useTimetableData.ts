@@ -1,7 +1,7 @@
 import { getUserId } from "@/services/auth";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserModules, swapLessonInTimetable } from "@/services/timetableDB";
+import { getUserModules, swapLessonInTimetableDB } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
 import type { DisplayLesson, ModuleDetails, NUSModsRawLesson, SavedTimetableModule } from "@/types";
 import {
@@ -56,7 +56,7 @@ export function useTimetableData(year: number, semester: number) {
             oldLesson: DisplayLesson;
             newClassSlots: DisplayLesson[];
         }) => {
-            await swapLessonInTimetable(oldLesson, newClassSlots, year, semester);
+            await swapLessonInTimetableDB(oldLesson, newClassSlots, year, semester);
         },
         onMutate: async ({ oldLesson, newClassSlots }) => {
             // Cancel outgoing refetches

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
-import type { ModuleDetails, NUSModsRawLesson } from "@/types"; ;
-import { addToTimetable, removeFromTimetable, isInTimetable } from "@/services/timetableDB";
+import type { ModuleDetails, NUSModsRawLesson } from "@/types";
+import { addToTimetableDB, removeFromTimetableDB, isInTimetableDB } from "@/services/timetableDB";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
@@ -16,13 +16,13 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
     // 1. Check Database for Sem 1 Status
     const { data: isAddedSem1 = false, isLoading: isLoadingSem1 } = useQuery({
         queryKey: ["timetableStatus", module.moduleCode, currentYear, 1],
-        queryFn: () => isInTimetable(module.moduleCode, currentYear, 1),
+        queryFn: () => isInTimetableDB(module.moduleCode, currentYear, 1),
     });
 
     // 2. Check Database for Sem 2 Status
     const { data: isAddedSem2 = false, isLoading: isLoadingSem2 } = useQuery({
         queryKey: ["timetableStatus", module.moduleCode, currentYear, 2],
-        queryFn: () => isInTimetable(module.moduleCode, currentYear, 2),
+        queryFn: () => isInTimetableDB(module.moduleCode, currentYear, 2),
     });
 
     // Database Mutation (Handles Add/Remove for either semester)
@@ -37,10 +37,10 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
             timetable: NUSModsRawLesson[];
         }) => {
             if (isAdded) {
-                await removeFromTimetable(module.moduleCode, currentYear, semester);
+                await removeFromTimetableDB(module.moduleCode, currentYear, semester);
                 return { semester, action: "removed" };
             } else {
-                await addToTimetable(module.moduleCode, timetable, currentYear, semester);
+                await addToTimetableDB(module.moduleCode, timetable, currentYear, semester);
                 return { semester, action: "added" };
             }
         },
@@ -58,7 +58,7 @@ export default function ModuleDetailsCard({ module }: { module: ModuleDetails })
                 }),
                 queryClient.invalidateQueries({
                     queryKey: ["timetable", currentYear, data.semester],
-                })
+                }),
             ]);
         },
         onError: (error, variables) => {

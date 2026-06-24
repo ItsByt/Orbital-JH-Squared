@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getModule } from "@/services/nusmods";
-import { addToTimetable, removeFromTimetable, addCustomEventToDB } from "@/services/timetableDB";
+import { addToTimetableDB, removeFromTimetableDB, addCustomEventToDB } from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { DisplayLesson } from "@/types";
@@ -65,7 +65,7 @@ export function useTimetableActions(
             }
 
             // If valid, add to Timetable Database
-            await addToTimetable(moduleCode, semData.timetable, currentYear, semester);
+            await addToTimetableDB(moduleCode, semData.timetable, currentYear, semester);
 
             await queryClient.invalidateQueries({
                 queryKey: ["timetable", currentYear, semester],
@@ -87,9 +87,9 @@ export function useTimetableActions(
 
         try {
             if (lessonType === "Personal Block" && id) {
-                await removeFromTimetable(moduleCode, currentYear, semester, String(id));
+                await removeFromTimetableDB(moduleCode, currentYear, semester, String(id));
             } else {
-                await removeFromTimetable(moduleCode, currentYear, semester);
+                await removeFromTimetableDB(moduleCode, currentYear, semester);
             }
 
             await queryClient.invalidateQueries({

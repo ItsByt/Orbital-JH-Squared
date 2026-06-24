@@ -17,7 +17,7 @@ export async function getUserModules(userId: string, year: number, semester: num
     return { myModules: data, error };
 }
 
-export async function isInTimetable(moduleCode: string, year: number, semester: number) {
+export async function isInTimetableDB(moduleCode: string, year: number, semester: number) {
     const userId = await getUserId();
     if (!userId) return false;
 
@@ -38,13 +38,13 @@ export async function isInTimetable(moduleCode: string, year: number, semester: 
     return data.length > 0;
 }
 
-export async function addToTimetable(
+export async function addToTimetableDB(
     moduleCode: string,
     timetableSlots: ModuleDetails["semesterData"][number]["timetable"],
     year: number,
     semester: number
 ) {
-    const userId = await requireAuth(); // Guaranteed to throw if not logged in
+    const userId = await requireAuth(); // Guaranteed to throw error if not logged in
 
     const { myModules } = await getUserModules(userId, year, semester);
 
@@ -72,7 +72,7 @@ export async function addToTimetable(
     if (error) throw error;
 }
 
-export async function removeFromTimetable(
+export async function removeFromTimetableDB(
     moduleCode: string,
     year: number,
     semester: number,
@@ -102,7 +102,7 @@ export async function removeFromTimetable(
     }
 }
 
-export async function swapLessonInTimetable(
+export async function swapLessonInTimetableDB(
     oldLesson: DisplayLesson,
     newClassSlots: DisplayLesson[],
     year: number,
