@@ -30,7 +30,7 @@ export const usePlannerStore = create<PlannerState>((set) => ({
     board: generateEmptyBoard(),
     dragState: { draggingModuleCode: null, isOverInvalidSem: false },
     visibleCustomColumns: [],
-    
+
     setBoard: (board) =>
         set(() => {
             const loadedCustomCols = Object.keys(board).filter(

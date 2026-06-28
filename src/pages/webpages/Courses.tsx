@@ -58,9 +58,7 @@ export default function Courses() {
             )}
 
             {/* Using the ModuleDetailsCard component for displaying module details */}
-            {selectedModule && !isFetching && (
-                <ModuleDetailsCard module={selectedModule} />
-            )}
+            {selectedModule && !isFetching && <ModuleDetailsCard module={selectedModule} />}
         </div>
     );
 }

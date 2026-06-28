@@ -86,7 +86,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     };
 
     const toggleExcludeMutation = useMutation<void, Error, ToggleVariables>({
-        mutationFn: async({ moduleCode, targetValue }) => {
+        mutationFn: async ({ moduleCode, targetValue }) => {
             await setExcludeInPlannerModuleDB(moduleCode, targetValue);
         },
         onError: (error, variables) => {

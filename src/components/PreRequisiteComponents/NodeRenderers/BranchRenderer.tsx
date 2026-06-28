@@ -20,6 +20,7 @@ export default function BranchRenderer({
     // The node received should be formatted already
     // make use of its properties to retrieve the list of children
     const children = (node.and || node.or || []) as FormattedPreReqNode[];
+    const hasChildren = children.length > 0;
 
     // The two booleans that are dependent on the formatted node's label are
     // needed to decide whether the hiding principle will be applied on children's leaf click.
@@ -63,41 +64,47 @@ export default function BranchRenderer({
     // 3. each tied to their respective horizontal connector from lines&Box
     return (
         <div className="flex flex-col items-center w-full">
-            {renderedChildren.length > 0 && (
+            {/* Render if there are children OR if it's a standalone text rule */}
+            {(hasChildren || node.label) && (
                 <div className="flex flex-col items-center">
                     <div className={`w-0.5 h-6 ${connectorStyle}`} />
                     {activeChildIdx === null && (
-                        <span className="bg-background text-muted-foreground text-[10px] px-2 -my-1 z-10">
-                            {label.toLowerCase()}
+                        <span
+                            className={`bg-background px-2 -my-1 z-10 text-center whitespace-pre-wrap ${!hasChildren ? "text-xs font-medium text-foreground" : "text-[10px] text-muted-foreground"}`}
+                        >
+                            {!hasChildren ? node.label : label.toLowerCase()}
                         </span>
                     )}
-                    <div className={`w-0.5 h-4 ${connectorStyle}`} />
+                    {/* Only draw bottom extension line if it actually has children to connect to */}
+                    {hasChildren && <div className={`w-0.5 h-4 ${connectorStyle}`} />}
                 </div>
             )}
 
-            <div className="flex flex-row justify-center items-start w-full isolate">
-                {renderedChildren.map((item, displayIdx) => (
-                    <div
-                        key={item.originalIdx}
-                        className="flex flex-col items-center relative w-full"
-                    >
-                        {renderedChildren.length > 1 && (
-                            <div
-                                className={`absolute top-0 h-0.5 ${connectorStyle} -z-10 ${getConnector(displayIdx, renderedChildren.length)}`}
+            {hasChildren && (
+                <div className="flex flex-row justify-center items-start w-full isolate">
+                    {renderedChildren.map((item, displayIdx) => (
+                        <div
+                            key={item.originalIdx}
+                            className="flex flex-col items-center relative w-full"
+                        >
+                            {renderedChildren.length > 1 && (
+                                <div
+                                    className={`absolute top-0 h-0.5 ${connectorStyle} -z-10 ${getConnector(displayIdx, renderedChildren.length)}`}
+                                />
+                            )}
+                            <div className={`w-0.5 h-4 ${connectorStyle}`} />
+                            <PreReqTree
+                                node={item.child}
+                                isRoot={false}
+                                onToggleExpand={(isExpanded) =>
+                                    handleChildToggle(item.originalIdx, isExpanded)
+                                }
+                                disableExpansion={disableExpansion}
                             />
-                        )}
-                        <div className={`w-0.5 h-4 ${connectorStyle}`} />
-                        <PreReqTree
-                            node={item.child}
-                            isRoot={false}
-                            onToggleExpand={(isExpanded) =>
-                                handleChildToggle(item.originalIdx, isExpanded)
-                            }
-                            disableExpansion={disableExpansion}
-                        />
-                    </div>
-                ))}
-            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -114,6 +121,6 @@ export default function BranchRenderer({
 //      any of
 //   CS0      CS1
 // on clicking CS1 to expand, it will tell the branch that idx = 1 is opened, isChildExpanded = true.
-// This would call the parent's handleChildToggle which will have have the active child's idx logged.
+// This would call the parent's handleChildToggle which will have the active child's idx logged.
 // The rendered children will see that it belongs in an OR branch
 // and completely ignore CS0, by which it will be hidden to the user by not being rendered.

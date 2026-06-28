@@ -9,7 +9,7 @@ export function useModulePrereq(moduleCode: string) {
             return data?.prereqTree || null;
         },
         staleTime: Infinity,
-        gcTime: Infinity,    
+        gcTime: Infinity,
     });
 
     return prereqTree;

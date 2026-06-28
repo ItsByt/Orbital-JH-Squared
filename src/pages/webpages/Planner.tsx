@@ -35,18 +35,18 @@ export default function Planner() {
     const setBoard = usePlannerStore((state) => state.setBoard);
     const setDragState = usePlannerStore((state) => state.setDragState);
     const moveModule = usePlannerStore((state) => state.moveModule);
-    
+
     // Loading the Planner Board
-     const { isLoading } = useQuery({
-         queryKey: ["plannerBoard"],
-         queryFn: async () => {
-             const rows = await getPlannerModules();
-             const formattedBoard = formatPlannerBoard(rows);
-             setBoard(formattedBoard); 
-             return formattedBoard;
-         },
-         staleTime: 1000 * 60 * 5, 
-     });
+    const { isLoading } = useQuery({
+        queryKey: ["plannerBoard"],
+        queryFn: async () => {
+            const rows = await getPlannerModules();
+            const formattedBoard = formatPlannerBoard(rows);
+            setBoard(formattedBoard);
+            return formattedBoard;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
 
     const moveModuleMutation = useMutation<
         void, // Return type of mutationFn
@@ -74,7 +74,7 @@ export default function Planner() {
             }
         },
         onError: (error, variables) => {
-            setBoard(variables.boardSnapshot); 
+            setBoard(variables.boardSnapshot);
             toast.error("Failed to move module.", {
                 description: getErrorMessage(error),
             });
@@ -83,7 +83,7 @@ export default function Planner() {
             queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
         },
     });
-    
+
     // Calculate and memoise Global Totals for the header
     const globalTotals = useMemo(() => {
         let count = 0;
@@ -97,7 +97,6 @@ export default function Planner() {
         });
         return { count, units };
     }, [board]);
-
 
     // Handle while-dragging updates
     const handleDragUpdate = (update: DragUpdate) => {

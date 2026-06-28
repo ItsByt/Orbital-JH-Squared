@@ -1,6 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getModule } from "@/services/nusmods";
-import { addToTimetableDB, removeFromTimetableDB, addCustomEventToDB } from "@/services/timetableDB";
+import {
+    addToTimetableDB,
+    removeFromTimetableDB,
+    addCustomEventToDB,
+} from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { DisplayLesson } from "@/types";
