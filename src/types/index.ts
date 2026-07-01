@@ -44,6 +44,7 @@ export interface SavedTimetableModule {
     end_time: string;
     venue: string;
     weeks: string | null;
+    color?: string;
 }
 
 // Details for class BLOCKS
@@ -63,8 +64,8 @@ export interface DisplayLesson {
     // We store each week using a corresponding bit (0 or 1),
     // where the ith week corresponds to the (i + 1)th bit from the right
     // So the number 101010 means the lesson is on weeks 1, 3 and 5
-    // Yes this means that the rightmost bit represents week 0 (but it is always defaulted to 0)
     weekBitmask: number;
+    color?: string;
 }
 
 //Details for modules added to the Planner

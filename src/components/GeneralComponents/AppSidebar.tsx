@@ -1,10 +1,12 @@
 import { getCurrentAcadSem } from "@/utils/generalUtils/time";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/services/supabase";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { toast } from "sonner";
 import logo from "@/assets/NUSModsPlusLogo.png";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
+
 
 export function AppSidebar() {
     const navigate = useNavigate();
@@ -35,10 +37,9 @@ export function AppSidebar() {
         const { error: signOutError } = await supabase.auth.signOut();
 
         if (signOutError) {
-            toast.error("Log Out Failed", { description: signOutError.message });
+            toast.error("Log Out Failed", { description: getErrorMessage(signOutError) });
         } else {
             toast.success("Logged Out Successfully!");
-            navigate("/");
         }
     }
 

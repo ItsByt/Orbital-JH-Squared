@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import { createClient, type Session } from "@supabase/supabase-js";
@@ -65,7 +65,7 @@ export default function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
 
-                        <Route element={session ? <Layout /> : <Login />}>
+                        <Route element={session ? <Layout /> : <Navigate to="/" replace />}>
                             <Route
                                 path="/timetable/sem-1"
                                 element={<TimetablePage semester={1} />}

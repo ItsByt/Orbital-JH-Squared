@@ -65,17 +65,27 @@ export default function ClassCard({
         }
     };
 
+    const baseHex = lesson.color || "#a855f7"; 
+    const bgHex = `${baseHex}33`; // To add opacity for background
+    const borderHex = `${baseHex}66`; // To add opacity for border
+
+    const isStandardState = !lesson.isAlternative && !hasOverlap;
+
     return (
         <div
             title={warningTooltip}
             onClick={handleClick}
             style={{
-                // Moved + 1 from convertTimeToColumn to here.
                 // +2 since the grid is 1-indexed whereas hourDiff is "0-indexed" (so +1),
                 // and to account for "Day" Column (so another +1)
                 gridColumnStart: colStart + 2,
                 gridColumnEnd: colEnd + 2,
                 gridRowStart: rowIndex,
+
+                ...(isStandardState && {
+                    backgroundColor: bgHex,
+                    borderColor: borderHex,
+                }),
             }}
             className={`my-1 mx-0.5 p-2 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 z-20 border
                 ${
@@ -86,7 +96,7 @@ export default function ClassCard({
                           ? // pulse red if conflict
                             "bg-destructive/10 border-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)] dark:shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse hover:animate-none group"
                           : // otherwise standard purple
-                            "bg-purple-500/10 dark:bg-purple-500/20 border-purple-400/40 dark:border-purple-400/30 hover:bg-purple-500/20"
+                            "hover:brightness-110"
                 }`}
         >
             <div className="flex flex-col space-y-0.5">

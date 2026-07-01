@@ -32,7 +32,12 @@ export default function AddCourseModal({
 }) {
     const queryClient = useQueryClient();
 
-    const { searchTerm, setSearchTerm, searchResults, isLoading } = AutoCompleteSearch();
+    const targetSemester = isUnvalidatedSemesterKey(semesterKey)
+        ? undefined
+        : parseSemesterKey(semesterKey).semester;
+
+    const { searchTerm, setSearchTerm, searchResults, isLoading } =
+        AutoCompleteSearch(targetSemester);
     const addModule = usePlannerStore((state) => state.addModule);
     const removeModule = usePlannerStore((state) => state.removeModule);
 

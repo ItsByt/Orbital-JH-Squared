@@ -27,7 +27,6 @@ export default function TimetableGrid({
         <div className="w-full border border-border rounded-xl overflow-x-auto bg-card shadow-sm relative scrollbar-thin">
             <div className="min-w-[1200px]">
                 {" "}
-                {/* Increased min-width for more hours */}
                 {/* Hour Markings */}
                 <div
                     className="grid border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none"

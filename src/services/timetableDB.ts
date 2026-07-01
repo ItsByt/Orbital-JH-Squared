@@ -149,3 +149,21 @@ export async function addCustomEventToDB(
     const { error } = await supabase.from("timetable_modules").insert(rowsToInsert);
     if (error) throw error;
 }
+
+export async function updateModuleColorInDB(
+    moduleCode: string, 
+    color: string, 
+    year: number,
+    semester: number,) {
+    
+    const userId = await requireAuth();
+    const { error } = await supabase
+        .from("timetable_modules")
+        .update({ color: color})
+        .eq("user_id", userId)
+        .eq("module_code", moduleCode)
+        .eq("year", year)
+        .eq("semester", semester);
+    
+    if (error) throw error;
+}

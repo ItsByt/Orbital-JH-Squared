@@ -4,7 +4,7 @@ import { getModuleList } from "@/services/nusmods";
 import type { ModuleSummary } from "@/types";
 import { getAcadYearStringDash } from "@/utils/generalUtils/time";
 
-export default function AutoCompleteSearch() {
+export default function AutoCompleteSearch(targetSemester?: number) {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<ModuleSummary[]>([]);
 
@@ -28,9 +28,16 @@ export default function AutoCompleteSearch() {
 
         //Filtering through the array of ModuleSummary
         const filtered = allModules.filter(
-            (mod) =>
-                mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
-                mod.title.toLowerCase().includes(lowerCaseSearch)
+            (mod) => {
+                if (targetSemester !== undefined && !mod.semesters.includes(targetSemester)) {
+                    return false;
+                }
+
+                return (
+                    mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
+                    mod.title.toLowerCase().includes(lowerCaseSearch)
+                )
+            }
         );
 
         filtered.sort((a, b) => {
@@ -59,7 +66,7 @@ export default function AutoCompleteSearch() {
         });
         // Only keep top 10 results
         setSearchResults(filtered.slice(0, 10));
-    }, [searchTerm, allModules]);
+    }, [searchTerm, allModules, targetSemester]);
 
     return {
         searchTerm,

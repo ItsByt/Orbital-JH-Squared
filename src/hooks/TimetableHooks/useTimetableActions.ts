@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getModule } from "@/services/nusmods";
-import { addToTimetableDB, removeFromTimetableDB, addCustomEventToDB } from "@/services/timetableDB";
+import { addToTimetableDB, removeFromTimetableDB, addCustomEventToDB, updateModuleColorInDB } from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { DisplayLesson } from "@/types";
@@ -142,11 +142,29 @@ export function useTimetableActions(
         }
     };
 
+    const handleUpdateColor = async (moduleCode: string, newColor: string) => {
+        // Optimistically Updating the Color
+        queryClient.setQueryData<DisplayLesson[]>(["timetable", currentYear, semester], (oldData) => {
+            if (!oldData) return oldData;
+            return oldData.map((lesson: DisplayLesson) => 
+                lesson.moduleCode === moduleCode ? { ...lesson, color: newColor } : lesson
+            );
+        });
+
+        try {
+            await updateModuleColorInDB(moduleCode, newColor, currentYear, semester);
+        } catch (error) {
+            toast.error("Failed to save color", { description: getErrorMessage(error) });
+            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] }); 
+        }
+    }
+
     return {
         handleSelectClass,
         handleSwapClass,
         handleAddModule,
         handleRemoveModule,
         handleCustomEvent,
+        handleUpdateColor,
     };
 }

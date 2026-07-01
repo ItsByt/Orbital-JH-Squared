@@ -50,6 +50,7 @@ export function formatSavedTimetableModules(savedList: SavedTimetableModule[]): 
             endMins: timeToMins(saved.end_time),
             weekBitmask: weeksToBitmask(parsedWeeks),
             isAlternative: false,
+            color: saved.color,
         };
     });
 }
