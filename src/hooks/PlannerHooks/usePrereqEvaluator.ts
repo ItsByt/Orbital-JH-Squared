@@ -70,7 +70,10 @@ export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
                     // Ignore checks against ourselves
                     if (dependentMod.moduleCode === moduleCode) return;
 
-                    const dependentTree = queryClient.getQueryData<PrereqTree>(["prereq", dependentMod.moduleCode]);
+                    const dependentTree = queryClient.getQueryData<PrereqTree>([
+                        "prereq",
+                        dependentMod.moduleCode,
+                    ]);
                     if (!dependentTree) return;
 
                     // We check if the dependent (other) module's requirements are fulfilled

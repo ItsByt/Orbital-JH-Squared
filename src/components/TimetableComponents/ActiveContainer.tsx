@@ -13,14 +13,19 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const PRESET_COLORS = ["#56A58B", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#64748b"];
+const PRESET_COLORS = ["#56A58B", "#3b82f6", "#f59e0b", "#ef4444", "#a855f7", "#ec4899", "#64748b"];
 
 interface ActiveContainerProps {
     uniqueActiveModules: DisplayLesson[];
     customNameCounts: Record<string, number>;
     handleAddModule: (moduleCode: string, uniqueModules: DisplayLesson[]) => Promise<void>;
     handleRemoveModule: (moduleCode: string, id?: string, lessonType?: string) => void;
-    handleUpdateColor: (moduleCode: string, color: string) => void;
+    handleUpdateColor: (
+        moduleCode: string,
+        color: string,
+        id?: string,
+        lessonType?: string
+    ) => void;
     semester: number;
 }
 
@@ -30,7 +35,7 @@ export default function ActiveContainer({
     handleAddModule,
     handleRemoveModule,
     handleUpdateColor,
-    semester
+    semester,
 }: ActiveContainerProps) {
     const [searchResetKey, setSearchResetKey] = useState(0);
 
@@ -97,18 +102,41 @@ export default function ActiveContainer({
                                             </DropdownMenuLabel>
 
                                             {/* Color Palette Grid */}
-                                            <div className="flex flex-wrap gap-2 px-2 py-1.5">
+                                            <div className="flex flex-wrap items-center gap-2 px-2 py-1.5">
                                                 {PRESET_COLORS.map((color) => (
                                                     <button
                                                         key={color}
                                                         onClick={() =>
-                                                            handleUpdateColor(mod.moduleCode, color)
+                                                            handleUpdateColor(
+                                                                mod.moduleCode,
+                                                                color,
+                                                                mod.id,
+                                                                mod.lessonType
+                                                            )
                                                         }
                                                         className="h-6 w-6 rounded-full border border-black/10 cursor-pointer hover:scale-110 hover:ring-2 hover:ring-offset-1 transition-all"
                                                         style={{ backgroundColor: color }}
                                                         aria-label={`Set color to ${color}`}
                                                     />
                                                 ))}
+
+                                                {/* Custom Coloring */}
+                                                <div className="relative block h-6 w-6 flex-shrink-0 rounded-full overflow-hidden border border-black/20 cursor-pointer hover:scale-110 transition-all">
+                                                    <div className="absolute inset-0 bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 pointer-events-none" />
+                                                    <input
+                                                        type="color"
+                                                        title="Pick a custom color"
+                                                        className="absolute inset-[-10px] w-10 h-10 opacity-0 cursor-pointer"
+                                                        onChange={(e) =>
+                                                            handleUpdateColor(
+                                                                mod.moduleCode,
+                                                                e.target.value,
+                                                                mod.id,
+                                                                mod.lessonType
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
 
                                             <DropdownMenuSeparator />

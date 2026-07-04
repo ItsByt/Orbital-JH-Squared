@@ -49,8 +49,8 @@ export default function SemesterColumn({
                 clearColumn(semesterKey);
                 toast.success(`${title} cleared`);
             }
-            
-            setIsConfirming(false); 
+
+            setIsConfirming(false);
         },
         onError: (error) => {
             toast.error("Failed to clear modules", { description: getErrorMessage(error) });

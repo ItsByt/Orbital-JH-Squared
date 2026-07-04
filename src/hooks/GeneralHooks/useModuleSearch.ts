@@ -13,8 +13,8 @@ export default function AutoCompleteSearch(targetSemester?: number) {
     const { data: allModules = [], isLoading } = useQuery({
         queryKey: ["moduleList", acadYearString],
         queryFn: () => getModuleList(),
-        staleTime: Infinity, 
-        gcTime: 1000 * 60 * 60 * 24, 
+        staleTime: Infinity,
+        gcTime: 1000 * 60 * 60 * 24,
     });
 
     //Autocomplete Logic for searching module codes
@@ -27,18 +27,16 @@ export default function AutoCompleteSearch(targetSemester?: number) {
         const lowerCaseSearch = searchTerm.toLowerCase();
 
         //Filtering through the array of ModuleSummary
-        const filtered = allModules.filter(
-            (mod) => {
-                if (targetSemester !== undefined && !mod.semesters.includes(targetSemester)) {
-                    return false;
-                }
-
-                return (
-                    mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
-                    mod.title.toLowerCase().includes(lowerCaseSearch)
-                )
+        const filtered = allModules.filter((mod) => {
+            if (targetSemester !== undefined && !mod.semesters.includes(targetSemester)) {
+                return false;
             }
-        );
+
+            return (
+                mod.moduleCode.toLowerCase().includes(lowerCaseSearch) ||
+                mod.title.toLowerCase().includes(lowerCaseSearch)
+            );
+        });
 
         filtered.sort((a, b) => {
             const aCode = a.moduleCode.toLowerCase();

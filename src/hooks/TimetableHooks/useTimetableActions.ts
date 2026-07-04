@@ -1,6 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { getModule } from "@/services/nusmods";
-import { addToTimetableDB, removeFromTimetableDB, addCustomEventToDB, updateModuleColorInDB } from "@/services/timetableDB";
+import {
+    addToTimetableDB,
+    removeFromTimetableDB,
+    addCustomEventToDB,
+    updateModuleColorInDB,
+} from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import type { DisplayLesson } from "@/types";
@@ -34,7 +39,11 @@ export function useTimetableActions(
         if (!oldLesson) return;
 
         try {
-            swapModuleSlot(oldLesson, chosenAlternative);
+            const alternativeWithColor = {
+                ...chosenAlternative,
+                color: oldLesson.color,
+            };
+            swapModuleSlot(oldLesson, alternativeWithColor);
         } catch (error) {
             toast.error("Failed to swap class", { description: getErrorMessage(error) });
         }
@@ -87,7 +96,13 @@ export function useTimetableActions(
 
         try {
             if (lessonType === "Personal Block" && id) {
-                await removeFromTimetableDB(moduleCode, currentYear, semester, String(id));
+                await removeFromTimetableDB(
+                    moduleCode,
+                    currentYear,
+                    semester,
+                    String(id),
+                    lessonType
+                );
             } else {
                 await removeFromTimetableDB(moduleCode, currentYear, semester);
             }
@@ -142,22 +157,49 @@ export function useTimetableActions(
         }
     };
 
-    const handleUpdateColor = async (moduleCode: string, newColor: string) => {
+    const handleUpdateColor = async (
+        moduleCode: string,
+        newColor: string,
+        id?: string,
+        lessonType?: string
+    ) => {
         // Optimistically Updating the Color
-        queryClient.setQueryData<DisplayLesson[]>(["timetable", currentYear, semester], (oldData) => {
-            if (!oldData) return oldData;
-            return oldData.map((lesson: DisplayLesson) => 
-                lesson.moduleCode === moduleCode ? { ...lesson, color: newColor } : lesson
-            );
-        });
+        queryClient.setQueryData<DisplayLesson[]>(
+            ["timetable", currentYear, semester],
+            (oldData) => {
+                if (!oldData) return oldData;
+                return oldData.map((lesson: DisplayLesson) => {
+                    if (lessonType == "Personal Block" && id) {
+                        if (lesson.id === id) return { ...lesson, color: newColor };
+                        return lesson;
+                    }
+
+                    if (
+                        lesson.moduleCode === moduleCode &&
+                        lesson.lessonType !== "Personal Block"
+                    ) {
+                        return { ...lesson, color: newColor };
+                    }
+
+                    return lesson;
+                });
+            }
+        );
 
         try {
-            await updateModuleColorInDB(moduleCode, newColor, currentYear, semester);
+            await updateModuleColorInDB(
+                moduleCode,
+                newColor,
+                currentYear,
+                semester,
+                id,
+                lessonType
+            );
         } catch (error) {
             toast.error("Failed to save color", { description: getErrorMessage(error) });
-            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] }); 
+            queryClient.invalidateQueries({ queryKey: ["timetable", currentYear, semester] });
         }
-    }
+    };
 
     return {
         handleSelectClass,

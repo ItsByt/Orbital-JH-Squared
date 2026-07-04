@@ -5,7 +5,9 @@ import { getAcadYearStringDash } from "@/utils/generalUtils/time";
 export async function getModuleList(): Promise<ModuleSummary[]> {
     try {
         const acadYearString = getAcadYearStringDash();
-        const response = await fetch(`https://api.nusmods.com/v2/${acadYearString}/moduleList.json`);
+        const response = await fetch(
+            `https://api.nusmods.com/v2/${acadYearString}/moduleList.json`
+        );
 
         if (!response.ok) return [];
 

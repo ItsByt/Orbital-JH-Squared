@@ -1,12 +1,8 @@
 import { getCurrentAcadSem } from "@/utils/generalUtils/time";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/services/supabase";
-import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
-import { toast } from "sonner";
 import logo from "@/assets/NUSModsPlusLogo.png";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
-
 
 export function AppSidebar() {
     const navigate = useNavigate();
@@ -33,16 +29,6 @@ export function AppSidebar() {
         navigate("/settings");
     };
 
-    async function handleLogOut() {
-        const { error: signOutError } = await supabase.auth.signOut();
-
-        if (signOutError) {
-            toast.error("Log Out Failed", { description: getErrorMessage(signOutError) });
-        } else {
-            toast.success("Logged Out Successfully!");
-        }
-    }
-
     return (
         <Sidebar>
             <SidebarHeader className="p-4">
@@ -68,10 +54,6 @@ export function AppSidebar() {
 
                 <Button onClick={goToSettings} variant="outline" className={buttonStyle}>
                     Settings
-                </Button>
-
-                <Button onClick={handleLogOut} variant="destructive" className={buttonStyle}>
-                    Log Out
                 </Button>
             </SidebarContent>
         </Sidebar>

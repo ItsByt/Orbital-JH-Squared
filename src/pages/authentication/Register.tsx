@@ -1,6 +1,7 @@
 import { supabase } from "@/services/supabase";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeComponents/ThemeToggle";
 import logo from "@/assets/NUSModsPlusLogo.png";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { Button } from "@/components/ui/button";
@@ -35,7 +36,8 @@ export default function Register() {
     }
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">
+        <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">
+            <ThemeToggle />
             <div className="w-full max-w-md space-y-8 flex flex-col items-center">
                 <div className="text-center w-full cursor-pointer" onClick={() => navigate("/")}>
                     <img

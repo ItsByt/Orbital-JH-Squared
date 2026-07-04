@@ -100,10 +100,7 @@ export interface SavedPlannerRow {
 // Either a string, an object with key of "and"/"or", value of array of PrereqTree,
 // or key of "nOf" and value [number of modules needed, specific type of module needed]
 export type PrereqTree =
-    | string
-    | { and: PrereqTree[] }
-    | { or: PrereqTree[] }
-    | { nOf: [number, PrereqTree[]] };
+    string | { and: PrereqTree[] } | { or: PrereqTree[] } | { nOf: [number, PrereqTree[]] };
 
 // Formatted Pre-Req Tree Node
 export interface FormattedPreReqNode {

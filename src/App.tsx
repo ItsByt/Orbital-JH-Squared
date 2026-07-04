@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { ThemeProvider } from "next-themes";
 
 import { createClient, type Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
-import { Theme } from "@/components/ThemeComponents/Theme";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -45,55 +45,58 @@ export default function App() {
         return () => subscription.unsubscribe();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-200">
-                <Loader2 className="h-10 w-10 animate-spin text-[#749c83]" />
-                <span className="ml-3 mt-4 text-base font-medium text-muted-foreground">
-                    Checking session...
-                </span>
-            </div>
-        );
-    }
-
     return (
         <QueryClientProvider client={queryClient}>
-            <Theme defaultTheme="dark" storageKey="nusmods-plus-theme">
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<Welcome />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+            <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+            >
+                {loading ? (
+                    <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-200">
+                        <Loader2 className="h-10 w-10 animate-spin text-[#749c83]" />
+                        <span className="ml-3 mt-4 text-base font-medium text-muted-foreground">
+                            Checking session...
+                        </span>
+                    </div>
+                ) : (
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<Welcome />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
 
-                        <Route element={session ? <Layout /> : <Navigate to="/" replace />}>
-                            <Route
-                                path="/timetable/sem-1"
-                                element={<TimetablePage semester={1} />}
-                            />
-                            <Route
-                                path="/timetable/sem-2"
-                                element={<TimetablePage semester={2} />}
-                            />
-                            <Route path="/planner" element={<Planner />} />
-                            <Route path="/pre-requisite" element={<Pre_Requisite />} />
-                            <Route path="/courses" element={<Courses />} />
-                            <Route path="/settings" element={<Settings />} />
-                        </Route>
-                    </Routes>
+                            <Route element={session ? <Layout /> : <Navigate to="/" replace />}>
+                                <Route
+                                    path="/timetable/sem-1"
+                                    element={<TimetablePage semester={1} />}
+                                />
+                                <Route
+                                    path="/timetable/sem-2"
+                                    element={<TimetablePage semester={2} />}
+                                />
+                                <Route path="/planner" element={<Planner />} />
+                                <Route path="/pre-requisite" element={<Pre_Requisite />} />
+                                <Route path="/courses" element={<Courses />} />
+                                <Route path="/settings" element={<Settings />} />
+                            </Route>
+                        </Routes>
 
-                    <Toaster
-                        theme="system"
-                        toastOptions={{
-                            classNames: {
-                                toast: "bg-background border border-border text-foreground rounded-xl p-4 shadow-xl flex items-center",
-                                title: "text-foreground font-semibold text-sm",
-                                description:
-                                    "text-muted-foreground dark:!text-[#e4e4e7] text-xs font-normal mt-1 block leading-relaxed",
-                            },
-                        }}
-                    />
-                </BrowserRouter>
-            </Theme>
+                        <Toaster
+                            theme="system"
+                            toastOptions={{
+                                classNames: {
+                                    toast: "bg-background border border-border text-foreground rounded-xl p-4 shadow-xl flex items-center",
+                                    title: "text-foreground font-semibold text-sm",
+                                    description:
+                                        "text-muted-foreground dark:!text-[#e4e4e7] text-xs font-normal mt-1 block leading-relaxed",
+                                },
+                            }}
+                        />
+                    </BrowserRouter>
+                )}
+            </ThemeProvider>
         </QueryClientProvider>
     );
 }
