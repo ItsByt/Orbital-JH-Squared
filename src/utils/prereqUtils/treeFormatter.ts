@@ -33,6 +33,25 @@ export function formatTree(node: PrereqTree, allValidCodes: string[]): Formatted
         // CASE 3: "OR" present
         // Either of the cases must exist and be intercepted
 
+        // EDGE CASE: "cohort" requirement
+        if ("cohort" in structure) {
+            const cohortData = structure.cohort as { rule?: string; years?: string[] };
+
+            const formattedYears =
+                cohortData.years
+                    ?.map((y) => {
+                        if (y.startsWith("S:")) return y.replace("S:", "starting from ");
+                        if (y.startsWith("E:")) return y.replace("E:", "up till ");
+                        return y;
+                    })
+                    .join(", ") || "";
+
+            return {
+                type: "branch",
+                label: `Cohorts ${formattedYears}`.trim(),
+            };
+        }
+
         // CASE 1:
         if ("nOf" in structure && Array.isArray(structure.nOf)) {
             // Cast elements as PrereqTree[] instead of string[] to handle

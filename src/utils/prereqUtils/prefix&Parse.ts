@@ -38,11 +38,20 @@ export function parseStringRule(node: string, allValidCodes: string[]): Formatte
             label: requiredCount ? `needs at least ${requiredCount} modules from` : `needs any of`,
         };
     }
+
     const exactModuleText = node.replace(/\\"/g, '"').trim();
 
+    const isModuleCode = /^[A-Z]{2,4}\d{1,4}[A-Z]{0,2}(:.+)?$/.test(exactModuleText);
+
+    if (!isModuleCode) {
+        return {
+            type: "branch",
+            label: exactModuleText,
+        };
+    }
+
     return {
-        type: "branch",
-        label: " ",
-        and: [{ type: "leaf", moduleCode: exactModuleText }],
+        type: "leaf",
+        moduleCode: exactModuleText,
     };
 }
