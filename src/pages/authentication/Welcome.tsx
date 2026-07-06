@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeComponents/ThemeToggle";
 import logo from "@/assets/NUSModsPlusLogo.png";
 
 export default function Welcome() {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">
+        <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">
+            <ThemeToggle />
             <div className="w-full max-w-2xl text-center space-y-8 flex flex-col items-center">
                 <div className="w-full">
                     <img

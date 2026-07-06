@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------------------------------------
 // G U I D E:
 // Helper to assign correct automatically rescalable horizontal connector to module based on relative index
-// Constants for box colors dependent on is_Expanded, constant for all line connectors' colour
+// Constants for box colors dependent on is_Expanded, constant for all line connectors' color
 //---------------------------------------------------------------------------------------------------------
 
 export const getConnector = (index: number, length: number): string => {

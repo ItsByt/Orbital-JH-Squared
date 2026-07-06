@@ -41,7 +41,12 @@ export function useTimetableData(year: number, semester: number) {
         if (!selectedLesson || !modData) return [];
         const semData = modData.semesterData?.find((s) => s.semester === semester);
         const rawTimetable = semData?.timetable || [];
-        return formatAlternativeLessons(rawTimetable, selectedLesson);
+
+        const rawAlternatives = formatAlternativeLessons(rawTimetable, selectedLesson);
+        return rawAlternatives.map((alt) => ({
+            ...alt,
+            color: selectedLesson.color,
+        }));
     }, [selectedLesson, modData, semester]);
 
     //___________________________________ fn to clear current alternatives___________________________________________//
@@ -104,7 +109,7 @@ export function useTimetableData(year: number, semester: number) {
         alternatives,
         selectModuleToCompare: setSelectedLesson,
         clearAlternatives,
-        swapModuleSlot: (oldLesson: DisplayLesson, newLesson: DisplayLesson) => {
+        swapModuleSlot: async (oldLesson: DisplayLesson, newLesson: DisplayLesson) => {
             if (!modData) return;
 
             const semData = modData.semesterData?.find((s) => s.semester === semester);
@@ -118,8 +123,18 @@ export function useTimetableData(year: number, semester: number) {
             );
 
             const newClassSlots: DisplayLesson[] = tiedRawSlots.map(
-                (slot: NUSModsRawLesson, index: number) =>
-                    buildDisplayLesson(oldLesson.moduleCode, slot, `temp-swap-${index}`, false)
+                (slot: NUSModsRawLesson, index: number) => {
+                    const builtLesson = buildDisplayLesson(
+                        oldLesson.moduleCode,
+                        slot,
+                        `temp-swap-${index}`,
+                        false
+                    );
+                    return {
+                        ...builtLesson,
+                        color: oldLesson.color,
+                    };
+                }
             );
 
             swapMutation.mutate({ oldLesson, newClassSlots });

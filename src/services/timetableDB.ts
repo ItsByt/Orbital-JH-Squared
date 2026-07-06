@@ -76,7 +76,8 @@ export async function removeFromTimetableDB(
     moduleCode: string,
     year: number,
     semester: number,
-    id?: string
+    id?: string,
+    lessonType?: string
 ) {
     const userId = await requireAuth();
 
@@ -87,19 +88,14 @@ export async function removeFromTimetableDB(
         .eq("year", year)
         .eq("semester", semester);
 
-    if (id) {
-        const targetId = id.startsWith("custom-") ? id : Number(id);
-        query = query.eq("id", targetId);
+    if (lessonType === "Personal Block" && id) {
+        query = query.eq("id", id);
     } else {
         query = query.eq("module_code", moduleCode);
     }
 
-    const { data, error } = await query.select();
-
+    const { error } = await query;
     if (error) throw error;
-    if (!data || data.length === 0) {
-        throw new Error("Could not find that module in your database to delete.");
-    }
 }
 
 export async function swapLessonInTimetableDB(
@@ -124,8 +120,14 @@ export async function swapLessonInTimetableDB(
     if (deleteError) throw deleteError;
 
     // Insert all new slots tied to the new classNo
-    const rowsToInsert = formatForTimetableDatabase(newClassSlots, userId, year, semester);
-    const { error: insertError } = await supabase.from("timetable_modules").insert(rowsToInsert);
+    const rawRowsToInsert = formatForTimetableDatabase(newClassSlots, userId, year, semester);
+    const rowsToInsertWithColor = rawRowsToInsert.map((row) => ({
+        ...row,
+        color: oldLesson.color,
+    }));
+    const { error: insertError } = await supabase
+        .from("timetable_modules")
+        .insert(rowsToInsertWithColor);
 
     if (insertError) throw insertError;
 }
@@ -147,5 +149,31 @@ export async function addCustomEventToDB(
     );
 
     const { error } = await supabase.from("timetable_modules").insert(rowsToInsert);
+    if (error) throw error;
+}
+
+export async function updateModuleColorInDB(
+    moduleCode: string,
+    color: string,
+    year: number,
+    semester: number,
+    id?: string,
+    lessonType?: string
+) {
+    const userId = await requireAuth();
+    let query = supabase
+        .from("timetable_modules")
+        .update({ color: color })
+        .eq("user_id", userId)
+        .eq("year", year)
+        .eq("semester", semester);
+
+    if (lessonType === "Personal Block" && id) {
+        query = query.eq("id", id);
+    } else {
+        query = query.eq("module_code", moduleCode);
+    }
+
+    const { error } = await query;
     if (error) throw error;
 }

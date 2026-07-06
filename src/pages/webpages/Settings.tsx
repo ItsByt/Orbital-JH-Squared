@@ -1,11 +1,22 @@
-import { useTheme } from "@/components/ThemeComponents/Theme";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, LogOut } from "lucide-react";
+import { supabase } from "@/services/supabase";
+import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import { toast } from "sonner";
 
 export default function Settings() {
-    // moved bulky code to theme.ts under components
-    // use this to activate
     const { theme, setTheme } = useTheme();
+
+    async function handleLogOut() {
+        const { error: signOutError } = await supabase.auth.signOut();
+
+        if (signOutError) {
+            toast.error("Log Out Failed", { description: getErrorMessage(signOutError) });
+        } else {
+            toast.success("Logged Out Successfully!");
+        }
+    }
 
     return (
         <div className="w-full min-h-screen flex flex-col items-start justify-start pt-1 px-6 pb-6 space-y-4 bg-background text-foreground">
@@ -21,6 +32,7 @@ export default function Settings() {
                 </h1>
             </div>
 
+            {/* Theme Toggling for Dark and Light Mode*/}
             <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
                     <h2
@@ -31,6 +43,9 @@ export default function Settings() {
                     >
                         Theme Toggle
                     </h2>
+                    <p className="text-sm text-muted-foreground">
+                        Toggle the brightness of page displays.
+                    </p>
                 </div>
 
                 {/* 3-Column Grid for Buttons */}
@@ -63,6 +78,32 @@ export default function Settings() {
                     >
                         <Monitor className="h-4 w-4" />
                         System
+                    </Button>
+                </div>
+            </div>
+
+            {/* Account Management */}
+            <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
+                <div className="space-y-1.5">
+                    <h2
+                        className="text-xl font-semibold leading-none tracking-tight text-destructive"
+                        style={{ fontFamily: "Bahnschrift, sans-serif" }}
+                    >
+                        Account Management
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                        Manage your active session across devices.
+                    </p>
+                </div>
+
+                <div className="pt-2">
+                    <Button
+                        variant="destructive"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 h-11 px-8"
+                        onClick={handleLogOut}
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Log Out
                     </Button>
                 </div>
             </div>

@@ -32,12 +32,16 @@ export const usePlannerStore = create<PlannerState>((set) => ({
     visibleCustomColumns: [],
 
     setBoard: (board) =>
-        set(() => {
+        set((state) => {
             const loadedCustomCols = Object.keys(board).filter(
                 (key) => isCustomSemesterKey(key) && board[key].length > 0
             );
 
-            return { board, visibleCustomColumns: loadedCustomCols };
+            const mergedColumns = Array.from(
+                new Set([...state.visibleCustomColumns, ...loadedCustomCols])
+            );
+
+            return { board, visibleCustomColumns: mergedColumns };
         }),
 
     setDragState: (dragState) => set({ dragState }),

@@ -3,9 +3,14 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export default function SearchBar({ onSelect }: { onSelect: (moduleCode: string) => void }) {
+interface SearchBarProps {
+    onSelect: (moduleCode: string) => void;
+    targetSemester?: number;
+}
+
+export default function SearchBar({ onSelect, targetSemester }: SearchBarProps) {
     const { searchTerm, setSearchTerm, searchResults, setSearchResults, isLoading } =
-        AutoCompleteSearch();
+        AutoCompleteSearch(targetSemester);
     const [isOpen, setIsOpen] = useState(false);
 
     return (

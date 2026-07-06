@@ -39,6 +39,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
         handleAddModule,
         handleRemoveModule,
         handleCustomEvent,
+        handleUpdateColor,
     } = useTimetableActions(
         semester,
         selectedLesson,
@@ -100,6 +101,8 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 customNameCounts={customNameCounts}
                 handleAddModule={handleAddModule}
                 handleRemoveModule={handleRemoveModule}
+                semester={semester}
+                handleUpdateColor={handleUpdateColor}
             />
         </div>
     );
