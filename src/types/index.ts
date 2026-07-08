@@ -16,7 +16,6 @@ export interface ModuleDetails {
         timetable: NUSModsRawLesson[];
     }[];
     prereqTree?: PrereqTree; // Modules with no pre-requisites default to undefined or null
-    prerequisite?: string;
 }
 
 // Details about just a lesson itself

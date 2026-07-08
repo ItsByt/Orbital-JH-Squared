@@ -14,7 +14,7 @@ type RenderContext = {
     nOfColor?: string;
 };
 
-export default function MissingMissingPrereqTreeRenderer({
+export default function MissingPrereqTreeRenderer({
     tree,
     boardMap,
     targetTime,
@@ -22,6 +22,8 @@ export default function MissingMissingPrereqTreeRenderer({
     if (!tree) return null;
 
     const renderNode = (node: PrereqTree, context?: RenderContext): React.ReactNode => {
+        if (!node) return null;
+
         if (typeof node === "string") {
             const cleanCode = removeModuleCodeGrade(node);
             const hasWildcard = cleanCode.includes("%");
@@ -124,6 +126,8 @@ export default function MissingMissingPrereqTreeRenderer({
             const evaluateChildStatus = (
                 child: PrereqTree
             ): "VALID" | "MISPLACED" | "MISSING" | "WILDCARD" => {
+                if (!child) return "MISSING";
+
                 if (typeof child === "string") {
                     const cleanCode = removeModuleCodeGrade(child).trim();
                     if (cleanCode.includes("%")) return "WILDCARD"; // We handle wildcards specially

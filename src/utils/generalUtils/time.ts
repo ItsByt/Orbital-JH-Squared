@@ -1,9 +1,9 @@
 export function getCurrentAcadYear(): number {
     const now = new Date();
     const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth(); //0-indexed, so Jan is 0
+    const currentMonth = now.getMonth(); // 0-indexed, so Jan is 0
 
-    if (currentMonth >= 7) {
+    if (currentMonth >= 6) {
         return currentYear;
     } else {
         return currentYear - 1;
@@ -25,9 +25,9 @@ export function getAcadYearStringDash(): string {
 // Returns only Semester 1 and 2
 export function getCurrentAcadSem(): number {
     const now = new Date();
-    const currentMonth = now.getMonth(); //0-indexed, so Jan is 0
+    const currentMonth = now.getMonth(); // 0-indexed, so Jan is 0
 
-    if (currentMonth >= 7) {
+    if (currentMonth >= 6) {
         return 1;
     } else {
         return 2;
