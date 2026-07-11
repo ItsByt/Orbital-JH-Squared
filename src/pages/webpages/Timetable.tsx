@@ -3,17 +3,19 @@ import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
 import { getCurrentAcadYear, getAcadYearStringSlash } from "@/utils/generalUtils/time";
 import { Loader2 } from "lucide-react";
-
+import { useState } from "react";
 import CustomSlotDialog from "@/components/TimetableComponents/CustomSlotDialog";
 import SemesterNavigation from "@/components/TimetableComponents/SemesterNavigation";
 import ActiveContainer from "@/components/TimetableComponents/ActiveContainer";
 import TimetableGrid from "@/components/TimetableComponents/TimetableGrid";
-
+import { DisplayLesson } from "@/types";
 import { DAYS, TIMETABLE_HOURS, TIMETABLE_WEEKS } from "@/config/constants";
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
     const acadYearString = getAcadYearStringSlash();
+    const [editingLesson, setEditingLesson] = useState<DisplayLesson | null>(null);
+    const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
     // TimetableData abstractions - retrieve, select and swap
     const {
@@ -39,6 +41,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
         handleAddModule,
         handleRemoveModule,
         handleCustomEvent,
+        handleUpdateCustomEvent,
         handleUpdateColor,
     } = useTimetableActions(
         semester,
@@ -79,18 +82,31 @@ export default function TimetablePage({ semester }: { semester: number }) {
                     selectedLesson={selectedLesson}
                     handleSelectClass={handleSelectClass}
                     handleSwapClass={handleSwapClass}
+                    handleUpdateCustomLesson={(lesson) => {
+                        setEditingLesson(lesson);
+                        setCustomDialogOpen(true);
+                    }}
                 />
 
                 <div className="w-full flex items-center justify-between mt-4">
                     {/* Semester Navigation */}
                     <SemesterNavigation semester={semester} />
 
-                    {/* Add Custom Event PLUS */}
+                    {/* Add Custom Event PLUS/EDIT */}
                     <CustomSlotDialog
                         DAYS={DAYS}
                         HOURS={TIMETABLE_HOURS}
                         WEEKS={TIMETABLE_WEEKS}
+                        open={customDialogOpen}
+                        onOpenChange={(open) => {
+                            setCustomDialogOpen(open);
+                            if (!open) {
+                                setEditingLesson(null);
+                            }
+                        }}
+                        editLesson={editingLesson}
                         onCustomEvent={handleCustomEvent}
+                        onUpdateCustomEvent={handleUpdateCustomEvent}
                     />
                 </div>
             </div>
