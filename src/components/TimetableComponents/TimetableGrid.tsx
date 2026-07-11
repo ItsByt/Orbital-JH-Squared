@@ -11,6 +11,7 @@ interface TimetableGridProps {
     selectedLesson: DisplayLesson | null;
     handleSelectClass: (lesson: DisplayLesson) => void;
     handleSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
+    handleUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }
 
 export default function TimetableGrid({
@@ -20,6 +21,7 @@ export default function TimetableGrid({
     selectedLesson,
     handleSelectClass,
     handleSwapClass,
+    handleUpdateCustomLesson,
 }: TimetableGridProps) {
     const gridTemplate = `80px repeat(${TOTAL_GRID_COLS}, 1fr)`;
 
@@ -91,6 +93,7 @@ export default function TimetableGrid({
                                         selectedLesson={selectedLesson}
                                         onSelectClass={handleSelectClass}
                                         onSwapClass={handleSwapClass}
+                                        onUpdateCustomLesson={handleUpdateCustomLesson}
                                     />
                                 ))}
                             </div>

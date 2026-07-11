@@ -152,6 +152,42 @@ export async function addCustomEventToDB(
     if (error) throw error;
 }
 
+export async function updateCustomEventInDB(
+    id: string,
+    eventData: {
+        name: string;
+        day: string;
+        startTime: string;
+        endTime: string;
+        venue: string;
+        selectedWeeks: number[];
+        weekBitmask: number;
+        classNo: string;
+    },
+    year: number,
+    semester: number
+) {
+    const userId = await requireAuth();
+
+    const { error } = await supabase
+        .from("timetable_modules")
+        .update({
+            module_code: eventData.name,
+            day: eventData.day,
+            start_time: eventData.startTime,
+            end_time: eventData.endTime,
+            venue: eventData.venue,
+            weeks: JSON.stringify(eventData.selectedWeeks),
+            class_no: eventData.classNo,
+        })
+        .eq("id", id)
+        .eq("user_id", userId)
+        .eq("year", year)
+        .eq("semester", semester);
+
+    if (error) throw error;
+}
+
 export async function updateModuleColorInDB(
     moduleCode: string,
     color: string,

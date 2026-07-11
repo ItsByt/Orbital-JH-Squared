@@ -23,6 +23,8 @@ export async function getModuleList(): Promise<ModuleSummary[]> {
 export async function getModule(moduleCode: string): Promise<ModuleDetails | null> {
     try {
         const acadYearString = getAcadYearStringDash();
+        const url = `https://api.nusmods.com/v2/${acadYearString}/modules/${moduleCode.toUpperCase()}.json`;
+        console.log("FETCHING NUSMODS URL:", url);
         const response = await fetch(
             `https://api.nusmods.com/v2/${acadYearString}/modules/${moduleCode.toUpperCase()}.json`
         );
