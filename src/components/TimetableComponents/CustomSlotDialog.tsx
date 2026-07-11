@@ -158,7 +158,7 @@ export default function CustomSlotDialog({
         return true;
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (isSubmitting) return;
 
