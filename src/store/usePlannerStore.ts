@@ -7,7 +7,7 @@ const initialState = {
     board: generateEmptyBoard(),
     dragState: { draggingModuleCode: null as string | null, isOverInvalidSem: false },
     visibleCustomColumns: [] as string[],
-}
+};
 
 interface PlannerState {
     // board key format: "Y1S1"
@@ -147,10 +147,10 @@ export const usePlannerStore = create<PlannerState>((set) => ({
                 ),
             },
         })),
-    
-    resetStore: () => 
+
+    resetStore: () =>
         set({
-            board: generateEmptyBoard(), 
+            board: generateEmptyBoard(),
             dragState: { draggingModuleCode: null, isOverInvalidSem: false },
             visibleCustomColumns: [],
         }),
