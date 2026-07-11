@@ -77,8 +77,10 @@ export default function CustomSlotDialog({
 }: CustomSlotDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
     const isDialogOpen = open ?? internalOpen;
-    const setDialogOpen = (value:boolean) => {
-        setInternalOpen(value);
+    const setDialogOpen = (value: boolean) => {
+        if (open === undefined) {
+            setInternalOpen(value);
+        }
         onOpenChange?.(value);
     };
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -213,7 +215,7 @@ export default function CustomSlotDialog({
                     </Button>
                 </DialogTrigger>
             )}
-            <DialogContent className="sm:max-w-[450px]">
+            <DialogContent className="sm:max-w-[450px]" onCloseAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>
                         {editLesson ? "Edit Custom Block" : "Customizable Block Creator"}
