@@ -2,9 +2,25 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeComponents/ThemeToggle";
 import logo from "@/assets/NUSModsPlusLogo.png";
+import { supabase } from "@/services/supabase";
+import { useEffect } from "react";
+import { getCurrentAcadSem } from "@/utils/generalUtils/time";
 
 export default function Welcome() {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            if (session) {
+                const currentSem = getCurrentAcadSem();
+                navigate(`/timetable/sem-${currentSem}`);
+            }
+        };
+        checkSession();
+    }, [navigate]);
 
     return (
         <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-background text-foreground px-4 transition-colors duration-200">

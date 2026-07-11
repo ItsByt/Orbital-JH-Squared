@@ -1,11 +1,14 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun, Monitor, LogOut } from "lucide-react";
 import { supabase } from "@/services/supabase";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { toast } from "sonner";
+import { usePlannerStore } from "@/store/usePlannerStore";
 
 export default function Settings() {
+    const queryClient = useQueryClient();
     const { theme, setTheme } = useTheme();
 
     async function handleLogOut() {
@@ -13,9 +16,12 @@ export default function Settings() {
 
         if (signOutError) {
             toast.error("Log Out Failed", { description: getErrorMessage(signOutError) });
-        } else {
-            toast.success("Logged Out Successfully!");
+            return;
         }
+
+        queryClient.clear();
+        usePlannerStore.setState({ board: {} });
+        toast.success("Logged Out Successfully!");
     }
 
     return (
