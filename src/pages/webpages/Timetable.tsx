@@ -92,13 +92,18 @@ export default function TimetablePage({ semester }: { semester: number }) {
                     {/* Semester Navigation */}
                     <SemesterNavigation semester={semester} />
 
-                    {/* Add Custom Event PLUS */}
+                    {/* Add Custom Event PLUS/EDIT */}
                     <CustomSlotDialog
                         DAYS={DAYS}
                         HOURS={TIMETABLE_HOURS}
                         WEEKS={TIMETABLE_WEEKS}
                         open={customDialogOpen}
-                        onOpenChange={setCustomDialogOpen}
+                        onOpenChange={(open) => {
+                            setCustomDialogOpen(open);
+                            if (!open) {
+                                setEditingLesson(null);
+                            }
+                        }}
                         editLesson={editingLesson}
                         onCustomEvent={handleCustomEvent}
                         onUpdateCustomEvent={handleUpdateCustomEvent}

@@ -186,16 +186,12 @@ export default function CustomSlotDialog({
 
 
             if (editLesson && onUpdateCustomEvent) {
-
                 await onUpdateCustomEvent(
                     editLesson.id,
                     updatedData
                 );
-
             } else {
-
                 await onCustomEvent(updatedData);
-
             }
 
             setDialogOpen(false);
@@ -207,7 +203,7 @@ export default function CustomSlotDialog({
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
-            {!editLesson && (
+            {!open && (
                 <DialogTrigger asChild>
                     <Button
                         size="icon"
