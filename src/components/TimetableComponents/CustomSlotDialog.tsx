@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getModule } from "@/services/nusmods";
@@ -17,11 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TIMETABLE_WEEKS } from "@/config/constants";
+import { DisplayLesson } from "@/types";
+import { useEffect, useState } from "react";
 
 interface CustomSlotDialogProps {
     DAYS: string[];
     HOURS: string[];
     WEEKS: number[];
+
+    // Creating a new custom block
     onCustomEvent: (eventData: {
         name: string;
         day: string;
@@ -32,6 +35,24 @@ interface CustomSlotDialogProps {
         weekBitmask: number;
         classNo: string;
     }) => Promise<void>;
+
+    // Editing an existing custom block
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    editLesson?: DisplayLesson | null;
+    onUpdateCustomEvent?: (
+        id: string,
+        eventData: {
+            name: string;
+            day: string;
+            startTime: string;
+            endTime: string;
+            venue: string;
+            selectedWeeks: number[];
+            weekBitmask: number;
+            classNo: string;
+        }
+    ) => Promise<void>;
 }
 
 const DEFAULT_FORM_STATE = {
@@ -49,12 +70,42 @@ export default function CustomSlotDialog({
     HOURS,
     WEEKS,
     onCustomEvent,
+    open,
+    onOpenChange,
+    editLesson,
+    onUpdateCustomEvent,
 }: CustomSlotDialogProps) {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isDialogOpen = open ?? internalOpen;
+    const setDialogOpen = (value:boolean) => {
+        setInternalOpen(value);
+        onOpenChange?.(value);
+    };
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Use a Unified State Object
     const [formData, setFormData] = useState({ ...DEFAULT_FORM_STATE, weeks: WEEKS });
+
+    useEffect(() => {
+        if (!editLesson) {
+            setFormData({
+                ...DEFAULT_FORM_STATE,
+                weeks: WEEKS,
+            });
+            return;
+        }
+        setFormData({
+            name: editLesson.moduleCode,
+            day: editLesson.day,
+            start: editLesson.startTime,
+            end: editLesson.endTime,
+            venue: editLesson.venue ?? "",
+            weeks: editLesson.weeks ?? [],
+            checkOverlap: editLesson.classNo !== "CUSTOM_IGNORE_FLAG",
+        });
+
+    }, [editLesson, WEEKS]);
+
 
     // Helper to update individual fields
     const updateField = <K extends keyof typeof DEFAULT_FORM_STATE>(
@@ -120,7 +171,7 @@ export default function CustomSlotDialog({
             // but don't uppercase here, do it when comparing
             const normalizedName = formData.name.trim();
 
-            await onCustomEvent({
+            const updatedData = {
                 name: normalizedName,
                 day: formData.day,
                 startTime: formData.start,
@@ -128,10 +179,26 @@ export default function CustomSlotDialog({
                 venue: formData.venue,
                 selectedWeeks: formData.weeks,
                 weekBitmask: weeksToBitmask(formData.weeks),
-                classNo: formData.checkOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG",
-            });
+                classNo: formData.checkOverlap
+                    ? "CUSTOM"
+                    : "CUSTOM_IGNORE_FLAG",
+            };
 
-            setIsDialogOpen(false);
+
+            if (editLesson && onUpdateCustomEvent) {
+
+                await onUpdateCustomEvent(
+                    editLesson.id,
+                    updatedData
+                );
+
+            } else {
+
+                await onCustomEvent(updatedData);
+
+            }
+
+            setDialogOpen(false);
             setFormData({ ...DEFAULT_FORM_STATE, weeks: WEEKS });
         } finally {
             setIsSubmitting(false);
@@ -139,19 +206,29 @@ export default function CustomSlotDialog({
     };
 
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    size="icon"
-                    className="h-12 w-12 rounded-full bg-[#56A58B] hover:bg-[#458570] text-white shadow-lg cursor-pointer transition-transform duration-200 hover:scale-105"
-                >
-                    <Plus className="h-6 w-6" />
-                </Button>
-            </DialogTrigger>
+        <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            {!editLesson && (
+                <DialogTrigger asChild>
+                    <Button
+                        size="icon"
+                        className="h-12 w-12 rounded-full bg-[#56A58B] hover:bg-[#458570] text-white shadow-lg cursor-pointer transition-transform duration-200 hover:scale-105"
+                    >
+                        <Plus className="h-6 w-6" />
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="sm:max-w-[450px]">
                 <DialogHeader>
-                    <DialogTitle>Customizable Block Creator</DialogTitle>
-                    <DialogDescription>Add your own personal events!</DialogDescription>
+                    <DialogTitle>
+                        {editLesson ? "Edit Custom Block" : "Customizable Block Creator"}
+                    </DialogTitle>
+
+                    <DialogDescription>
+                        {editLesson
+                            ? "Update your personal event."
+                            : "Add your own personal events!"
+                        }
+                    </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 pt-2">
@@ -282,7 +359,7 @@ export default function CustomSlotDialog({
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => setIsDialogOpen(false)}
+                            onClick={() => setDialogOpen(false)}
                             disabled={isSubmitting}
                         >
                             Cancel
@@ -292,7 +369,13 @@ export default function CustomSlotDialog({
                             disabled={isSubmitting}
                             className="bg-[#749c83] hover:bg-[#638570] text-white"
                         >
-                            {isSubmitting ? "Adding..." : "Insert into Schedule"}
+                            {
+                                isSubmitting
+                                    ? "Saving..."
+                                    : editLesson
+                                        ? "Update Schedule"
+                                        : "Insert into Schedule"
+                            }
                         </Button>
                     </DialogFooter>
                 </form>

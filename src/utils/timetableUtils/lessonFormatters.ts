@@ -65,6 +65,7 @@ export function buildDisplayLesson(
     const rawWeeks = slot.weeks ?? [];
     const weekBitmask = weeksToBitmask(rawWeeks);
 
+    
     return {
         id,
         moduleCode,

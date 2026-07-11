@@ -2,19 +2,19 @@
 export function weeksToBitmask(weeks: Array<number | string>): number {
     if (!Array.isArray(weeks)) return 0;
     return weeks.reduce<number>((mask, week) => {
-        const weekNum = typeof week === "number" ? week : parseInt(week, 10);
-        return mask | (1 << weekNum);
+        const weekNum: number =
+            typeof week === "number" ? week : parseInt(week, 10);
+        return mask | (1 << (weekNum - 1));
     }, 0);
 }
 
 // Convert bitmask to weeks array
 export function bitmaskToWeeks(bitmask: number): number[] {
     const weeks: number[] = [];
-    let week = 1;
-    while (bitmask > 0) {
-        if (bitmask & 1) weeks.push(week);
-        bitmask >>= 1;
-        week++;
+    for (let week = 1; week <= 13; week++) {
+        if ((bitmask & (1 << (week - 1))) !== 0) {
+            weeks.push(week);
+        }
     }
     return weeks;
 }

@@ -14,6 +14,7 @@ export default function ClassCard({
     selectedLesson,
     onSelectClass,
     onSwapClass,
+    onUpdateCustomLesson,
 }: {
     lesson: DisplayLesson;
     allVisibleLessons: DisplayLesson[];
@@ -23,6 +24,7 @@ export default function ClassCard({
     selectedLesson: DisplayLesson | null;
     onSelectClass: (lesson: DisplayLesson) => void;
     onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
+    onUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }) {
     // Conflict Logic - filter out to get conflict classes by ignoring...
     // 1. alternatives
@@ -59,6 +61,15 @@ export default function ClassCard({
         : undefined;
 
     const handleClick = () => {
+        const isCustom =
+            lesson.classNo.startsWith("CUSTOM") ||
+            lesson.lessonType === "Personal Block";
+
+        if (isCustom) {
+            onUpdateCustomLesson(lesson);
+            return;
+        }
+
         if (lesson.isAlternative) {
             onSwapClass(selectedLesson, lesson);
         } else {

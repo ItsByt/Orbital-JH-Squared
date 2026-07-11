@@ -4,6 +4,7 @@ import {
     addToTimetableDB,
     removeFromTimetableDB,
     addCustomEventToDB,
+    updateCustomEventInDB,
     updateModuleColorInDB,
 } from "@/services/timetableDB";
 import { getCurrentAcadYear } from "@/utils/generalUtils/time";
@@ -157,6 +158,35 @@ export function useTimetableActions(
         }
     };
 
+    // Handle modifications of custom event
+    const handleUpdateCustomEvent = async (
+        id: string,
+        eventData: {
+            name: string;
+            day: string;
+            startTime: string;
+            endTime: string;
+            venue: string;
+            selectedWeeks: number[];
+            weekBitmask: number;
+            classNo: string;
+        }
+    ) => {
+        try {
+            await updateCustomEventInDB(id, eventData, currentYear, semester);
+
+            await queryClient.invalidateQueries({
+                queryKey: ["timetable", currentYear, semester],
+            });
+
+            toast.success("Custom event updated!");
+        } catch (error) {
+            toast.error("Failed to update custom event", {
+                description: getErrorMessage(error),
+            });
+        }
+    };
+
     const handleUpdateColor = async (
         moduleCode: string,
         newColor: string,
@@ -207,6 +237,7 @@ export function useTimetableActions(
         handleAddModule,
         handleRemoveModule,
         handleCustomEvent,
+        handleUpdateCustomEvent,
         handleUpdateColor,
     };
 }
