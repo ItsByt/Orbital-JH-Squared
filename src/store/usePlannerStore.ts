@@ -3,6 +3,12 @@ import type { PlannerModule } from "@/types";
 import { generateEmptyBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { isExemptionKey, isCustomSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
+const initialState = {
+    board: generateEmptyBoard(),
+    dragState: { draggingModuleCode: null as string | null, isOverInvalidSem: false },
+    visibleCustomColumns: [] as string[],
+}
+
 interface PlannerState {
     // board key format: "Y1S1"
     board: Record<string, PlannerModule[]>;
@@ -24,12 +30,12 @@ interface PlannerState {
     clearAndHideColumn: (semesterKey: string) => void;
 
     togglePrereqWarning: (semesterKey: string, moduleCode: string) => void;
+
+    resetStore: () => void;
 }
 
 export const usePlannerStore = create<PlannerState>((set) => ({
-    board: generateEmptyBoard(),
-    dragState: { draggingModuleCode: null, isOverInvalidSem: false },
-    visibleCustomColumns: [],
+    ...initialState,
 
     setBoard: (board) =>
         set((state) => {
@@ -141,4 +147,11 @@ export const usePlannerStore = create<PlannerState>((set) => ({
                 ),
             },
         })),
+    
+    resetStore: () => 
+        set({
+            board: generateEmptyBoard(), 
+            dragState: { draggingModuleCode: null, isOverInvalidSem: false },
+            visibleCustomColumns: [],
+        }),
 }));

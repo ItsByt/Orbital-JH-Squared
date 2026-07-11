@@ -20,7 +20,7 @@ export default function Settings() {
         }
 
         queryClient.clear();
-        usePlannerStore.setState({ board: {} });
+        usePlannerStore.getState().resetStore();
         toast.success("Logged Out Successfully!");
     }
 
