@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea/dnd";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
 import type { PlannerModule } from "@/types";
@@ -18,6 +19,7 @@ import {
     EXEMPTION_KEY,
 } from "@/utils/plannerUtils/semesterKeyUtils";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import { FocusModeProvider, useFocusModeContext } from "@/context/FocusModeContext";
 
 interface MoveModuleVariables {
     fromKey: string;
@@ -27,6 +29,106 @@ interface MoveModuleVariables {
 }
 
 const YEARS = Array.from({ length: TOTAL_PLANNER_YEARS }, (_, i) => i + 1);
+
+function PlannerContent({ globalTotals }: { globalTotals: { count: number; units: number } }) {
+    const { isFocusMode, toggleFocusMode } = useFocusModeContext();
+
+    const dragState = usePlannerStore((state) => state.dragState);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        // We only run this loop when a module is actively being dragged
+        if (!dragState.draggingModuleCode) return;
+
+        let animationFrameId: number;
+        let currentMouseX = 0;
+
+        // Track the mouse location on the screen
+        const handleMouseMove = (e: MouseEvent) => {
+            currentMouseX = e.clientX;
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+
+        const scrollLoop = () => {
+            const container = scrollContainerRef.current;
+            if (container && currentMouseX > 0) {
+                const { left, right } = container.getBoundingClientRect();
+                const threshold = 150; // Triggers when mouse is within 150px of the edge
+                const maxSpeed = 18; // Max scroll speed
+
+                // If mouse is near the left edge
+                if (currentMouseX < left + threshold) {
+                    const intensity = 1 - Math.max(0, currentMouseX - left) / threshold;
+                    container.scrollLeft -= maxSpeed * intensity;
+                }
+                // If mouse is near the right edge
+                else if (currentMouseX > right - threshold) {
+                    const intensity = 1 - Math.max(0, right - currentMouseX) / threshold;
+                    container.scrollLeft += maxSpeed * intensity;
+                }
+            }
+            // Loop at 60 FPS
+            animationFrameId = requestAnimationFrame(scrollLoop);
+        };
+
+        animationFrameId = requestAnimationFrame(scrollLoop);
+
+        return () => {
+            // Clean up when drag finishes
+            window.removeEventListener("mousemove", handleMouseMove);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [dragState.draggingModuleCode]);
+
+    return (
+        <div className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4 pt-1 px-6 pb-2 w-full">
+            <div className="flex justify-between items-end shrink-0 border-b border-border/50 pb-2">
+                <div className="flex items-center gap-6">
+                    <h1
+                        className="text-3xl font-bold tracking-tight"
+                        style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
+                    >
+                        Module Planner
+                    </h1>
+
+                    {/* Toggle Button for Focus Mode*/}
+                    <Button
+                        variant={isFocusMode ? "default" : "outline"}
+                        onClick={toggleFocusMode}
+                        className={`flex items-center gap-2 h-9 transition-all ${
+                            isFocusMode
+                                ? "bg-[#56A58B] hover:bg-[#468973] text-white border-transparent"
+                                : ""
+                        }`}
+                    >
+                        {isFocusMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        {isFocusMode ? "Focus Mode: ON" : "Focus Mode"}
+                    </Button>
+                </div>
+
+                {/* Global Totals */}
+                <div className="text-right text-xl uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold">
+                    <span className="text-zinc-900 dark:text-zinc-200">{globalTotals.count}</span>{" "}
+                    Courses /{" "}
+                    <span className="text-zinc-900 dark:text-zinc-200">{globalTotals.units}</span>{" "}
+                    Units
+                </div>
+            </div>
+
+            {/* Horizontal Scroll Container */}
+            {/* flex-1 lets it fill the rest of the screen, overflow-x-auto enables the single scrollbar */}
+            <div
+                ref={scrollContainerRef}
+                className="flex flex-1 overflow-x-auto gap-4 pb-4 scrollbar-thin scrollbar-thumb-zinc-700"
+            >
+                {YEARS.map((yearNum) => (
+                    <YearBlock key={yearNum} yearNum={yearNum} />
+                ))}
+            </div>
+            <ExemptionRow />
+        </div>
+    );
+}
 
 export default function Planner() {
     const queryClient = useQueryClient();
@@ -171,41 +273,12 @@ export default function Planner() {
     }
 
     return (
-        // Also available to use: onDragStart
+        // Also available to use for DragDropContext: onDragStart
         // onDragEnd is the only one required
         <DragDropContext onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
-            <div className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4 pt-1 px-6 pb-2 w-full">
-                <div className="flex justify-between items-end shrink-0 border-b border-border/50 pb-2">
-                    <h1
-                        className="text-3xl font-bold tracking-tight"
-                        style={{ fontFamily: "Bahnschrift, sans-serif", color: "#56A58B" }}
-                    >
-                        Module Planner
-                    </h1>
-
-                    {/* Global Totals */}
-                    <div className="text-right text-xl uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold">
-                        <span className="text-zinc-900 dark:text-zinc-200">
-                            {globalTotals.count}
-                        </span>{" "}
-                        Courses /{" "}
-                        <span className="text-zinc-900 dark:text-zinc-200">
-                            {globalTotals.units}
-                        </span>{" "}
-                        Units
-                    </div>
-                </div>
-
-                {/* Horizontal Scroll Container */}
-                {/* flex-1 lets it fill the rest of the screen, overflow-x-auto enables the single scrollbar */}
-                <div className="flex flex-1 overflow-x-auto overflow-y-hidden gap-4 pb-4 snap-x scrollbar-thin scrollbar-thumb-zinc-700">
-                    {YEARS.map((yearNum) => (
-                        <YearBlock key={yearNum} yearNum={yearNum} />
-                    ))}
-                </div>
-
-                <ExemptionRow />
-            </div>
+            <FocusModeProvider>
+                <PlannerContent globalTotals={globalTotals} />
+            </FocusModeProvider>
         </DragDropContext>
     );
 }

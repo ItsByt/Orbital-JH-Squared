@@ -21,9 +21,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { getModuleBlockStyles } from "@/utils/plannerUtils/moduleBlockStyles";
 import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
 import ModuleWarningTooltip from "./ModuleWarningTooltip";
 import { usePrereqEvaluator } from "@/hooks/PlannerHooks/usePrereqEvaluator";
+import { useFocusModeContext } from "@/context/FocusModeContext";
 
 interface ModuleBlockProps {
     module: PlannerModule;
@@ -146,6 +148,10 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
         toggleExcludeMutation.isPending ||
         toggleWarningMutation.isPending;
 
+    const { isFocusMode, focusMap, setFocusedModule } = useFocusModeContext();
+    const focusStatus = focusMap[module.moduleCode];
+    const hasActiveFocus = Object.keys(focusMap).length > 0;
+
     return (
         <Draggable draggableId={module.moduleCode} index={index}>
             {/* Draggable snapshot properties -> isDragging, draggingOver */}
@@ -155,11 +161,12 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    onClick={() => {
+                        if (isFocusMode) setFocusedModule(module.moduleCode);
+                    }}
                     className={cn(
                         "relative group p-2.5 rounded-md shadow-sm flex flex-col transition-colors duration-150 text-white",
-                        module.excludeFromTotal
-                            ? "bg-zinc-700 hover:bg-zinc-600"
-                            : "bg-[#3070b3] hover:bg-[#28619e]",
+                        getModuleBlockStyles(module, isFocusMode, hasActiveFocus, focusStatus),
                         snapshot.isDragging &&
                             !isBeingDraggedInvalidly &&
                             "shadow-xl opacity-90 ring-2 ring-white/50",
