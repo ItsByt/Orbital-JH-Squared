@@ -10,10 +10,7 @@ interface TimetableGridProps {
     lessonsByDay: Record<string, DisplayLesson[]>;
     selectedLesson: DisplayLesson | null;
     handleSelectClass: (lesson: DisplayLesson) => void;
-    handleSwapClass: (
-        selected: DisplayLesson | null,
-        target: DisplayLesson
-    ) => void;
+    handleSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     handleUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }
 

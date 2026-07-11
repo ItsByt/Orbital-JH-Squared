@@ -105,9 +105,7 @@ export default function CustomSlotDialog({
             weeks: editLesson.weeks ?? [],
             checkOverlap: editLesson.classNo !== "CUSTOM_IGNORE_FLAG",
         });
-
     }, [editLesson, WEEKS]);
-
 
     // Helper to update individual fields
     const updateField = <K extends keyof typeof DEFAULT_FORM_STATE>(
@@ -181,17 +179,11 @@ export default function CustomSlotDialog({
                 venue: formData.venue,
                 selectedWeeks: formData.weeks,
                 weekBitmask: weeksToBitmask(formData.weeks),
-                classNo: formData.checkOverlap
-                    ? "CUSTOM"
-                    : "CUSTOM_IGNORE_FLAG",
+                classNo: formData.checkOverlap ? "CUSTOM" : "CUSTOM_IGNORE_FLAG",
             };
 
-
             if (editLesson && onUpdateCustomEvent) {
-                await onUpdateCustomEvent(
-                    editLesson.id,
-                    updatedData
-                );
+                await onUpdateCustomEvent(editLesson.id, updatedData);
             } else {
                 await onCustomEvent(updatedData);
             }
@@ -215,7 +207,10 @@ export default function CustomSlotDialog({
                     </Button>
                 </DialogTrigger>
             )}
-            <DialogContent className="sm:max-w-[450px]" onCloseAutoFocus={(e) => e.preventDefault()}>
+            <DialogContent
+                className="sm:max-w-[450px]"
+                onCloseAutoFocus={(e) => e.preventDefault()}
+            >
                 <DialogHeader>
                     <DialogTitle>
                         {editLesson ? "Edit Custom Block" : "Customizable Block Creator"}
@@ -224,8 +219,7 @@ export default function CustomSlotDialog({
                     <DialogDescription>
                         {editLesson
                             ? "Update your personal event."
-                            : "Add your own personal events!"
-                        }
+                            : "Add your own personal events!"}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -367,13 +361,11 @@ export default function CustomSlotDialog({
                             disabled={isSubmitting}
                             className="bg-[#749c83] hover:bg-[#638570] text-white"
                         >
-                            {
-                                isSubmitting
-                                    ? "Saving..."
-                                    : editLesson
-                                        ? "Update Schedule"
-                                        : "Insert into Schedule"
-                            }
+                            {isSubmitting
+                                ? "Saving..."
+                                : editLesson
+                                  ? "Update Schedule"
+                                  : "Insert into Schedule"}
                         </Button>
                     </DialogFooter>
                 </form>

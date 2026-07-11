@@ -62,8 +62,7 @@ export default function ClassCard({
 
     const handleClick = () => {
         const isCustom =
-            lesson.classNo.startsWith("CUSTOM") ||
-            lesson.lessonType === "Personal Block";
+            lesson.classNo.startsWith("CUSTOM") || lesson.lessonType === "Personal Block";
 
         if (isCustom) {
             onUpdateCustomLesson(lesson);

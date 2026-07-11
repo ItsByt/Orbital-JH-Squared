@@ -2,8 +2,7 @@
 export function weeksToBitmask(weeks: Array<number | string>): number {
     if (!Array.isArray(weeks)) return 0;
     return weeks.reduce<number>((mask, week) => {
-        const weekNum: number =
-            typeof week === "number" ? week : parseInt(week, 10);
+        const weekNum: number = typeof week === "number" ? week : parseInt(week, 10);
         return mask | (1 << (weekNum - 1));
     }, 0);
 }
