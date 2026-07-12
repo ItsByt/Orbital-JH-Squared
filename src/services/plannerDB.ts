@@ -109,3 +109,15 @@ export async function setPrereqWarningInPlannerModuleDB(moduleCode: string, newV
 
     if (error) throw error;
 }
+
+export async function updatePlannerModuleGradeDB(moduleCode: string, grade: string | null) {
+    const userId = await requireAuth();
+
+    const { error } = await supabase
+        .from("planner_modules")
+        .update({ grade: grade })
+        .eq("user_id", userId)
+        .eq("module_code", moduleCode);
+
+    if (error) throw error;
+}

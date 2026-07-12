@@ -26,6 +26,7 @@ import { EXEMPTION_KEY } from "@/utils/plannerUtils/semesterKeyUtils";
 import ModuleWarningTooltip from "./ModuleWarningTooltip";
 import { usePrereqEvaluator } from "@/hooks/PlannerHooks/usePrereqEvaluator";
 import { useFocusModeContext } from "@/context/FocusModeContext";
+import GradeSelector from "./GradeSelector";
 
 interface ModuleBlockProps {
     module: PlannerModule;
@@ -176,16 +177,6 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     )}
                     style={{ ...provided.draggableProps.style }}
                 >
-                    {/* Pre-req Warning */}
-                    {!snapshot.isDragging && !module.hidePreReqWarning && (
-                        <ModuleWarningTooltip
-                            takenTooEarlyIssues={takenTooEarlyIssues}
-                            boardMap={filteredBoardMap}
-                            targetTime={targetTime}
-                            takenTooLateIssues={takenTooLateIssues}
-                        />
-                    )}
-
                     <div className="flex justify-between items-start mb-1">
                         <span className="text-[12px] font-bold tracking-tight leading-none">
                             {module.moduleCode}
@@ -273,8 +264,29 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                         {module.title}
                     </span>
 
-                    <div className="mt-2 flex justify-start text-[10px] font-medium text-white/70">
-                        <span>{module.moduleCredit} Units</span>
+                    <div className="mt-2 flex justify-between items-center">
+                        <span className="text-[10px] font-medium text-white/70">
+                            {module.moduleCredit} Units
+                        </span>
+
+                        {/* Grade Selector */}
+                        <div className="flex items-center gap-1.5">
+                            <GradeSelector
+                                semesterKey={semesterKey}
+                                moduleCode={module.moduleCode}
+                                currentGrade={module.grade}
+                            />
+
+                            {/* Pre-req Warning */}
+                            {!snapshot.isDragging && !module.hidePreReqWarning && (
+                                <ModuleWarningTooltip
+                                    takenTooEarlyIssues={takenTooEarlyIssues}
+                                    boardMap={filteredBoardMap}
+                                    targetTime={targetTime}
+                                    takenTooLateIssues={takenTooLateIssues}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

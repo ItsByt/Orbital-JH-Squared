@@ -26,6 +26,7 @@ export function buildPlannerModule(
         excludeFromTotal: false,
         hidePreReqWarning: false,
         isCustom: false,
+        grade: undefined,
     };
 }
 
@@ -43,6 +44,7 @@ export function formatToPlannerModule(row: SavedPlannerRow): PlannerModule {
         excludeFromTotal: row.exclude_from_total,
         hidePreReqWarning: row.hide_pre_req_warning,
         isCustom: row.is_custom,
+        grade: row.grade ?? undefined,
     };
 }
 
@@ -65,6 +67,7 @@ export function formatForPlannerDatabase(
         exclude_from_total: module.excludeFromTotal,
         hide_pre_req_warning: module.hidePreReqWarning,
         is_custom: module.isCustom,
+        grade: module.grade ?? null,
     };
 }
 
@@ -86,6 +89,7 @@ export function buildCustomPlannerModule(
         excludeFromTotal: false,
         hidePreReqWarning: true, // Hide warnings for custom modules
         isCustom: true,
+        grade: undefined,
     };
 }
 
