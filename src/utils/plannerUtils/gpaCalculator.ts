@@ -3,7 +3,7 @@ import { GRADE_DICTIONARY } from "@/config/grades";
 
 export interface GPAResult {
     gpa: number | null; // Null if no graded modules taken yet
-    totalEarnedUnits: number; // Includes CS/S and Exemptions
+    totalCompletedUnits: number; // Includes CS/S and Exemptions
     gpaAttemptedUnits: number; // Only units that impact GPA (A-F)
     suUsedCount: number;
 }
@@ -11,7 +11,7 @@ export interface GPAResult {
 export function calculateStatistics(modules: PlannerModule[]): GPAResult {
     let totalQualityPoints = 0; // Numerator: (Grade * Credits)
     let gpaAttemptedUnits = 0;  // Denominator: Credits that impact GPA
-    let totalEarnedUnits = 0;   // Credits that count towards graduation
+    let totalCompletedUnits = 0;   // Credits that count towards graduation
     let suUsedCount = 0;
 
     modules.forEach((mod) => {
@@ -34,7 +34,7 @@ export function calculateStatistics(modules: PlannerModule[]): GPAResult {
         }
 
         if (gradeDef.grantsUnits) {
-            totalEarnedUnits += mod.moduleCredit;
+            totalCompletedUnits += mod.moduleCredit;
         }
 
         if (gradeDef.isSU) {
@@ -49,7 +49,7 @@ export function calculateStatistics(modules: PlannerModule[]): GPAResult {
 
     return {
         gpa,
-        totalEarnedUnits,
+        totalCompletedUnits,
         gpaAttemptedUnits,
         suUsedCount
     };

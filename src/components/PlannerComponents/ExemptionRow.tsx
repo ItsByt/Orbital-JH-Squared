@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
@@ -11,6 +11,7 @@ import { clearPlannerColumnDBBySemesterKey } from "@/services/plannerDB";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
+import { calculateStatistics } from "@/utils/plannerUtils/gpaCalculator";
 
 export default function ExemptionRow() {
     const queryClient = useQueryClient();
@@ -26,6 +27,7 @@ export default function ExemptionRow() {
     const includedModules = modules.filter((mod) => !mod.excludeFromTotal);
     const exemptionUnits = includedModules.reduce((sum, mod) => sum + mod.moduleCredit, 0);
     const exemptionCount = includedModules.length;
+    const stats = useMemo(() => calculateStatistics(includedModules), [includedModules]);
 
     const clearMutation = useMutation<void, Error>({
         mutationFn: async () => {
@@ -97,6 +99,24 @@ export default function ExemptionRow() {
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {exemptionCount} Courses / {exemptionUnits} Units
                         </span>
+
+                        {stats.gpa !== null && (
+                            <>
+                                <span className="text-zinc-500 dark:text-zinc-400 mx-1.5">•</span>
+                                <span className="text-xs font-bold text-[#56A58B]">
+                                    GPA: {stats.gpa.toFixed(2)}
+                                </span>
+                            </>
+                        )}
+
+                        {stats.suUsedCount > 0 && (
+                            <>
+                                <span className="text-zinc-500 dark:text-zinc-400 mx-1.5">•</span>
+                                <span className="text-xs font-medium text-amber-500">
+                                    {stats.suUsedCount} S/U Used
+                                </span>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
