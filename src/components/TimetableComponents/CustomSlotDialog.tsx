@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { getModule } from "@/services/nusmods";
@@ -17,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TIMETABLE_WEEKS } from "@/config/constants";
 import { DisplayLesson } from "@/types";
-import { useEffect, useState } from "react";
 
 interface CustomSlotDialogProps {
     DAYS: string[];

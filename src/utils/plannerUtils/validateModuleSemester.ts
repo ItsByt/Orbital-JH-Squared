@@ -16,6 +16,8 @@ export function checkValidSemesterUsingPlannerModule(
 ) {
     if (!module) return false;
 
+    if (module.isCustom) return true;
+
     if (isUnvalidatedSemesterCode(semester)) return true;
 
     return module.availableSemesters.includes(semester);

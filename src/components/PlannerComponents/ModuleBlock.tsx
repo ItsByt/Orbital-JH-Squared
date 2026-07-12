@@ -122,7 +122,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
         takenTooEarlyIssues,
         takenTooLateIssues,
         hasAnyPreReqWarning,
-    } = usePrereqEvaluator(module.moduleCode, semesterKey);
+    } = usePrereqEvaluator(module.moduleCode, semesterKey, module.isCustom);
 
     // Used to reset Pre-requisite warning when the requirements have been fully met
     useEffect(() => {

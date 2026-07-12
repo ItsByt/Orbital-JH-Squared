@@ -77,6 +77,7 @@ export interface PlannerModule {
     isExemption: boolean;
     excludeFromTotal: boolean;
     hidePreReqWarning?: boolean;
+    isCustom: boolean;
 }
 
 //Details for Planner modules stored in supabase
@@ -93,6 +94,7 @@ export interface SavedPlannerRow {
     available_semesters: number[];
     exclude_from_total: boolean;
     hide_pre_req_warning?: boolean;
+    is_custom: boolean;
 }
 
 // Details for Pre-requisite Tree
