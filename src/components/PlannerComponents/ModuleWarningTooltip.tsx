@@ -56,7 +56,7 @@ export default function ModuleWarningTooltip({
                 <TooltipTrigger asChild>
                     <div
                         className={cn(
-                            "absolute bottom-1.5 right-1.5 rounded-sm p-0.5 cursor-help shadow-md border",
+                            "rounded-sm p-0.5 cursor-help shadow-md border shrink-0",
                             isRedIcon
                                 ? "bg-red-500/90 border-red-700 text-white"
                                 : "bg-[#F5C519] border-amber-500/50 text-amber-950"

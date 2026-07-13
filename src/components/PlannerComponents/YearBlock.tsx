@@ -6,6 +6,8 @@ import {
     SEMESTER_CODES,
     REVERSE_SEMESTER_CODE_MAP,
     SEMESTER_CODE_MAP,
+    isExemptionKey,
+    parseSemesterKey,
 } from "@/utils/plannerUtils/semesterKeyUtils";
 import {
     DropdownMenu,
@@ -13,6 +15,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { calculateStatistics } from "@/utils/plannerUtils/gpaCalculator";
 
 interface YearBlockProps {
     yearNum: number;
@@ -31,22 +34,36 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
     const SPECIAL_TERM_2 = REVERSE_SEMESTER_CODE_MAP[SEMESTER_CODES.SPECIAL_TERM_2];
     const SUMMER_BREAK = REVERSE_SEMESTER_CODE_MAP[SEMESTER_CODES.SUMMER_BREAK];
 
-    // Calculate Totals for a specific year
-    const yearTotals = useMemo(() => {
-        let count = 0;
-        let units = 0;
-
+    // Calculate Totals and Stats for a specific year
+    const { yearTotals, stats } = useMemo(() => {
         const suffixes = Object.keys(SEMESTER_CODE_MAP);
+        const yearModules = suffixes.flatMap((suffix) => board[`Y${yearNum}${suffix}`] || []);
 
-        suffixes.forEach((suffix) => {
-            const semesterKey = `Y${yearNum}${suffix}`;
-            const modules = board[semesterKey] || [];
+        return {
+            yearTotals: {
+                count: yearModules.length,
+                units: yearModules.reduce((sum, mod) => sum + mod.moduleCredit, 0),
+            },
+            stats: calculateStatistics(yearModules), // Get S/U for this year
+        };
+    }, [board, yearNum]);
 
-            count += modules.length;
-            units += modules.reduce((sum, mod) => sum + mod.moduleCredit, 0);
+    const progressiveStats = useMemo(() => {
+        const allProgressiveModules = Object.entries(board).flatMap(([key, semModules]) => {
+            // Progressive Stats include Exemptions
+            if (isExemptionKey(key)) return semModules;
+
+            try {
+                const { year } = parseSemesterKey(key);
+                if (year <= yearNum) return semModules;
+            } catch (error) {
+                // Skips any keys that are somehow unparseable
+                console.log(error);
+            }
+            return [];
         });
 
-        return { count, units };
+        return calculateStatistics(allProgressiveModules);
     }, [board, yearNum]);
 
     const isVisible = (suffix: string) => visibleCustomColumns.includes(`Y${yearNum}${suffix}`);
@@ -75,35 +92,56 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                     </h2>
                 </div>
 
-                <div className="flex flex-col items-end gap-2.5">
+                <div className="flex flex-col items-end gap-1">
+                    {/* Top line: Year Load + S/U Count */}
                     <div className="text-right text-[13px] text-zinc-500 dark:text-zinc-400 font-medium leading-tight">
-                        <p>{yearTotals.count} Courses</p>
-                        <p>{yearTotals.units} Units</p>
+                        <span>
+                            {yearTotals.count} Courses / {yearTotals.units} Units
+                        </span>
+
+                        {/* Show S/U only if used this year */}
+                        {stats.suUsedCount > 0 && (
+                            <>
+                                <span className="mx-1.5">•</span>
+                                <span className="text-amber-500 font-bold">
+                                    {stats.suUsedCount} S/U
+                                </span>
+                            </>
+                        )}
                     </div>
+
+                    {/* Bottom line: Progressive GPA */}
+                    {progressiveStats.gpa !== null && (
+                        <div className="text-right text-[13px] font-bold text-[#56A58B] tracking-wide">
+                            Cumulative GPA: {progressiveStats.gpa.toFixed(2)}
+                        </div>
+                    )}
 
                     {/* Adding Special Terms */}
                     {hiddenCustomTerms.length > 0 && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <button className="flex items-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-100/50 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2.5 py-1.5 transition-all">
-                                    <Plus size={14} className="mr-1" /> Add Special Term
-                                </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                align="end"
-                                className="bg-white dark:bg-[#18181a] border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300"
-                            >
-                                {hiddenCustomTerms.map((term) => (
-                                    <DropdownMenuItem
-                                        key={term.key}
-                                        onClick={() => showCustomColumn(`Y${yearNum}${term.key}`)}
-                                        className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                    >
-                                        Add {term.label}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="mt-2.5">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-100/50 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2.5 py-1.5 transition-all">
+                                        <Plus size={14} className="mr-1" /> Add Special Term
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="bg-white dark:bg-[#18181a] border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300"
+                                >
+                                    {hiddenCustomTerms.map((term) => (
+                                        <DropdownMenuItem
+                                            key={term.key}
+                                            onClick={() => showCustomColumn(`Y${yearNum}${term.key}`)}
+                                            className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        >
+                                            Add {term.label}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     )}
                 </div>
             </div>

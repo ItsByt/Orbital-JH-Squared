@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2, X } from "lucide-react";
 import { Droppable } from "@hello-pangea/dnd";
@@ -9,6 +9,7 @@ import { usePlannerStore } from "@/store/usePlannerStore";
 import { clearPlannerColumnDBBySemesterKey } from "@/services/plannerDB";
 import ModuleBlock from "./ModuleBlock";
 import AddCourseModal from "./AddCourseModal";
+import { calculateStatistics } from "@/utils/plannerUtils/gpaCalculator";
 
 interface SemesterColumnProps {
     title: string; //Format: Semester 1
@@ -27,6 +28,7 @@ export default function SemesterColumn({
     const [isConfirming, setIsConfirming] = useState(false); // Used for when in confirmation
 
     const modules = usePlannerStore((state) => state.board[semesterKey]) || [];
+    const stats = useMemo(() => calculateStatistics(modules), [modules]);
     const moduleCount = modules.length;
     const semUnits = modules.reduce((sum, mod) => sum + mod.moduleCredit, 0);
 
@@ -118,12 +120,33 @@ export default function SemesterColumn({
                     )}
                 </div>
 
-                {/* Bottom Row: Units */}
+                {/* Bottom Row: Unit and Module Count, S/U, and GPA */}
                 {modules.length > 0 && !isConfirming && !clearMutation.isPending && (
-                    <div className="mt-1">
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                            {moduleCount} Courses / {semUnits} Units
-                        </span>
+                    <div className="mt-1 flex flex-col gap-0.5">
+                        {/* Line 1: Unit, Module Counts and S/U */}
+                        <div className="flex items-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                            <span>
+                                {moduleCount} Courses / {semUnits} Units
+                            </span>
+
+                            {stats.suUsedCount > 0 && (
+                                <>
+                                    <span className="mx-1.5 text-zinc-300 dark:text-zinc-700">
+                                        •
+                                    </span>
+                                    <span className="font-bold text-amber-500">
+                                        {stats.suUsedCount} S/U
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Line 2: GPA */}
+                        {stats.gpa !== null && (
+                            <div className="text-xs font-bold text-[#56A58B]">
+                                GPA: {stats.gpa.toFixed(2)}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

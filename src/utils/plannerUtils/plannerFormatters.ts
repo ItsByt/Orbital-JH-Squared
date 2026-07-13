@@ -25,6 +25,8 @@ export function buildPlannerModule(
         isExemption: isExemptionKey(semesterKey),
         excludeFromTotal: false,
         hidePreReqWarning: false,
+        isCustom: false,
+        grade: undefined,
     };
 }
 
@@ -41,6 +43,8 @@ export function formatToPlannerModule(row: SavedPlannerRow): PlannerModule {
         isExemption: isExemption,
         excludeFromTotal: row.exclude_from_total,
         hidePreReqWarning: row.hide_pre_req_warning,
+        isCustom: row.is_custom,
+        grade: row.grade ?? undefined,
     };
 }
 
@@ -62,6 +66,30 @@ export function formatForPlannerDatabase(
         available_semesters: module.availableSemesters,
         exclude_from_total: module.excludeFromTotal,
         hide_pre_req_warning: module.hidePreReqWarning,
+        is_custom: module.isCustom,
+        grade: module.grade ?? null,
+    };
+}
+
+// Building a Custom Planner Module
+export function buildCustomPlannerModule(
+    moduleCode: string,
+    title: string,
+    credits: number,
+    displayOrder: number,
+    semesterKey: string
+): PlannerModule {
+    return {
+        moduleCode: moduleCode.toUpperCase().trim(),
+        title: title.trim(),
+        moduleCredit: credits,
+        displayOrder: displayOrder,
+        availableSemesters: [], // Custom modules don't have official semester constraints
+        isExemption: isExemptionKey(semesterKey),
+        excludeFromTotal: false,
+        hidePreReqWarning: true, // Hide warnings for custom modules
+        isCustom: true,
+        grade: undefined,
     };
 }
 

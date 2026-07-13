@@ -1,84 +1,29 @@
-import { useEffect, useMemo, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { DragDropContext, type DragUpdate, type DropResult } from "@hello-pangea/dnd";
-import { toast } from "sonner";
+import { DragDropContext } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
 
 import { TOTAL_PLANNER_YEARS } from "@/config/constants";
-import type { PlannerModule } from "@/types";
 import YearBlock from "@/components/PlannerComponents/YearBlock";
 import ExemptionRow from "@/components/PlannerComponents/ExemptionRow";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
-import { checkValidSemesterUsingPlannerModule } from "@/utils/plannerUtils/validateModuleSemester";
-import { getPlannerModules, massUpdatePlannerModuleDB } from "@/services/plannerDB";
-import {
-    isUnvalidatedSemesterKey,
-    parseSemesterKey,
-    EXEMPTION_KEY,
-} from "@/utils/plannerUtils/semesterKeyUtils";
-import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
-import { FocusModeProvider, useFocusModeContext } from "@/context/FocusModeContext";
+import { getPlannerModules } from "@/services/plannerDB";
 
-interface MoveModuleVariables {
-    fromKey: string;
-    toKey: string;
-    updatedBoard: Record<string, PlannerModule[]>;
-    boardSnapshot: Record<string, PlannerModule[]>;
-}
+import { FocusModeProvider, useFocusModeContext } from "@/context/FocusModeContext";
+import { useDragScroll } from "@/hooks/PlannerHooks/useDragScroll";
+import { usePlannerDragAndDrop } from "@/hooks/PlannerHooks/usePlannerDragAndDrop";
+import GlobalStatistics from "@/components/PlannerComponents/GlobalStatistics";
 
 const YEARS = Array.from({ length: TOTAL_PLANNER_YEARS }, (_, i) => i + 1);
 
-function PlannerContent({ globalTotals }: { globalTotals: { count: number; units: number } }) {
+function PlannerContent() {
     const { isFocusMode, toggleFocusMode } = useFocusModeContext();
-
     const dragState = usePlannerStore((state) => state.dragState);
+
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        // We only run this loop when a module is actively being dragged
-        if (!dragState.draggingModuleCode) return;
-
-        let animationFrameId: number;
-        let currentMouseX = 0;
-
-        // Track the mouse location on the screen
-        const handleMouseMove = (e: MouseEvent) => {
-            currentMouseX = e.clientX;
-        };
-        window.addEventListener("mousemove", handleMouseMove);
-
-        const scrollLoop = () => {
-            const container = scrollContainerRef.current;
-            if (container && currentMouseX > 0) {
-                const { left, right } = container.getBoundingClientRect();
-                const threshold = 150; // Triggers when mouse is within 150px of the edge
-                const maxSpeed = 18; // Max scroll speed
-
-                // If mouse is near the left edge
-                if (currentMouseX < left + threshold) {
-                    const intensity = 1 - Math.max(0, currentMouseX - left) / threshold;
-                    container.scrollLeft -= maxSpeed * intensity;
-                }
-                // If mouse is near the right edge
-                else if (currentMouseX > right - threshold) {
-                    const intensity = 1 - Math.max(0, right - currentMouseX) / threshold;
-                    container.scrollLeft += maxSpeed * intensity;
-                }
-            }
-            // Loop at 60 FPS
-            animationFrameId = requestAnimationFrame(scrollLoop);
-        };
-
-        animationFrameId = requestAnimationFrame(scrollLoop);
-
-        return () => {
-            // Clean up when drag finishes
-            window.removeEventListener("mousemove", handleMouseMove);
-            cancelAnimationFrame(animationFrameId);
-        };
-    }, [dragState.draggingModuleCode]);
+    useDragScroll(scrollContainerRef, !!dragState.draggingModuleCode);
 
     return (
         <div className="flex flex-col flex-1 min-h-0 min-w-0 space-y-4 pt-1 px-6 pb-2 w-full">
@@ -105,14 +50,7 @@ function PlannerContent({ globalTotals }: { globalTotals: { count: number; units
                         {isFocusMode ? "Focus Mode: ON" : "Focus Mode"}
                     </Button>
                 </div>
-
-                {/* Global Totals */}
-                <div className="text-right text-xl uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold">
-                    <span className="text-zinc-900 dark:text-zinc-200">{globalTotals.count}</span>{" "}
-                    Courses /{" "}
-                    <span className="text-zinc-900 dark:text-zinc-200">{globalTotals.units}</span>{" "}
-                    Units
-                </div>
+                <GlobalStatistics />
             </div>
 
             {/* Horizontal Scroll Container */}
@@ -131,12 +69,8 @@ function PlannerContent({ globalTotals }: { globalTotals: { count: number; units
 }
 
 export default function Planner() {
-    const queryClient = useQueryClient();
-
-    const board = usePlannerStore((state) => state.board);
     const setBoard = usePlannerStore((state) => state.setBoard);
-    const setDragState = usePlannerStore((state) => state.setDragState);
-    const moveModule = usePlannerStore((state) => state.moveModule);
+    const { handleDragUpdate, handleDragEnd } = usePlannerDragAndDrop();
 
     // Loading the Planner Board
     const { isLoading } = useQuery({
@@ -149,116 +83,6 @@ export default function Planner() {
         },
         staleTime: 1000 * 60 * 5,
     });
-
-    const moveModuleMutation = useMutation<
-        void, // Return type of mutationFn
-        Error, // Type of error
-        MoveModuleVariables // Type of the variables passed into .mutate()
-    >({
-        mutationFn: async ({ fromKey, toKey, updatedBoard }) => {
-            const dbUpdates = [];
-
-            const { year: toYear, semester: toSem } = parseSemesterKey(toKey);
-            const updatedToSem = massUpdatePlannerModuleDB(updatedBoard[toKey], toYear, toSem);
-            dbUpdates.push(updatedToSem);
-
-            // If the columns are the same, the previous update already suffices
-            if (fromKey !== toKey) {
-                const { year: fromYear, semester: fromSem } = parseSemesterKey(fromKey);
-                const updatedFromSem = massUpdatePlannerModuleDB(
-                    updatedBoard[fromKey],
-                    fromYear,
-                    fromSem
-                );
-                dbUpdates.push(updatedFromSem);
-
-                await Promise.all(dbUpdates);
-            }
-        },
-        onError: (error, variables) => {
-            setBoard(variables.boardSnapshot);
-            toast.error("Failed to move module.", {
-                description: getErrorMessage(error),
-            });
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["plannerBoard"] });
-        },
-    });
-
-    // Calculate and memoise Global Totals for the header
-    const globalTotals = useMemo(() => {
-        let count = 0;
-        let units = 0;
-        Object.entries(board).forEach(([key, sem]) => {
-            sem.forEach((mod) => {
-                if (key === EXEMPTION_KEY && mod.excludeFromTotal) return;
-                count += 1;
-                units += mod.moduleCredit;
-            });
-        });
-        return { count, units };
-    }, [board]);
-
-    // Handle while-dragging updates
-    const handleDragUpdate = (update: DragUpdate) => {
-        const { draggableId, destination } = update;
-        if (!destination || isUnvalidatedSemesterKey(destination.droppableId)) {
-            setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: false });
-            return;
-        }
-
-        // Check if module is dragged over invalid semester
-        const { semester: toSem } = parseSemesterKey(destination.droppableId);
-        const draggedModuleDetails = Object.values(board)
-            .flat()
-            .find((m) => m.moduleCode === draggableId);
-        const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModuleDetails, toSem);
-
-        setDragState({ draggingModuleCode: draggableId, isOverInvalidSem: !isValidSemester });
-    };
-
-    // Handle end-of-drag updates
-    const handleDragEnd = async (result: DropResult) => {
-        setDragState({ draggingModuleCode: null, isOverInvalidSem: false });
-        const { source, destination } = result;
-
-        if (!destination) return;
-
-        const fromKey = source.droppableId;
-        const toKey = destination.droppableId;
-        const fromIndex = source.index;
-        const toIndex = destination.index;
-
-        // No net movement
-        if (fromKey === toKey && fromIndex === toIndex) return;
-
-        // moveModule completely reassigns the arrays for the semesters involved,
-        // so a shallow copy is sufficient
-        const boardSnapshot = { ...usePlannerStore.getState().board };
-
-        // Checking if new semester moved to is valid
-        const draggedModule = boardSnapshot[fromKey][fromIndex];
-        const { semester: toSem } = parseSemesterKey(toKey);
-        if (!isUnvalidatedSemesterKey(toKey)) {
-            const isValidSemester = checkValidSemesterUsingPlannerModule(draggedModule, toSem);
-            if (!isValidSemester) {
-                toast.error(`${draggedModule.moduleCode} is not available in this semester!`);
-                return;
-            }
-        }
-
-        // Optimistic update of module
-        moveModule(fromKey, toKey, fromIndex, toIndex);
-        const updatedBoard = usePlannerStore.getState().board;
-
-        moveModuleMutation.mutate({
-            fromKey,
-            toKey,
-            updatedBoard,
-            boardSnapshot,
-        });
-    };
 
     // Loading
     if (isLoading) {
@@ -277,7 +101,7 @@ export default function Planner() {
         // onDragEnd is the only one required
         <DragDropContext onDragEnd={handleDragEnd} onDragUpdate={handleDragUpdate}>
             <FocusModeProvider>
-                <PlannerContent globalTotals={globalTotals} />
+                <PlannerContent />
             </FocusModeProvider>
         </DragDropContext>
     );

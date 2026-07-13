@@ -11,11 +11,11 @@ import {
     extractModulesFromTree,
 } from "@/utils/plannerUtils/prereqUtils";
 
-export function usePrereqEvaluator(moduleCode: string, semesterKey: string) {
+export function usePrereqEvaluator(moduleCode: string, semesterKey: string, isCustom?: boolean) {
     const queryClient = useQueryClient();
 
     const board = usePlannerStore((state) => state.board);
-    const prereqTree = useModulePrereq(moduleCode);
+    const prereqTree = useModulePrereq(moduleCode, isCustom);
 
     // Map all modules on the board to their absolute time and semesterKey
     const boardMap = useMemo(() => {
