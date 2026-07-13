@@ -11,6 +11,7 @@ interface TimetableGridProps {
     handleSelectClass: (lesson: DisplayLesson) => void;
     handleSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     handleUpdateCustomLesson: (lesson: DisplayLesson) => void;
+    captureMode?: boolean;
 }
 
 export default function TimetableGrid({
@@ -21,6 +22,7 @@ export default function TimetableGrid({
     handleSelectClass,
     handleSwapClass,
     handleUpdateCustomLesson,
+    captureMode = false,
 }: TimetableGridProps) {
     const totalGridCols = HOURS.length * 2;
     // Keep 1fr to ensure grid items align exactly with background lines
@@ -33,8 +35,15 @@ export default function TimetableGrid({
     };
 
     return (
-        <div className="w-full border border-border rounded-xl overflow-x-auto bg-card shadow-sm relative scrollbar-thin">
-            <div style={{ minWidth: `${minContainerWidth}px` }}>
+        <div className={`border border-border rounded-xl bg-card shadow-sm relative
+                ${captureMode
+                    ? "overflow-visible w-fit"
+                    : "overflow-x-auto w-full scrollbar-thin"}`}>
+            <div style={{
+                width: captureMode
+                    ? `${minContainerWidth}px`
+                    : undefined,
+                minWidth: `${minContainerWidth}px`,}}>
                 {/* Hour Markings */}
                 <div
                     className="grid border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none"
