@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Welcome from "@/pages/authentication/Welcome";
 import Register from "@/pages/authentication/Register";
 import Login from "@/pages/authentication/Login";
+import UpdatePassword from "./pages/authentication/UpdatePassword";
 import Layout from "@/components/GeneralComponents/Layout";
 import TimetablePage from "@/pages/webpages/Timetable";
 import Planner from "@/pages/webpages/Planner";
@@ -105,6 +106,9 @@ export default function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
                         </Route>
+
+                        {/* STANDALONE Route - do not move elsewhere */}
+                        <Route path="/update-password" element={<UpdatePassword />} />
 
                         {/* Protected Routes */}
                         <Route element={session ? <Layout /> : <Navigate to="/" replace />}>
