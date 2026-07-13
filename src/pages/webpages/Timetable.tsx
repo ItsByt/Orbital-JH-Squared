@@ -3,19 +3,50 @@ import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
 import { getCurrentAcadYear, getAcadYearStringSlash } from "@/utils/generalUtils/time";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
 import CustomSlotDialog from "@/components/TimetableComponents/CustomSlotDialog";
 import SemesterNavigation from "@/components/TimetableComponents/SemesterNavigation";
 import ActiveContainer from "@/components/TimetableComponents/ActiveContainer";
 import TimetableGrid from "@/components/TimetableComponents/TimetableGrid";
 import { DisplayLesson } from "@/types";
 import { DAYS, TIMETABLE_HOURS, TIMETABLE_WEEKS } from "@/config/constants";
+import { supabase } from "@/services/supabase";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
     const acadYearString = getAcadYearStringSlash();
     const [editingLesson, setEditingLesson] = useState<DisplayLesson | null>(null);
     const [customDialogOpen, setCustomDialogOpen] = useState(false);
+    const { startHour, endHour, hydrateSettings } = useSettingsStore();
+
+    // Load Settings
+    useEffect(() => {
+        async function loadUserSettings() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data, error } = await supabase
+                .from("accessibilities")
+                .select("start_hour, end_hour, card_font_size, card_font_family")
+                .eq("id", user.id)
+                .single();
+            if (data && !error) {
+                hydrateSettings({
+                    startHour: data.start_hour,
+                    endHour: data.end_hour,
+                    cardFontSize: data.card_font_size,
+                    cardFontFamily: data.card_font_family,
+                });
+            }
+        }
+        loadUserSettings();
+    }, [hydrateSettings]);
+
+    // Settings chosen array size
+    const dynamicHours: string[] = [];
+    for (let i = startHour; i <= endHour; i++) {
+        dynamicHours.push(`${i.toString().padStart(2, "0")}00`);
+    }
 
     // TimetableData abstractions - retrieve, select and swap
     const {
@@ -77,7 +108,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
                 {/* Scalable Timetable Grid (sem nav and custom anchored) */}
                 <TimetableGrid
                     DAYS={DAYS}
-                    HOURS={TIMETABLE_HOURS}
+                    HOURS={dynamicHours}
                     lessonsByDay={lessonsByDay}
                     selectedLesson={selectedLesson}
                     handleSelectClass={handleSelectClass}

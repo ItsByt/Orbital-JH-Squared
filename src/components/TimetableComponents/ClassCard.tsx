@@ -2,6 +2,7 @@ import { type DisplayLesson } from "@/types";
 import { formatWeeksDisplay, bitmaskToWeeks } from "@/utils/timetableUtils/weekFormat";
 import { doLessonsSchedulesClash } from "@/utils/timetableUtils/lessonClashDetection";
 import { useTheme } from "next-themes";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 // Now handles abstraction for clash logic and
 // all other details pertaining to class card
@@ -26,6 +27,8 @@ export default function ClassCard({
     onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     onUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }) {
+
+    const { cardFontSize, cardFontFamily } = useSettingsStore();
     // Conflict Logic - filter out to get conflict classes by ignoring...
     // 1. alternatives
     // 2. itself
@@ -84,13 +87,12 @@ export default function ClassCard({
 
     const isStandardState = !lesson.isAlternative && !hasOverlap;
 
-    // +2 since the grid is 1-indexed whereas hourDiff is "0-indexed" (so +1),
-    // and to account for "Day" Column (so another +1)
     const customStyles: React.CSSProperties = {
-        gridColumnStart: colStart + 2,
-        gridColumnEnd: colEnd + 2,
+        gridColumnStart: colStart, 
+        gridColumnEnd: colEnd,
         gridRowStart: rowIndex,
     };
+    
 
     if (isStandardState || lesson.isAlternative) {
         customStyles.backgroundColor = bgHex;
@@ -108,12 +110,29 @@ export default function ClassCard({
         customStyles.borderStyle = "dashed";
     }
 
+    const sizeClassMap = {
+        small: "text-[10px] space-y-0",
+        regular: "text-xs space-y-0.5",
+        large: "text-base space-y-1.5 leading-snug",
+    };
+
+    const fontClassMap = {
+        sans: "font-sans",
+        mono: "font-mono",
+        bahnschrift: "font-['Bahnschrift']",
+        atkinson: "font-atkinson",
+        inter: "font-inter",
+        lexend: "font-lexend",
+    };
+
+    const typographyClasses = `${sizeClassMap[cardFontSize] || sizeClassMap.regular} ${fontClassMap[cardFontFamily] || fontClassMap.sans}`;
+
     return (
         <div
             title={warningTooltip}
             onClick={handleClick}
             style={customStyles}
-            className={`my-1 mx-0.5 p-2 rounded shadow-sm text-xs flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 z-20 border
+            className={`my-1 mx-0.5 p-2 rounded shadow-sm flex flex-col justify-between overflow-hidden cursor-pointer transition-all duration-300 z-20 border ${typographyClasses}
                 ${
                     lesson.isAlternative
                         ? "opacity-50 hover:opacity-100 hover:scale-[1.02] hover:shadow-md z-30"

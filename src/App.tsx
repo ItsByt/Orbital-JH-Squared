@@ -5,7 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { createClient, type Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
-
+import { useSettingsStore } from "./store/useSettingsStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Welcome from "@/pages/authentication/Welcome";
@@ -45,6 +45,31 @@ export default function App() {
         //Only runs when component is cleaned up or closed
         return () => subscription.unsubscribe();
     }, []);
+
+    // use User-Specific Settings on logging back in
+    const hydrateSettings = useSettingsStore((state) => state.hydrateSettings);
+    useEffect(() => {
+        const fetchSettings = async () => {
+            if (!session?.user?.id) return;
+
+            const { data, error } = await supabase
+                .from("accessibilities")
+                .select("*")
+                .eq("id", session.user.id)
+                .single();
+
+            if (data && !error) {
+                hydrateSettings({
+                    startHour: data.start_hour,
+                    endHour: data.end_hour,
+                    cardFontSize: data.card_font_size,
+                    cardFontFamily: data.card_font_family,
+                });
+            }
+        };
+
+        fetchSettings();
+    }, [session, hydrateSettings]);
 
     const currentSem = getCurrentAcadSem();
     const defaultAppPath = `/timetable/sem-${currentSem}`;
