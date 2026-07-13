@@ -19,28 +19,38 @@ export default function TimetablePage({ semester }: { semester: number }) {
     const [editingLesson, setEditingLesson] = useState<DisplayLesson | null>(null);
     const [customDialogOpen, setCustomDialogOpen] = useState(false);
     const { startHour, endHour, hydrateSettings } = useSettingsStore();
+    const [hasHydrated, setHasHydrated] = useState(false);
 
     // Load Settings
     useEffect(() => {
+        if (hasHydrated) return;
         async function loadUserSettings() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
             const { data, error } = await supabase
                 .from("accessibilities")
                 .select("start_hour, end_hour, card_font_size, card_font_family")
-                .eq("id", user.id)
-                .single();
-            if (data && !error) {
+                .eq("id", user.id); 
+
+            if (error) {
+                console.error("Fetch error:", error);
+                return;
+            }
+            // If a row exists, hydrate the store
+            if (data && data.length > 0) {
+                const settings = data[0];
                 hydrateSettings({
-                    startHour: data.start_hour,
-                    endHour: data.end_hour,
-                    cardFontSize: data.card_font_size,
-                    cardFontFamily: data.card_font_family,
+                    startHour: settings.start_hour,
+                    endHour: settings.end_hour,
+                    cardFontSize: settings.card_font_size,
+                    cardFontFamily: settings.card_font_family,
                 });
             }
+            setHasHydrated(true); // Prevent re-run
         }
         loadUserSettings();
-    }, [hydrateSettings]);
+    }, [hydrateSettings, hasHydrated]);
+
 
     // Settings chosen array size
     const dynamicHours: string[] = [];
