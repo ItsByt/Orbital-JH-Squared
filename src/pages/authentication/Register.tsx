@@ -26,8 +26,7 @@ export default function Register() {
             toast.error("Registration Failed", { description: getErrorMessage(signUpError) });
         } else {
             toast.success("Account created! 🎉", {
-                description:
-                    "Remember, if you fail to plan, you plan to fail!",
+                description: "Remember, if you fail to plan, you plan to fail!",
             });
             navigate("/login");
         }

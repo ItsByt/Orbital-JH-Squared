@@ -3,8 +3,8 @@ import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import { useTimetableActions } from "@/hooks/TimetableHooks/useTimetableActions";
 import { getCurrentAcadYear, getAcadYearStringSlash } from "@/utils/generalUtils/time";
 import { Loader2, Download } from "lucide-react";
-import { useState, useEffect, useRef } from "react"; 
-import * as htmlToImage from 'html-to-image';
+import { useState, useEffect, useRef } from "react";
+import * as htmlToImage from "html-to-image";
 import CustomSlotDialog from "@/components/TimetableComponents/CustomSlotDialog";
 import SemesterNavigation from "@/components/TimetableComponents/SemesterNavigation";
 import ActiveContainer from "@/components/TimetableComponents/ActiveContainer";
@@ -28,12 +28,14 @@ export default function TimetablePage({ semester }: { semester: number }) {
     useEffect(() => {
         if (hasHydrated) return;
         async function loadUserSettings() {
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             if (!user) return;
             const { data, error } = await supabase
                 .from("accessibilities")
                 .select("start_hour, end_hour, card_font_size, card_font_family")
-                .eq("id", user.id); 
+                .eq("id", user.id);
 
             if (error) {
                 console.error("Fetch error:", error);
@@ -58,7 +60,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
         if (!timetableRef.current) return;
         const element = timetableRef.current;
         setCaptureMode(true);
-        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise((resolve) => requestAnimationFrame(resolve));
 
         const originalStyle = {
             width: element.style.width,
@@ -75,7 +77,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
             element.style.height = `${fullHeight}px`;
             element.style.overflow = "visible";
 
-            await new Promise(resolve => requestAnimationFrame(resolve));
+            await new Promise((resolve) => requestAnimationFrame(resolve));
 
             const dataUrl = await htmlToImage.toPng(element, {
                 backgroundColor: "#121212",
@@ -89,7 +91,6 @@ export default function TimetablePage({ semester }: { semester: number }) {
             link.download = `semester-${semester}.png`;
             link.href = dataUrl;
             link.click();
-
         } catch (err) {
             console.error("Failed to export timetable:", err);
         } finally {
@@ -185,7 +186,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
 
                     <div className="flex items-center gap-4">
                         {/* Download Button */}
-                        <button 
+                        <button
                             onClick={downloadTimetable}
                             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
                         >

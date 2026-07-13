@@ -21,7 +21,7 @@ export default function Settings() {
         setTimeRange,
         setCardFontSize,
         setCardFontFamily,
-        resetSettings
+        resetSettings,
     } = useSettingsStore();
 
     async function handleLogOut() {
@@ -64,20 +64,37 @@ export default function Settings() {
             {/* Theme Toggling */}
             <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
-                    <h2 className="text-xl font-semibold leading-none tracking-tight" style={{ fontFamily: "Bahnschrift, sans-serif" }}>
+                    <h2
+                        className="text-xl font-semibold leading-none tracking-tight"
+                        style={{ fontFamily: "Bahnschrift, sans-serif" }}
+                    >
                         Theme Toggle
                     </h2>
-                    <p className="text-sm text-muted-foreground">Toggle the brightness of page displays.</p>
+                    <p className="text-sm text-muted-foreground">
+                        Toggle the brightness of page displays.
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-2">
-                    <Button variant={theme === "light" ? "default" : "outline"} className="w-full flex items-center justify-center gap-2 h-12" onClick={() => setTheme("light")}>
+                    <Button
+                        variant={theme === "light" ? "default" : "outline"}
+                        className="w-full flex items-center justify-center gap-2 h-12"
+                        onClick={() => setTheme("light")}
+                    >
                         <Sun className="h-4 w-4" /> Light
                     </Button>
-                    <Button variant={theme === "dark" ? "default" : "outline"} className="w-full flex items-center justify-center gap-2 h-12" onClick={() => setTheme("dark")}>
+                    <Button
+                        variant={theme === "dark" ? "default" : "outline"}
+                        className="w-full flex items-center justify-center gap-2 h-12"
+                        onClick={() => setTheme("dark")}
+                    >
                         <Moon className="h-4 w-4" /> Dark
                     </Button>
-                    <Button variant={theme === "system" ? "default" : "outline"} className="w-full flex items-center justify-center gap-2 h-12" onClick={() => setTheme("system")}>
+                    <Button
+                        variant={theme === "system" ? "default" : "outline"}
+                        className="w-full flex items-center justify-center gap-2 h-12"
+                        onClick={() => setTheme("system")}
+                    >
                         <Monitor className="h-4 w-4" /> System
                     </Button>
                 </div>
@@ -86,13 +103,20 @@ export default function Settings() {
             {/* Timetable Range Dropdowns */}
             <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
-                    <h2 className="text-xl font-semibold leading-none tracking-tight text-destructive" style={{ fontFamily: "Bahnschrift, sans-serif" }}>
+                    <h2
+                        className="text-xl font-semibold leading-none tracking-tight text-destructive"
+                        style={{ fontFamily: "Bahnschrift, sans-serif" }}
+                    >
                         Timetable Grid Scale
                     </h2>
-                    <p className="text-sm text-muted-foreground">Select start and end hours of the Timetable.</p>
-                    <p className="text-sm text-muted-foreground">Note: Lessons cut off by timing will not be displayed.</p>
+                    <p className="text-sm text-muted-foreground">
+                        Select start and end hours of the Timetable.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        Note: Lessons cut off by timing will not be displayed.
+                    </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                     <div className="space-y-2">
                         <label className="text-sm font-semibold">Start Time</label>
@@ -101,7 +125,8 @@ export default function Settings() {
                             onChange={(e) => {
                                 const newStart = Number(e.target.value);
                                 // If new start is >= current end, automatically push end hour 2 hours later
-                                const newEnd = newStart >= endHour ? Math.min(newStart + 2, 24) : endHour;
+                                const newEnd =
+                                    newStart >= endHour ? Math.min(newStart + 2, 24) : endHour;
                                 setTimeRange(newStart, newEnd);
                             }}
                             className="w-full h-11 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -125,7 +150,9 @@ export default function Settings() {
                                 .filter((hour) => hour > startHour) // Only show hours strictly after the start time
                                 .map((hour) => (
                                     <option key={hour} value={hour}>
-                                        {hour === 24 ? "24:00 (Midnight)" : `${hour.toString().padStart(2, "0")}:00`}
+                                        {hour === 24
+                                            ? "24:00 (Midnight)"
+                                            : `${hour.toString().padStart(2, "0")}:00`}
                                     </option>
                                 ))}
                         </select>
@@ -136,10 +163,15 @@ export default function Settings() {
             {/* Typography Customization */}
             <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
                 <div className="space-y-1.5">
-                    <h2 className="text-xl font-semibold leading-none tracking-tight text-destructive" style={{ fontFamily: "Bahnschrift, sans-serif" }}>
+                    <h2
+                        className="text-xl font-semibold leading-none tracking-tight text-destructive"
+                        style={{ fontFamily: "Bahnschrift, sans-serif" }}
+                    >
                         Font Styling
                     </h2>
-                    <p className="text-sm text-muted-foreground">Customize card font scaling and type.</p>
+                    <p className="text-sm text-muted-foreground">
+                        Customize card font scaling and type.
+                    </p>
                 </div>
 
                 <div className="space-y-2">
@@ -164,7 +196,11 @@ export default function Settings() {
                         {[
                             { id: "sans", label: "Sans (Geist)", style: "font-sans" },
                             { id: "mono", label: "Monospace", style: "font-mono" },
-                            { id: "bahnschrift", label: "Bahnschrift", style: "font-['Bahnschrift']" },
+                            {
+                                id: "bahnschrift",
+                                label: "Bahnschrift",
+                                style: "font-['Bahnschrift']",
+                            },
                             { id: "atkinson", label: "Atkinson", style: "font-atkinson" },
                             { id: "inter", label: "Inter", style: "font-inter" },
                             { id: "lexend", label: "Lexend", style: "font-lexend" },
@@ -185,13 +221,22 @@ export default function Settings() {
             {/* Account Management */}
             <div className="w-full bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
                 <div className="space-y-1.5">
-                    <h2 className="text-xl font-semibold leading-none tracking-tight text-destructive" style={{ fontFamily: "Bahnschrift, sans-serif" }}>
+                    <h2
+                        className="text-xl font-semibold leading-none tracking-tight text-destructive"
+                        style={{ fontFamily: "Bahnschrift, sans-serif" }}
+                    >
                         Account Management
                     </h2>
-                    <p className="text-sm text-muted-foreground">Manage your active session across devices.</p>
+                    <p className="text-sm text-muted-foreground">
+                        Manage your active session across devices.
+                    </p>
                 </div>
                 <div className="pt-2">
-                    <Button variant="destructive" className="w-full sm:w-auto flex items-center justify-center gap-2 h-11 px-8" onClick={handleLogOut}>
+                    <Button
+                        variant="destructive"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 h-11 px-8"
+                        onClick={handleLogOut}
+                    >
                         <LogOut className="h-4 w-4" /> Log Out
                     </Button>
                 </div>

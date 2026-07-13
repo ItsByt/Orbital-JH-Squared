@@ -25,25 +25,26 @@ export default function TimetableGrid({
     captureMode = false,
 }: TimetableGridProps) {
     const totalGridCols = HOURS.length * 2;
-    // Keep 1fr to ensure grid items align exactly with background lines
     const gridTemplate = `80px repeat(${totalGridCols}, 1fr)`;
-    // Force a minimum width to prevent squishing when many hours are selected
-    const minContainerWidth = 80 + (HOURS.length * 120); 
+    const minContainerWidth = 80 + HOURS.length * 120;
 
     const getGridOffset = (firstHourString: string) => {
         return convertTimeToColumn(firstHourString) - 1;
     };
 
     return (
-        <div className={`border border-border rounded-xl bg-card shadow-sm relative
-                ${captureMode
-                    ? "overflow-visible w-fit"
-                    : "overflow-x-auto w-full scrollbar-thin"}`}>
-            <div style={{
-                width: captureMode
-                    ? `${minContainerWidth}px`
-                    : undefined,
-                minWidth: `${minContainerWidth}px`,}}>
+        <div
+            className={`border border-border rounded-xl bg-card shadow-sm relative
+                ${
+                    captureMode ? "overflow-visible w-fit" : "overflow-x-auto w-full scrollbar-thin"
+                }`}
+        >
+            <div
+                style={{
+                    width: captureMode ? `${minContainerWidth}px` : undefined,
+                    minWidth: `${minContainerWidth}px`,
+                }}
+            >
                 {/* Hour Markings */}
                 <div
                     className="grid border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none"
@@ -67,14 +68,15 @@ export default function TimetableGrid({
                         const allVisibleLessons = lessonsByDay[day] || [];
                         const firstHour = parseInt(HOURS[0].split(":")[0]);
                         const firstHourStr = HOURS[0];
-                        const lastHour = parseInt(HOURS[HOURS.length - 1].split(":")[0]) + 1; 
+                        const lastHour = parseInt(HOURS[HOURS.length - 1].split(":")[0]) + 1;
                         const filteredLessons = allVisibleLessons.filter((lesson) => {
                             const startH = parseInt(lesson.startTime.split(":")[0]);
                             const endH = parseInt(lesson.endTime.split(":")[0]);
                             return startH >= firstHour && endH <= lastHour;
                         });
                         const gridOffset = getGridOffset(firstHourStr);
-                        const { totalRowsForDay, lessonRowMap } = calculateDayLayout(allVisibleLessons);
+                        const { totalRowsForDay, lessonRowMap } =
+                            calculateDayLayout(allVisibleLessons);
 
                         return (
                             <div
@@ -110,8 +112,12 @@ export default function TimetableGrid({
                                         key={lesson.id}
                                         lesson={lesson}
                                         allVisibleLessons={filteredLessons}
-                                        colStart={convertTimeToColumn(lesson.startTime) - gridOffset + 1}
-                                        colEnd={convertTimeToColumn(lesson.endTime) - gridOffset + 1}
+                                        colStart={
+                                            convertTimeToColumn(lesson.startTime) - gridOffset + 1
+                                        }
+                                        colEnd={
+                                            convertTimeToColumn(lesson.endTime) - gridOffset + 1
+                                        }
                                         rowIndex={(lessonRowMap.get(lesson.id) ?? 0) + 1}
                                         selectedLesson={selectedLesson}
                                         onSelectClass={handleSelectClass}

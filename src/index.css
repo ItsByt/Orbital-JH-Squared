@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Inter:wght@400;600&family=Lexend:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Inter:wght@400;600&family=Lexend:wght@400;600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -227,4 +227,3 @@ code {
     scrollbar-width: thin;
     scrollbar-color: #4b5563 transparent;
 }
-

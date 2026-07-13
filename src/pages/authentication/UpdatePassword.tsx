@@ -43,7 +43,7 @@ export default function UpdatePassword() {
 
     async function handleUpdatePassword(e: React.FormEvent) {
         e.preventDefault();
-        
+
         const { error } = await supabase.auth.updateUser({ password });
 
         if (error) {
@@ -56,14 +56,27 @@ export default function UpdatePassword() {
         }
     }
 
-    if (isProcessing) return <div className="flex h-screen items-center justify-center">Verifying recovery link...</div>;
+    if (isProcessing)
+        return (
+            <div className="flex h-screen items-center justify-center">
+                Verifying recovery link...
+            </div>
+        );
 
     return (
         <div className="flex min-h-screen items-center justify-center p-4">
             <form onSubmit={handleUpdatePassword} className="w-full max-w-sm space-y-4">
                 <h2 className="text-lg font-bold">Set New Password</h2>
-                <Input type="password" placeholder="New Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <Button type="submit" className="w-full">Update Password</Button>
+                <Input
+                    type="password"
+                    placeholder="New Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <Button type="submit" className="w-full">
+                    Update Password
+                </Button>
             </form>
         </div>
     );

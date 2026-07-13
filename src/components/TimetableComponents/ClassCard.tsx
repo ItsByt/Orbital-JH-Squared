@@ -27,7 +27,6 @@ export default function ClassCard({
     onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     onUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }) {
-
     const { cardFontSize, cardFontFamily } = useSettingsStore();
     // Conflict Logic - filter out to get conflict classes by ignoring...
     // 1. alternatives
@@ -88,11 +87,10 @@ export default function ClassCard({
     const isStandardState = !lesson.isAlternative && !hasOverlap;
 
     const customStyles: React.CSSProperties = {
-        gridColumnStart: colStart, 
+        gridColumnStart: colStart,
         gridColumnEnd: colEnd,
         gridRowStart: rowIndex,
     };
-    
 
     if (isStandardState || lesson.isAlternative) {
         customStyles.backgroundColor = bgHex;
@@ -137,10 +135,10 @@ export default function ClassCard({
                     lesson.isAlternative
                         ? "opacity-50 hover:opacity-100 hover:scale-[1.02] hover:shadow-md z-30"
                         : hasOverlap
-                            ? // pulse red if conflict
-                              "bg-destructive/10 border-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)] dark:shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse hover:animate-none group"
-                            : // otherwise standard hovering
-                              "border hover:brightness-110"
+                          ? // pulse red if conflict
+                            "bg-destructive/10 border-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)] dark:shadow-[0_0_20px_rgba(239,68,68,0.3)] animate-pulse hover:animate-none group"
+                          : // otherwise standard hovering
+                            "border hover:brightness-110"
                 }`}
         >
             <div className="flex flex-col space-y-0.5">

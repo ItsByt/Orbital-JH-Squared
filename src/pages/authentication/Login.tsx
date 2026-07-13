@@ -34,7 +34,9 @@ export default function Login() {
 
     async function handleForgotPassword() {
         if (!email) {
-            toast.error("Email required", { description: "Please enter your email to reset your password." });
+            toast.error("Email required", {
+                description: "Please enter your email to reset your password.",
+            });
             return;
         }
 
@@ -45,7 +47,9 @@ export default function Login() {
         if (error) {
             toast.error("Error", { description: error.message });
         } else {
-            toast.success("Check your email", { description: "We've sent you a password reset link." });
+            toast.success("Check your email", {
+                description: "We've sent you a password reset link.",
+            });
         }
     }
 
@@ -68,7 +72,9 @@ export default function Login() {
                     <h3 className="text-xl font-bold text-foreground text-center mb-2">Login</h3>
 
                     <Field className="space-y-1.5 text-left">
-                        <FieldLabel htmlFor="email" className="text-sm font-medium">Email</FieldLabel>
+                        <FieldLabel htmlFor="email" className="text-sm font-medium">
+                            Email
+                        </FieldLabel>
                         <Input
                             id="email"
                             type="email"
@@ -81,7 +87,9 @@ export default function Login() {
                     </Field>
 
                     <Field className="space-y-1.5 text-left">
-                        <FieldLabel htmlFor="password" className="text-sm font-medium">Password</FieldLabel>
+                        <FieldLabel htmlFor="password" className="text-sm font-medium">
+                            Password
+                        </FieldLabel>
                         <Input
                             id="password"
                             type="password"
