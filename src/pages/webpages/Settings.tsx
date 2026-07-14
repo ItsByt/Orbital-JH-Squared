@@ -3,7 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun, Monitor, LogOut, Loader2 } from "lucide-react";
 import { useSettingsStore, FontFamilyOption } from "@/store/useSettingsStore";
 import { SettingsSection } from "@/components/SettingsComponents/SettingsSection";
-import { START_HOURS_SETTING, END_HOURS_SETTING, FONT_SIZES, FONT_FAMILIES } from "@/config/constants";
+import {
+    START_HOURS_SETTING,
+    END_HOURS_SETTING,
+    FONT_SIZES,
+    FONT_FAMILIES,
+} from "@/config/constants";
 import { useLogout } from "@/hooks/GeneralHooks/useAccSettings";
 
 export default function Settings() {
@@ -87,7 +92,8 @@ export default function Settings() {
                             value={startHour}
                             onChange={(e) => {
                                 const newStart = Number(e.target.value);
-                                const newEnd = newStart >= endHour ? Math.min(newStart + 2, 24) : endHour;
+                                const newEnd =
+                                    newStart >= endHour ? Math.min(newStart + 2, 24) : endHour;
                                 setTimeRange(newStart, newEnd);
                             }}
                             className="w-full h-11 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -107,15 +113,13 @@ export default function Settings() {
                             onChange={(e) => setTimeRange(startHour, Number(e.target.value))}
                             className="w-full h-11 px-3 py-2 rounded-md border border-input bg-background text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                         >
-                            {END_HOURS_SETTING
-                                .filter((hour) => hour > startHour)
-                                .map((hour) => (
-                                    <option key={hour} value={hour}>
-                                        {hour === 24
-                                            ? "24:00 (Midnight)"
-                                            : `${hour.toString().padStart(2, "0")}:00`}
-                                    </option>
-                                ))}
+                            {END_HOURS_SETTING.filter((hour) => hour > startHour).map((hour) => (
+                                <option key={hour} value={hour}>
+                                    {hour === 24
+                                        ? "24:00 (Midnight)"
+                                        : `${hour.toString().padStart(2, "0")}:00`}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>

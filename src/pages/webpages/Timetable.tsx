@@ -19,7 +19,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
     const [editingLesson, setEditingLesson] = useState<DisplayLesson | null>(null);
     const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
-    // TimetableSettings/Export abstractions
+    // TimetableSettings/Export abstractions - memoized hour range, download
     const { dynamicHours } = useTimetableSettings();
     const { timetableRef, captureMode, downloadTimetable } = useTimetableExport(semester);
 

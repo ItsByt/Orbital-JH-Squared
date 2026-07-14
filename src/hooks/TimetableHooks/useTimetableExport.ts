@@ -9,7 +9,7 @@ export function useTimetableExport(semester: number) {
     const downloadTimetable = async () => {
         if (!timetableRef.current) return;
         const element = timetableRef.current;
-        
+
         setCaptureMode(true);
         await new Promise((resolve) => requestAnimationFrame(resolve));
 

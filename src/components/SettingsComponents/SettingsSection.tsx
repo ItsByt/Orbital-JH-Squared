@@ -18,7 +18,9 @@ export function SettingsSection({
     const descriptions = Array.isArray(description) ? description : [description];
 
     return (
-        <div className={`w-full bg-card border border-border rounded-xl p-6 shadow-sm ${className}`}>
+        <div
+            className={`w-full bg-card border border-border rounded-xl p-6 shadow-sm ${className}`}
+        >
             <div className="space-y-1.5">
                 <h2
                     className={`text-xl font-semibold leading-none tracking-tight ${titleClassName}`}
