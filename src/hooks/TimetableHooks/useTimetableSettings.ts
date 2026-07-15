@@ -44,7 +44,7 @@ export function useTimetableSettings() {
     // Memoize the hours array so it only recalculates when start/end hours change
     const dynamicHours = useMemo(() => {
         const hours: string[] = [];
-        for (let i = startHour; i <= endHour; i++) {
+        for (let i = startHour; i < endHour; i++) {
             hours.push(`${i.toString().padStart(2, "0")}00`);
         }
         return hours;
