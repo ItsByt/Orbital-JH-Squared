@@ -252,7 +252,10 @@ export default function CustomSlotDialog({
                                 value={formData.day}
                                 onValueChange={(value) => updateField("day", value)}
                             >
-                                <SelectTrigger id="custom-day" className="w-full h-10 px-3 border border-input bg-background text-sm">
+                                <SelectTrigger
+                                    id="custom-day"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
                                     <SelectValue placeholder="Select Day" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" side="bottom" className="max-h-56">
@@ -283,7 +286,10 @@ export default function CustomSlotDialog({
                                 value={formData.start}
                                 onValueChange={(value) => updateField("start", value)}
                             >
-                                <SelectTrigger id="custom-start" className="w-full h-10 px-3 border border-input bg-background text-sm">
+                                <SelectTrigger
+                                    id="custom-start"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
                                     <SelectValue placeholder="Select Start" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" side="bottom" className="max-h-56">
@@ -301,7 +307,10 @@ export default function CustomSlotDialog({
                                 value={formData.end}
                                 onValueChange={(value) => updateField("end", value)}
                             >
-                                <SelectTrigger id="custom-end" className="w-full h-10 px-3 border border-input bg-background text-sm">
+                                <SelectTrigger
+                                    id="custom-end"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
                                     <SelectValue placeholder="Select End" />
                                 </SelectTrigger>
                                 <SelectContent position="popper" side="bottom" className="max-h-56">

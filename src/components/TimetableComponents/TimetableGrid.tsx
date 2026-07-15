@@ -66,13 +66,13 @@ export default function TimetableGrid({
                 <div className="divide-y divide-border">
                     {DAYS.map((day) => {
                         const allVisibleLessons = lessonsByDay[day] || [];
-                        const firstHour = parseInt(HOURS[0].split(":")[0]);
                         const firstHourStr = HOURS[0];
-                        const lastHour = parseInt(HOURS[HOURS.length - 1].split(":")[0]) + 1;
+                        const gridStart = convertTimeToColumn(HOURS[0]);
+                        const gridEnd = convertTimeToColumn(HOURS[HOURS.length - 1]) + 2;
                         const filteredLessons = allVisibleLessons.filter((lesson) => {
-                            const startH = parseInt(lesson.startTime.split(":")[0]);
-                            const endH = parseInt(lesson.endTime.split(":")[0]);
-                            return startH >= firstHour && endH <= lastHour;
+                            const lessonStart = convertTimeToColumn(lesson.startTime);
+                            const lessonEnd = convertTimeToColumn(lesson.endTime);
+                            return lessonStart >= gridStart && lessonEnd <= gridEnd;
                         });
                         const gridOffset = getGridOffset(firstHourStr);
                         const { totalRowsForDay, lessonRowMap } =
