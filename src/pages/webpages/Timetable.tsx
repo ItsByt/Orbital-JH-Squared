@@ -11,7 +11,7 @@ import SemesterNavigation from "@/components/TimetableComponents/SemesterNavigat
 import ActiveContainer from "@/components/TimetableComponents/ActiveContainer";
 import TimetableGrid from "@/components/TimetableComponents/TimetableGrid";
 import { DisplayLesson } from "@/types";
-import { DAYS, TIMETABLE_WEEKS } from "@/config/constants";
+import { DAYS, TIMETABLE_HOURS, TIMETABLE_WEEKS } from "@/config/constants";
 
 export default function TimetablePage({ semester }: { semester: number }) {
     const currentYear = getCurrentAcadYear();
@@ -113,7 +113,7 @@ export default function TimetablePage({ semester }: { semester: number }) {
                         {/* Add Custom Event PLUS/EDIT */}
                         <CustomSlotDialog
                             DAYS={DAYS}
-                            HOURS={dynamicHours}
+                            HOURS={TIMETABLE_HOURS}
                             WEEKS={TIMETABLE_WEEKS}
                             open={customDialogOpen}
                             onOpenChange={(open) => {
