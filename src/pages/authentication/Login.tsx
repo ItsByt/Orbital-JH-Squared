@@ -47,8 +47,8 @@ export default function Login() {
         if (error) {
             toast.error("Error", { description: error.message });
         } else {
-            toast.success("Check your email", {
-                description: "We've sent you a password reset link.",
+            toast.success("Reset Request Received", {
+                description: "If an account exists for this email, you will receive a reset link in your inbox.",
             });
         }
     }
