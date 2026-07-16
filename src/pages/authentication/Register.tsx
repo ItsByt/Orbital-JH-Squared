@@ -17,20 +17,17 @@ export default function Register() {
     async function handleRegister(e: React.SubmitEvent) {
         e.preventDefault();
 
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
             email: email,
             password: password,
         });
 
         if (signUpError) {
             toast.error("Registration Failed", { description: getErrorMessage(signUpError) });
-            console.error("Registration error:", signUpError.message);
         } else {
             toast.success("Account created! 🎉", {
-                description:
-                    "Please check your email to confirm your registration. Then log in again.",
+                description: "Remember, if you fail to plan, you plan to fail!",
             });
-            console.log("Registered successfully! Please exit and login again.", data);
             navigate("/login");
         }
     }

@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&family=Inter:wght@400;600&family=Lexend:wght@400;600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -83,6 +84,10 @@
 }
 
 @theme {
+    --font-sans: "Geist Variable", sans-serif;
+    --font-inter: "Inter", sans-serif;
+    --font-atkinson: "Atkinson Hyperlegible", sans-serif;
+    --font-lexend: "Lexend", sans-serif;
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-muted-foreground: var(--muted-foreground);

@@ -1,5 +1,4 @@
 import ClassCard from "./ClassCard";
-import { TOTAL_GRID_COLS } from "@/config/constants";
 import { calculateDayLayout } from "@/utils/timetableUtils/subrowAllocation";
 import { convertTimeToColumn } from "@/utils/timetableUtils/timeFormat";
 import type { DisplayLesson } from "@/types";
@@ -12,6 +11,7 @@ interface TimetableGridProps {
     handleSelectClass: (lesson: DisplayLesson) => void;
     handleSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     handleUpdateCustomLesson: (lesson: DisplayLesson) => void;
+    captureMode?: boolean;
 }
 
 export default function TimetableGrid({
@@ -22,13 +22,29 @@ export default function TimetableGrid({
     handleSelectClass,
     handleSwapClass,
     handleUpdateCustomLesson,
+    captureMode = false,
 }: TimetableGridProps) {
-    const gridTemplate = `80px repeat(${TOTAL_GRID_COLS}, 1fr)`;
+    const totalGridCols = HOURS.length * 2;
+    const gridTemplate = `80px repeat(${totalGridCols}, 1fr)`;
+    const minContainerWidth = 80 + HOURS.length * 120;
+
+    const getGridOffset = (firstHourString: string) => {
+        return convertTimeToColumn(firstHourString) - 1;
+    };
 
     return (
-        <div className="w-full border border-border rounded-xl overflow-x-auto bg-card shadow-sm relative scrollbar-thin">
-            <div className="min-w-[1200px]">
-                {" "}
+        <div
+            className={`border border-border rounded-xl bg-card shadow-sm relative
+                ${
+                    captureMode ? "overflow-visible w-fit" : "overflow-x-auto w-full scrollbar-thin"
+                }`}
+        >
+            <div
+                style={{
+                    width: captureMode ? `${minContainerWidth}px` : undefined,
+                    minWidth: `${minContainerWidth}px`,
+                }}
+            >
                 {/* Hour Markings */}
                 <div
                     className="grid border-b border-border text-center text-xs font-semibold text-muted-foreground bg-muted/50 select-none"
@@ -50,6 +66,15 @@ export default function TimetableGrid({
                 <div className="divide-y divide-border">
                     {DAYS.map((day) => {
                         const allVisibleLessons = lessonsByDay[day] || [];
+                        const firstHourStr = HOURS[0];
+                        const gridStart = convertTimeToColumn(HOURS[0]);
+                        const gridEnd = convertTimeToColumn(HOURS[HOURS.length - 1]) + 2;
+                        const filteredLessons = allVisibleLessons.filter((lesson) => {
+                            const lessonStart = convertTimeToColumn(lesson.startTime);
+                            const lessonEnd = convertTimeToColumn(lesson.endTime);
+                            return lessonStart >= gridStart && lessonEnd <= gridEnd;
+                        });
+                        const gridOffset = getGridOffset(firstHourStr);
                         const { totalRowsForDay, lessonRowMap } =
                             calculateDayLayout(allVisibleLessons);
 
@@ -70,10 +95,10 @@ export default function TimetableGrid({
                                 <div
                                     className="absolute inset-0 left-[80px] grid pointer-events-none select-none"
                                     style={{
-                                        gridTemplateColumns: `repeat(${TOTAL_GRID_COLS}, 1fr)`,
+                                        gridTemplateColumns: `repeat(${totalGridCols}, 1fr)`,
                                     }}
                                 >
-                                    {Array.from({ length: TOTAL_GRID_COLS }).map((_, idx) => (
+                                    {Array.from({ length: totalGridCols }).map((_, idx) => (
                                         <div
                                             key={idx}
                                             className={`h-full border-r ${idx % 2 === 1 ? "border-border/40" : "border-border/10 border-dashed"}`}
@@ -82,13 +107,17 @@ export default function TimetableGrid({
                                 </div>
 
                                 {/* Render all Classes with ClassCards */}
-                                {allVisibleLessons.map((lesson) => (
+                                {filteredLessons.map((lesson) => (
                                     <ClassCard
                                         key={lesson.id}
                                         lesson={lesson}
-                                        allVisibleLessons={allVisibleLessons}
-                                        colStart={convertTimeToColumn(lesson.startTime)}
-                                        colEnd={convertTimeToColumn(lesson.endTime)}
+                                        allVisibleLessons={filteredLessons}
+                                        colStart={
+                                            convertTimeToColumn(lesson.startTime) - gridOffset + 1
+                                        }
+                                        colEnd={
+                                            convertTimeToColumn(lesson.endTime) - gridOffset + 1
+                                        }
                                         rowIndex={(lessonRowMap.get(lesson.id) ?? 0) + 1}
                                         selectedLesson={selectedLesson}
                                         onSelectClass={handleSelectClass}

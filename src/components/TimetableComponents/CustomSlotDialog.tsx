@@ -16,6 +16,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+// Import Shadcn Select components
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { TIMETABLE_WEEKS } from "@/config/constants";
 import { DisplayLesson } from "@/types";
 
@@ -158,7 +166,7 @@ export default function CustomSlotDialog({
         return true;
     };
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (isSubmitting) return;
 
@@ -240,18 +248,24 @@ export default function CustomSlotDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="custom-day">Day</Label>
-                            <select
-                                id="custom-day"
+                            <Select
                                 value={formData.day}
-                                onChange={(e) => updateField("day", e.target.value)}
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                onValueChange={(value) => updateField("day", value)}
                             >
-                                {DAYS.map((d) => (
-                                    <option key={d} value={d}>
-                                        {d}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="custom-day"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
+                                    <SelectValue placeholder="Select Day" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" side="bottom" className="max-h-56">
+                                    {DAYS.map((d) => (
+                                        <SelectItem key={d} value={d}>
+                                            {d}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-1">
                             <Label htmlFor="custom-venue">Venue</Label>
@@ -268,33 +282,45 @@ export default function CustomSlotDialog({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <Label htmlFor="custom-start">Start Time</Label>
-                            <select
-                                id="custom-start"
+                            <Select
                                 value={formData.start}
-                                onChange={(e) => updateField("start", e.target.value)}
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                onValueChange={(value) => updateField("start", value)}
                             >
-                                {HOURS.map((h) => (
-                                    <option key={h} value={h}>
-                                        {h}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="custom-start"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
+                                    <SelectValue placeholder="Select Start" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" side="bottom" className="max-h-56">
+                                    {HOURS.map((h) => (
+                                        <SelectItem key={h} value={h}>
+                                            {h}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-1">
                             <Label htmlFor="custom-end">End Time</Label>
-                            <select
-                                id="custom-end"
+                            <Select
                                 value={formData.end}
-                                onChange={(e) => updateField("end", e.target.value)}
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                                onValueChange={(value) => updateField("end", value)}
                             >
-                                {HOURS.map((h) => (
-                                    <option key={h} value={h}>
-                                        {h}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="custom-end"
+                                    className="w-full h-10 px-3 border border-input bg-background text-sm"
+                                >
+                                    <SelectValue placeholder="Select End" />
+                                </SelectTrigger>
+                                <SelectContent position="popper" side="bottom" className="max-h-56">
+                                    {HOURS.map((h) => (
+                                        <SelectItem key={h} value={h}>
+                                            {h}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
