@@ -11,12 +11,11 @@
     "type-check": "tsc -p tsconfig.app.json --noEmit",
     "lint": "eslint src --config eslint.config.ts --report-unused-disable-directives --max-warnings 0",
     "check-all": "npm run type-check && npm run lint",
-    
-    "test": "vitest run",            
-    "test:watch": "vitest",            
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage", 
-    "test:e2e": "playwright test",    
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
@@ -55,6 +54,7 @@
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vitest/ui": "^4.1.10",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.7.0",
