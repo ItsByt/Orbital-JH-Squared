@@ -11,10 +11,13 @@ export const TIMETABLE_END_HOUR = 24; // 2000
 export const TOTAL_HOURS = TIMETABLE_END_HOUR - TIMETABLE_START_HOUR;
 export const GRID_COLUMNS_PER_HOUR = 2; // 30-min blocks
 
-export const TIMETABLE_HOURS = Array.from({ length: TOTAL_HOURS }, (_, i) => {
-    const hour = TIMETABLE_START_HOUR + i;
-    return `${hour.toString().padStart(2, "0")}00`;
-});
+export const TIMETABLE_HOURS = Array.from(
+    { length: TIMETABLE_END_HOUR - TIMETABLE_START_HOUR + 1 },
+    (_, i) => {
+        const hour = TIMETABLE_START_HOUR + i;
+        return `${hour.toString().padStart(2, "0")}00`;
+    }
+);
 
 // Settings constants
 export const START_HOURS_SETTING = Array.from({ length: 16 }, (_, i) => i + 5); // 5 to 20
