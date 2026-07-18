@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 import type { PlannerModule, PrereqTree } from "@/types";
-import { removeModuleCodeWildCard, extractModulesFromTree } from "./prereqUtils";
+import { removeModuleCodeWildCard, extractModulesFromTree } from "./plannerPreReqUtils";
 
 export type FocusState = "focus" | "prereq" | "postreq";
 

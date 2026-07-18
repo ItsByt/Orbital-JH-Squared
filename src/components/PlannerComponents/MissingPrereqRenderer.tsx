@@ -2,7 +2,10 @@ import { PrereqTree } from "@/types";
 import { Fragment } from "react/jsx-runtime";
 import { cn } from "@/lib/utils";
 import { formatSemesterKeyReadable } from "@/utils/plannerUtils/semesterKeyUtils";
-import { removeModuleCodeGrade, removeModuleCodeWildCard } from "@/utils/plannerUtils/prereqUtils";
+import {
+    removeModuleCodeGrade,
+    removeModuleCodeWildCard,
+} from "@/utils/plannerUtils/plannerPreReqUtils";
 
 interface PrereqRendererProps {
     tree: PrereqTree;
