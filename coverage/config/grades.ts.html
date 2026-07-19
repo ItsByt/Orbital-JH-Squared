@@ -1,64 +1,68 @@
+
 <!doctype html>
 <html lang="en">
-    <head>
-        <title>Code coverage report for config/grades.ts</title>
-        <meta charset="utf-8" />
-        <link rel="stylesheet" href="../prettify.css" />
-        <link rel="stylesheet" href="../base.css" />
-        <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style type="text/css">
-            .coverage-summary .sorter {
-                background-image: url(../sort-arrow-sprite.png);
-            }
-        </style>
-    </head>
 
-    <body>
-        <div class="wrapper">
-            <div class="pad1">
-                <h1>
-                    <a href="../index.html">All files</a> /
-                    <a href="index.html">config</a> grades.ts
-                </h1>
-                <div class="clearfix">
-                    <div class="fl pad1y space-right2">
-                        <span class="strong">100% </span>
-                        <span class="quiet">Statements</span>
-                        <span class="fraction">2/2</span>
-                    </div>
-
-                    <div class="fl pad1y space-right2">
-                        <span class="strong">100% </span>
-                        <span class="quiet">Branches</span>
-                        <span class="fraction">0/0</span>
-                    </div>
-
-                    <div class="fl pad1y space-right2">
-                        <span class="strong">100% </span>
-                        <span class="quiet">Functions</span>
-                        <span class="fraction">0/0</span>
-                    </div>
-
-                    <div class="fl pad1y space-right2">
-                        <span class="strong">100% </span>
-                        <span class="quiet">Lines</span>
-                        <span class="fraction">2/2</span>
-                    </div>
-                </div>
-                <p class="quiet">
-                    Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>,
-                    <em>p</em> or <em>k</em> for the previous block.
-                </p>
-                <template id="filterTemplate">
-                    <div class="quiet">
-                        Filter:
-                        <input type="search" id="fileSearch" />
-                    </div>
-                </template>
+<head>
+    <title>Code coverage report for config/grades.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">config</a> grades.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>2/2</span>
             </div>
-            <div class="status-line high"></div>
-            <pre><table class="coverage">
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/0</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">100% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>2/2</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
 <a name='L3'></a><a href='#L3'>3</a>
@@ -128,52 +132,48 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">export interface GradeDefinition {
-    pointValue: number;        // The number used for GPA math (e.g., 5.0)
+    pointValue: number; // The number used for GPA math (e.g., 5.0)
     countsTowardsGPA: boolean; // Denominator inclusion (True for A-F, False for CS/CU/S/U)
-    grantsUnits: boolean;      // Does it give earned credits? (True for A-D/CS/S, False for F/CU/U)
-    isSU: boolean;             // Does it consume an S/U option?
+    grantsUnits: boolean; // Does it give earned credits? (True for A-D/CS/S, False for F/CU/U)
+    isSU: boolean; // Does it consume an S/U option?
 }
 &nbsp;
 // Single Source of Truth for all Grading Logic
 export const GRADE_DICTIONARY: Record&lt;string, GradeDefinition&gt; = {
     "A+": { pointValue: 5.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
-    "A":  { pointValue: 5.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
+    A: { pointValue: 5.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
     "A-": { pointValue: 4.5, countsTowardsGPA: true, grantsUnits: true, isSU: false },
     "B+": { pointValue: 4.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
-    "B":  { pointValue: 3.5, countsTowardsGPA: true, grantsUnits: true, isSU: false },
+    B: { pointValue: 3.5, countsTowardsGPA: true, grantsUnits: true, isSU: false },
     "B-": { pointValue: 3.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
     "C+": { pointValue: 2.5, countsTowardsGPA: true, grantsUnits: true, isSU: false },
-    "C":  { pointValue: 2.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
+    C: { pointValue: 2.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
     "D+": { pointValue: 1.5, countsTowardsGPA: true, grantsUnits: true, isSU: false },
-    "D":  { pointValue: 1.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
-    
+    D: { pointValue: 1.0, countsTowardsGPA: true, grantsUnits: true, isSU: false },
+&nbsp;
     // Failing Grade: Impacts GPA (0 points), but grants no units
-    "F":  { pointValue: 0.0, countsTowardsGPA: true, grantsUnits: false, isSU: false },
-    
+    F: { pointValue: 0.0, countsTowardsGPA: true, grantsUnits: false, isSU: false },
+&nbsp;
     // CS/CU: No GPA impact. CS gives units, CU doesn't.
-    "CS": { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: true, isSU: false },
-    "CU": { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: false, isSU: false },
-    
+    CS: { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: true, isSU: false },
+    CU: { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: false, isSU: false },
+&nbsp;
     // S/U: No GPA impact. Consumes SU count. S gives units, U doesn't.
-    "S":  { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: true, isSU: true },
-    "U":  { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: false, isSU: true },
+    S: { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: true, isSU: true },
+    U: { pointValue: 0.0, countsTowardsGPA: false, grantsUnits: false, isSU: true },
 };
 &nbsp;
 // Helper for UI dropdowns
 export const AVAILABLE_GRADES = Object.keys(GRADE_DICTIONARY);
 &nbsp;</pre></td></tr></table></pre>
 
-            <div class="push"></div>
-            <!-- for sticky footer -->
-        </div>
-        <!-- /wrapper -->
-        <div class="footer quiet pad2 space-top1 center small">
-            Code coverage generated by
-            <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer"
-                >istanbul</a
-            >
-            at 2026-07-16T15:54:36.503Z
-        </div>
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-07-19T08:25:46.141Z
+            </div>
         <script src="../prettify.js"></script>
         <script>
             window.onload = function () {
@@ -184,3 +184,4 @@ export const AVAILABLE_GRADES = Object.keys(GRADE_DICTIONARY);
         <script src="../block-navigation.js"></script>
     </body>
 </html>
+    

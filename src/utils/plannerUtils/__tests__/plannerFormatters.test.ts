@@ -81,6 +81,24 @@ describe("Planner Formatters Utilities", () => {
             expect(dbPayload.year).toBe(1);
             expect(dbPayload.grade).toBe("A");
         });
+
+        it("should handle null grades safely in formatToPlannerModule", () => {
+            const rowWithNullGrade = {
+                ...mockRow, // from your existing test
+                grade: null,
+            };
+            const result = formatToPlannerModule(rowWithNullGrade);
+            expect(result.grade).toBeUndefined(); // Should convert null to undefined
+        });
+
+        it("should handle undefined grades safely in formatForPlannerDatabase", () => {
+            const modWithUndefinedGrade = {
+                ...formatToPlannerModule(mockRow),
+                grade: undefined,
+            };
+            const result = formatForPlannerDatabase("user-123", modWithUndefinedGrade, 1, 1);
+            expect(result.grade).toBeNull(); // Should convert undefined back to null for DB
+        });
     });
 
     describe("buildCustomPlannerModule", () => {

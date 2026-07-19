@@ -1,11 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
+    SEMESTER_CODES,
     parseSemesterKey,
+    EXEMPTION_KEY,
     buildKeyFromDB,
     isUnvalidatedSemesterKey,
+    isExemptionKey,
+    isExemptionYearSemValue,
     formatSemesterKeyReadable,
-    EXEMPTION_KEY,
-    SEMESTER_CODES,
+    isCustomSemesterKey,
 } from "../semesterKeyUtils";
 
 describe("Semester Key Utils", () => {
@@ -30,8 +33,15 @@ describe("Semester Key Utils", () => {
 
         it("should throw an error for malformed keys", () => {
             // Wrapped in a function so `expect().toThrow()` can catch it
+
+            // Muting console.error temporarily so it doesn't print to the terminal during the test
+            const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
             expect(() => parseSemesterKey("INVALID_KEY")).toThrow();
             expect(() => parseSemesterKey("Y1")).toThrow(); // missing sem suffix
+
+            // Restoring the console back to normal
+            consoleSpy.mockRestore();
         });
     });
 
@@ -62,13 +72,38 @@ describe("Semester Key Utils", () => {
         });
     });
 
+    describe("isExemptionKey / isExemptionYearSemValue", () => {
+        it("should identify exemption keys correctly", () => {
+            expect(isExemptionKey(EXEMPTION_KEY)).toBe(true);
+            expect(isExemptionKey("Y1S1")).toBe(false);
+        });
+        it("should identify exemption year/sem values correctly", () => {
+            expect(isExemptionYearSemValue(0, 0)).toBe(true);
+            expect(isExemptionYearSemValue(1, 1)).toBe(false);
+        });
+    });
+
     describe("formatSemesterKeyReadable", () => {
         it.each([
             { input: "Y1S1", expected: "Year 1 Semester 1" },
+            { input: "Y4S2", expected: "Year 4 Semester 2" },
             { input: "Y3ST2", expected: "Year 3 Special Term II" },
             { input: EXEMPTION_KEY, expected: "Exemptions" },
+            { input: "Y2WB", expected: "Year 2 Winter Break" },
         ])("should format $input to '$expected'", ({ input, expected }) => {
             expect(formatSemesterKeyReadable(input)).toBe(expected);
+        });
+    });
+
+    describe("isCustomSemesterKey", () => {
+        it("should return false for exemptions, S1, and S2", () => {
+            expect(isCustomSemesterKey(EXEMPTION_KEY)).toBe(false);
+            expect(isCustomSemesterKey("Y1S1")).toBe(false);
+            expect(isCustomSemesterKey("Y2S2")).toBe(false);
+        });
+        it("should return true for other keys like ST1, WB", () => {
+            expect(isCustomSemesterKey("Y1ST1")).toBe(true);
+            expect(isCustomSemesterKey("Y1WB")).toBe(true);
         });
     });
 });

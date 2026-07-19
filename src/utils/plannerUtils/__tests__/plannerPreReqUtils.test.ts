@@ -1,14 +1,43 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { PrereqTree } from "@/types";
 import {
     removeModuleCodeGrade,
     removeModuleCodeWildCard,
     evaluatePrereqTree,
     extractModulesFromTree,
     trimPrereqTree,
+    getSemesterAbsoluteTime,
 } from "../plannerPreReqUtils";
-import { PrereqTree } from "@/types";
+import * as SemesterKeyUtils from "../semesterKeyUtils";
 
 describe("Planner Pre-Req Utilities", () => {
+    describe("getSemesterAbsoluteTime", () => {
+        it("should return 0 for Exemptions", () => {
+            expect(getSemesterAbsoluteTime("EXEMPTIONS")).toBe(0);
+        });
+
+        it("should calculate correct chronological weights", () => {
+            // Y1S1 < Y1S2 < Y2S1
+            const time1 = getSemesterAbsoluteTime("Y1S1");
+            const time2 = getSemesterAbsoluteTime("Y1S2");
+            const time3 = getSemesterAbsoluteTime("Y2S1");
+
+            expect(time1).toBeLessThan(time2);
+            expect(time2).toBeLessThan(time3);
+        });
+
+        it("should throw an error for unmapped semester codes", () => {
+            // Spy on parseSemesterKey to force it to return a fake, unmapped semester code (99)
+            const spy = vi
+                .spyOn(SemesterKeyUtils, "parseSemesterKey")
+                .mockReturnValue({ year: 1, semester: 99 });
+            expect(() => getSemesterAbsoluteTime("FAKE_KEY")).toThrow(
+                "Developer Error: Unmapped chronological order"
+            );
+            spy.mockRestore();
+        });
+    });
+
     describe("String Formatters", () => {
         it("removeModuleCodeGrade: should strip grade requirements", () => {
             expect(removeModuleCodeGrade("CS1101S:D")).toBe("CS1101S");
@@ -66,6 +95,11 @@ describe("Planner Pre-Req Utilities", () => {
             const failTree: PrereqTree = { nOf: [3, ["CS1101S", "MA1521", "CS2040S"]] };
             expect(evaluatePrereqTree(failTree, takenSet)).toBe(false);
         });
+
+        it("should hit the fallback return true for unknown node types", () => {
+            // @ts-expect-error - Testing runtime fallback
+            expect(evaluatePrereqTree({ unknown_key: "value" }, takenSet)).toBe(true);
+        });
     });
 
     describe("extractModulesFromTree", () => {
@@ -80,6 +114,11 @@ describe("Planner Pre-Req Utilities", () => {
 
             const result = extractModulesFromTree(tree);
             expect(result).toEqual(["CS1101S", "CS2030S", "CS2040S", "MA1521", "MA1522"]);
+        });
+
+        it("should hit the fallback return empty array for unknown node types", () => {
+            // @ts-expect-error - Testing runtime fallback
+            expect(extractModulesFromTree({ unknown_key: "value" })).toEqual([]);
         });
     });
 
@@ -114,20 +153,98 @@ describe("Planner Pre-Req Utilities", () => {
             expect(result.hasMissing).toBe(true);
         });
 
-        it("should collapse OR trees if at least one option is VALID", () => {
-            // Requires IS1108 (Missing) OR CS1101S (Valid)
-            const tree = { or: ["IS1108", "CS1101S"] };
-            const result = trimPrereqTree(tree, boardMap, 20);
+        // OR Tests
+        describe("OR logic", () => {
+            it("should collapse OR trees if at least one option is VALID", () => {
+                // Requires IS1108 (Missing) OR CS1101S (Valid)
+                const tree = { or: ["IS1108", "CS1101S"] };
+                const result = trimPrereqTree(tree, boardMap, 20);
 
-            // Should collapse the tree to just show the valid module
-            expect(result.status).toBe("VALID");
-            expect(result.tree).toBe("CS1101S");
+                // Should collapse the tree to just show the valid module
+                expect(result.status).toBe("VALID");
+                expect(result.tree).toBe("CS1101S");
+            });
+
+            it("should return MISSING if all OR options are completely missing", () => {
+                const tree = { or: ["IS1108", "MISSING_MOD"] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+
+                expect(result.status).toBe("MISSING");
+                expect(result.hasMissing).toBe(true);
+            });
         });
 
-        it("should evaluate wildcards properly on the board", () => {
-            // CS1% requires a CS1000 level module. CS1101S is on the board at time 10.
-            const result = trimPrereqTree("CS1%", boardMap, 20);
-            expect(result.status).toBe("VALID");
+        // AND Tests
+        describe("AND logic", () => {
+            it("should return VALID if all AND children are valid", () => {
+                const tree = { and: ["CS1101S"] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("VALID");
+            });
+
+            it("should return MISPLACED if at least one AND child is misplaced and none are missing", () => {
+                const tree = { and: ["CS1101S", "ST2334"] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("MISPLACED");
+                expect(result.hasMisplaced).toBe(true);
+            });
+
+            it("should return MISSING if any AND child is completely missing", () => {
+                const tree = { and: ["CS1101S", "MISSING_MOD"] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("MISSING");
+            });
+        });
+
+        // Wildcard Tests
+        describe("Wildcard logic", () => {
+            it("should evaluate wildcards properly on the board", () => {
+                // CS1% requires a CS1000 level module. CS1101S is on the board at time 10.
+                const result = trimPrereqTree("CS1%", boardMap, 20);
+                expect(result.status).toBe("VALID");
+            });
+        });
+
+        describe("nOf logic", () => {
+            // Tests below use Target Module being placed at Time: 20
+            const boardMap = {
+                MOD_A: { time: 10, semKey: "Y1S1" }, // Valid
+                MOD_B: { time: 25, semKey: "Y2S2" }, // Misplaced
+            };
+
+            it("should return VALID if enough choices are valid", () => {
+                const tree: PrereqTree = { nOf: [1, ["MOD_A", "MOD_C"]] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("VALID");
+            });
+
+            it("should return MISPLACED if valid + misplaced meets the count", () => {
+                const tree: PrereqTree = { nOf: [2, ["MOD_A", "MOD_B", "MOD_C"]] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("MISPLACED");
+            });
+
+            it("should return MISSING if valid + misplaced is less than required count", () => {
+                const tree: PrereqTree = { nOf: [3, ["MOD_A", "MOD_B", "MOD_C"]] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("MISSING");
+            });
+
+            it("should handle wildcards inside nOf", () => {
+                const tree: PrereqTree = { nOf: [1, ["MOD_%"]] };
+                const result = trimPrereqTree(tree, boardMap, 20);
+                expect(result.status).toBe("VALID"); // MOD_A satisfies this validly
+            });
+        });
+
+        describe("Fallback", () => {
+            it("should return a MISSING result for an unknown node type", () => {
+                // @ts-expect-error - Testing runtime fallback for bad data
+                const result = trimPrereqTree({ unknown_key: "value" }, boardMap, 20);
+
+                expect(result.status).toBe("MISSING");
+                expect(result.tree).toBeNull();
+            });
         });
     });
 });

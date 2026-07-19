@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getModuleBlockStyles } from "../moduleBlockStyles";
 import type { PlannerModule } from "@/types";
+import { FocusResult } from "../focusModeUtils";
 
 describe("Module Block Styles Utilities", () => {
     const mockModule: PlannerModule = {
@@ -92,4 +93,14 @@ describe("Module Block Styles Utilities", () => {
             expect(style).toContain("dark:bg-rose");
         });
     }
+
+    it("should return an empty string fallback for unrecognized focus states", () => {
+        // Casting an invalid state to bypass typescript for the test
+        // @ts-expect-error - Intentionally passing an invalid state to test the runtime fallback
+        const invalidFocus: FocusResult = { state: "unknown_state", distance: 1 };
+
+        const style = getModuleBlockStyles(mockModule, true, true, invalidFocus);
+
+        expect(style).toBe("");
+    });
 });
