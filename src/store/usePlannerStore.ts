@@ -156,15 +156,13 @@ export const usePlannerStore = create<PlannerState>((set) => ({
             dragState: { draggingModuleCode: null, isOverInvalidSem: false },
             visibleCustomColumns: [],
         }),
-    
-    setModuleGrade: (semesterKey, moduleCode, grade) => 
+
+    setModuleGrade: (semesterKey, moduleCode, grade) =>
         set((state) => ({
             board: {
                 ...state.board,
                 [semesterKey]: state.board[semesterKey].map((mod) =>
-                    mod.moduleCode === moduleCode
-                        ? { ...mod, grade }
-                        : mod
+                    mod.moduleCode === moduleCode ? { ...mod, grade } : mod
                 ),
             },
         })),

@@ -10,8 +10,8 @@ export interface GPAResult {
 
 export function calculateStatistics(modules: PlannerModule[]): GPAResult {
     let totalQualityPoints = 0; // Numerator: (Grade * Credits)
-    let gpaAttemptedUnits = 0;  // Denominator: Credits that impact GPA
-    let totalCompletedUnits = 0;   // Credits that count towards graduation
+    let gpaAttemptedUnits = 0; // Denominator: Credits that impact GPA
+    let totalCompletedUnits = 0; // Credits that count towards graduation
     let suUsedCount = 0;
 
     modules.forEach((mod) => {
@@ -20,7 +20,7 @@ export function calculateStatistics(modules: PlannerModule[]): GPAResult {
 
         // If module has no grade yet, skip it
         if (!mod.grade) {
-            return; 
+            return;
         }
 
         const gradeDef = GRADE_DICTIONARY[mod.grade.toUpperCase()];
@@ -30,7 +30,7 @@ export function calculateStatistics(modules: PlannerModule[]): GPAResult {
         // Calculate GPA: Attempted Units (The Denominator) & Quality Points (The Numerator)
         if (gradeDef.countsTowardsGPA) {
             gpaAttemptedUnits += mod.moduleCredit;
-            totalQualityPoints += (gradeDef.pointValue * mod.moduleCredit);
+            totalQualityPoints += gradeDef.pointValue * mod.moduleCredit;
         }
 
         if (gradeDef.grantsUnits) {
@@ -51,6 +51,6 @@ export function calculateStatistics(modules: PlannerModule[]): GPAResult {
         gpa,
         totalCompletedUnits,
         gpaAttemptedUnits,
-        suUsedCount
+        suUsedCount,
     };
 }

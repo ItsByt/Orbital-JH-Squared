@@ -18,7 +18,7 @@ export default function SearchBar({ onSelect, targetSemester }: SearchBarProps) 
             {/* Search Bar */}
             <div className="relative">
                 <Input
-                    placeholder="Search modules (e.g., CS1231S or Discrete Structures)"
+                    placeholder="Search modules (e.g., CS2030S or Discrete Structures)"
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);

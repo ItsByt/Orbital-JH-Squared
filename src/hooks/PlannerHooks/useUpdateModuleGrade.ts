@@ -26,7 +26,7 @@ export function useUpdateModuleGrade() {
         onError: (error, variables) => {
             setModuleGrade(variables.semesterKey, variables.moduleCode, variables.previousGrade);
             toast.error("Failed to save grade", { description: getErrorMessage(error) });
-        }
+        },
     });
 
     return moduleGradeMuutation;

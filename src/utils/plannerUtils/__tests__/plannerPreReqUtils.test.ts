@@ -9,7 +9,6 @@ import {
 import { PrereqTree } from "@/types";
 
 describe("Planner Pre-Req Utilities", () => {
-    
     describe("String Formatters", () => {
         it("removeModuleCodeGrade: should strip grade requirements", () => {
             expect(removeModuleCodeGrade("CS1101S:D")).toBe("CS1101S");
@@ -24,7 +23,7 @@ describe("Planner Pre-Req Utilities", () => {
     });
 
     describe("evaluatePrereqTree", () => {
-        const takenSet = new Set(["CS1101S", "MA1521", "CS2100", "ST2334"]);
+        const takenSet = new Set(["CS1101S", "MA1521", "CS2030S", "ST2334"]);
 
         it("should return true for empty or null trees", () => {
             expect(evaluatePrereqTree(null, takenSet)).toBe(true);
@@ -45,15 +44,15 @@ describe("Planner Pre-Req Utilities", () => {
         it("should evaluate AND logic", () => {
             const tree = { and: ["CS1101S", "MA1521"] };
             const failTree = { and: ["CS1101S", "CS2040S"] };
-            
+
             expect(evaluatePrereqTree(tree, takenSet)).toBe(true);
             expect(evaluatePrereqTree(failTree, takenSet)).toBe(false);
         });
 
         it("should evaluate OR logic", () => {
-            const tree = { or: ["CS2040S", "MA1521"] }; // MA1521 is taken
-            const failTree = { or: ["CS2040S", "CS2030S"] }; // Neither taken
-            
+            const tree = { or: ["MA1521", "MA1522"] }; // MA1521 is taken
+            const failTree = { or: ["CS2040S", "CS2100"] }; // Neither taken
+
             expect(evaluatePrereqTree(tree, takenSet)).toBe(true);
             expect(evaluatePrereqTree(failTree, takenSet)).toBe(false);
         });
@@ -75,8 +74,8 @@ describe("Planner Pre-Req Utilities", () => {
                 and: [
                     "CS1101S:D",
                     { or: ["CS2030S", "CS2040S"] },
-                    { nOf: [1, ["MA1521", "MA1522"]] }
-                ]
+                    { nOf: [1, ["MA1521", "MA1522"]] },
+                ],
             };
 
             const result = extractModulesFromTree(tree);
@@ -87,10 +86,10 @@ describe("Planner Pre-Req Utilities", () => {
     describe("trimPrereqTree", () => {
         // Tests below use Target Module being placed at Time: 20
         const boardMap = {
-            "CS1101S": { time: 10, semKey: "Y1S1" }, // Valid (taken before 20)
-            "MA1521": { time: 10, semKey: "Y1S1" },  // Valid
-            "CS2040S": { time: 25, semKey: "Y2S2" }, // Misplaced (taken AFTER target)
-            "ST2334": { time: 20, semKey: "Y2S1" }   // Misplaced (taken SAME TIME as target)
+            CS1101S: { time: 10, semKey: "Y1S1" }, // Valid (taken before 20)
+            MA1521: { time: 10, semKey: "Y1S1" }, // Valid
+            CS2040S: { time: 25, semKey: "Y2S2" }, // Misplaced (taken AFTER target)
+            ST2334: { time: 20, semKey: "Y2S1" }, // Misplaced (taken SAME TIME as target)
         };
 
         it("should return VALID for a prerequisite taken earlier", () => {
@@ -104,7 +103,7 @@ describe("Planner Pre-Req Utilities", () => {
             const result = trimPrereqTree("CS2040S", boardMap, 20);
             expect(result.status).toBe("MISPLACED");
             expect(result.hasMisplaced).toBe(true);
-            
+
             const resultSameTime = trimPrereqTree("ST2334", boardMap, 20);
             expect(resultSameTime.status).toBe("MISPLACED");
         });
@@ -119,10 +118,10 @@ describe("Planner Pre-Req Utilities", () => {
             // Requires IS1108 (Missing) OR CS1101S (Valid)
             const tree = { or: ["IS1108", "CS1101S"] };
             const result = trimPrereqTree(tree, boardMap, 20);
-            
+
             // Should collapse the tree to just show the valid module
             expect(result.status).toBe("VALID");
-            expect(result.tree).toBe("CS1101S"); 
+            expect(result.tree).toBe("CS1101S");
         });
 
         it("should evaluate wildcards properly on the board", () => {

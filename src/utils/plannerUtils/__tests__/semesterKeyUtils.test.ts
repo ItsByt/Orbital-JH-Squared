@@ -5,11 +5,10 @@ import {
     isUnvalidatedSemesterKey,
     formatSemesterKeyReadable,
     EXEMPTION_KEY,
-    SEMESTER_CODES
+    SEMESTER_CODES,
 } from "../semesterKeyUtils";
 
 describe("Semester Key Utils", () => {
-
     describe("parseSemesterKey", () => {
         // Parameterized tests to test multiple data points against the same logic cleanly
         it.each([
