@@ -56,13 +56,13 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-            
+
         if (!validateForm()) return;
 
         onSubmit(formData.code, formData.title, Number(formData.units));
 
         setFormData({ ...DEFAULT_FORM_STATE });
-    }
+    };
 
     return (
         <form onSubmit={handleSubmit} className="p-4 space-y-5">

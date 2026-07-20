@@ -133,7 +133,9 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                                     {hiddenCustomTerms.map((term) => (
                                         <DropdownMenuItem
                                             key={term.key}
-                                            onClick={() => showCustomColumn(`Y${yearNum}${term.key}`)}
+                                            onClick={() =>
+                                                showCustomColumn(`Y${yearNum}${term.key}`)
+                                            }
                                             className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             Add {term.label}

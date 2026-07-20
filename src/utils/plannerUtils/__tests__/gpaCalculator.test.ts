@@ -29,11 +29,11 @@ describe("GPA Calculator (calculateStatistics)", () => {
         it("should correctly calculate GPA for standard graded modules", () => {
             const modules = [
                 createMockModule({ moduleCredit: 4, grade: "A+" }), // QualityPoints = 5.0 * 4 = 20
-                createMockModule({ moduleCredit: 4, grade: "B" }),  // QualityPoints = 3.5 * 4 = 14
+                createMockModule({ moduleCredit: 4, grade: "B" }), // QualityPoints = 3.5 * 4 = 14
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             // Total QualityPoints = 34. Attempted Units = 8. GPA = 34 / 8 = 4.25
             expect(stats.gpa).toBeCloseTo(4.25);
             expect(stats.totalCompletedUnits).toBe(8);
@@ -44,9 +44,9 @@ describe("GPA Calculator (calculateStatistics)", () => {
                 createMockModule({ moduleCredit: 4, grade: "A" }), // QualityPoints = 5.0 * 4 = 20
                 createMockModule({ moduleCredit: 4, grade: "F" }), // QualityPoints = 0.0 * 4 = 0
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             // QualityPoints = 20. Attempted = 8. GPA = 2.5. Earned Units = 4 (Only the 'A')
             expect(stats.gpa).toBeCloseTo(2.5);
             expect(stats.totalCompletedUnits).toBe(4);
@@ -59,9 +59,9 @@ describe("GPA Calculator (calculateStatistics)", () => {
                 createMockModule({ moduleCredit: 4, grade: "A" }),
                 createMockModule({ moduleCredit: 4, grade: "CS" }),
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             expect(stats.gpa).toBeCloseTo(5.0);
             expect(stats.totalCompletedUnits).toBe(8);
         });
@@ -72,9 +72,9 @@ describe("GPA Calculator (calculateStatistics)", () => {
                 createMockModule({ moduleCredit: 4, grade: "U" }),
                 createMockModule({ moduleCredit: 4, grade: "CS" }), // Not an SU
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             expect(stats.suUsedCount).toBe(2);
             expect(stats.totalCompletedUnits).toBe(8);
             expect(stats.gpa).toBeNull();
@@ -82,23 +82,38 @@ describe("GPA Calculator (calculateStatistics)", () => {
 
         it("should NOT grant units for ungraded exemptions (e.g., MA1301 prerequisite fulfillment)", () => {
             const modules = [
-                createMockModule({ moduleCode: "MA1301", moduleCredit: 4, isExemption: true, grade: undefined }),
+                createMockModule({
+                    moduleCode: "MA1301",
+                    moduleCredit: 4,
+                    isExemption: true,
+                    grade: undefined,
+                }),
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             expect(stats.totalCompletedUnits).toBe(0);
             expect(stats.gpa).toBeNull();
         });
 
         it("should grant units for exemptions graded (e.g., Poly APCs / CS1010X)", () => {
             const modules = [
-                createMockModule({ moduleCode: "APC", moduleCredit: 20, isExemption: true, grade: "CS" }),
-                createMockModule({ moduleCode: "CS1010X", moduleCredit: 4, isExemption: true, grade: "D+" }),
+                createMockModule({
+                    moduleCode: "APC",
+                    moduleCredit: 20,
+                    isExemption: true,
+                    grade: "CS",
+                }),
+                createMockModule({
+                    moduleCode: "CS1010X",
+                    moduleCredit: 4,
+                    isExemption: true,
+                    grade: "D+",
+                }),
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             expect(stats.totalCompletedUnits).toBe(24);
             expect(stats.gpa).toBe(1.5);
         });
@@ -110,9 +125,9 @@ describe("GPA Calculator (calculateStatistics)", () => {
                 createMockModule({ moduleCredit: 2, grade: "A-" }),
                 createMockModule({ moduleCredit: 4, grade: "A+", excludeFromTotal: true }),
             ];
-            
+
             const stats = calculateStatistics(modules);
-            
+
             expect(stats.gpa).toBeCloseTo(4.5);
             expect(stats.totalCompletedUnits).toBe(2);
         });

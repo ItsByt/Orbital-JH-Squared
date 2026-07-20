@@ -21,7 +21,7 @@ export default function GlobalStatistics() {
 
         // Calculating Completed Stats
         const completedStats = calculateStatistics(allModules);
-        
+
         return { ...completedStats, plannedUnits };
     }, [board]);
 
