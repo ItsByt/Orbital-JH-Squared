@@ -240,7 +240,6 @@ export default function CustomSlotDialog({
                             placeholder="e.g. CCAs, Mealtime, Gym"
                             value={formData.name}
                             onChange={(e) => updateField("name", e.target.value)}
-                            required
                         />
                     </div>
 
