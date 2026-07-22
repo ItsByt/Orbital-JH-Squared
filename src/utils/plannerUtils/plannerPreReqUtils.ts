@@ -136,7 +136,10 @@ export function extractModulesFromTree(tree: PrereqTree | null | undefined): str
 
     if (typeof tree === "string") {
         if (!isValidModuleNode(tree)) return [];
-        if (isModuleWildcard(tree)) return []; // Skip extracting prefixes as exact modules
+        if (isModuleWildcard(tree)) {
+            // Need to return wildcard for Focus Mode
+            return [removeModuleCodeWildCard(tree) + "%"];
+        }
         return [removeModuleCodeGrade(tree)];
     }
     if ("and" in tree) return tree.and.flatMap(extractModulesFromTree);
