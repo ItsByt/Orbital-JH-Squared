@@ -100,10 +100,10 @@ export interface SavedPlannerRow {
 }
 
 // Cohort Requirements for PreReqTree
-export type CohortRule = 'IF_IN' | 'IF_NOT_IN' | 'MUST_BE_IN' | 'MUST_NOT_BE_IN';
+export type CohortRule = "IF_IN" | "IF_NOT_IN" | "MUST_BE_IN" | "MUST_NOT_BE_IN";
 export type CohortCondition = { rule: CohortRule; years: Array<string> };
 
-export type ProgramTypeRule = 'IF_IN' | 'MUST_BE_IN';
+export type ProgramTypeRule = "IF_IN" | "MUST_BE_IN";
 export type ProgramTypeCondition = { rule: ProgramTypeRule; types: Array<string> };
 
 // Details for Pre-requisite Tree
@@ -115,7 +115,7 @@ export type PrereqTree =
     | { and: Array<PrereqTree> }
     | { or: Array<PrereqTree> }
     | { nOf: [number, Array<PrereqTree>] }
-    | { cohort: CohortCondition; then?: PrereqTree } // then is optional since some modules omit it 
+    | { cohort: CohortCondition; then?: PrereqTree } // then is optional since some modules omit it
     | { programType: ProgramTypeCondition; then?: PrereqTree };
 
 // Formatted Pre-Req Tree Node
