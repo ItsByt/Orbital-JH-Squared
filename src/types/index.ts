@@ -99,11 +99,24 @@ export interface SavedPlannerRow {
     grade?: string | null; // Optional to allow for no grade
 }
 
+// Cohort Requirements for PreReqTree
+export type CohortRule = "IF_IN" | "IF_NOT_IN" | "MUST_BE_IN" | "MUST_NOT_BE_IN";
+export type CohortCondition = { rule: CohortRule; years: Array<string> };
+
+export type ProgramTypeRule = "IF_IN" | "MUST_BE_IN";
+export type ProgramTypeCondition = { rule: ProgramTypeRule; types: Array<string> };
+
 // Details for Pre-requisite Tree
 // Either a string, an object with key of "and"/"or", value of array of PrereqTree,
 // or key of "nOf" and value [number of modules needed, specific type of module needed]
+// or has varying cohort requirements
 export type PrereqTree =
-    string | { and: PrereqTree[] } | { or: PrereqTree[] } | { nOf: [number, PrereqTree[]] };
+    | string
+    | { and: Array<PrereqTree> }
+    | { or: Array<PrereqTree> }
+    | { nOf: [number, Array<PrereqTree>] }
+    | { cohort: CohortCondition; then?: PrereqTree } // then is optional since some modules omit it
+    | { programType: ProgramTypeCondition; then?: PrereqTree };
 
 // Formatted Pre-Req Tree Node
 export interface FormattedPreReqNode {
