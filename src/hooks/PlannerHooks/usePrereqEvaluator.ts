@@ -9,7 +9,7 @@ import {
     trimPrereqTree,
     evaluatePrereqTree,
     extractModulesFromTree,
-} from "@/utils/plannerUtils/prereqUtils";
+} from "@/utils/plannerUtils/plannerPreReqUtils";
 
 export function usePrereqEvaluator(moduleCode: string, semesterKey: string, isCustom?: boolean) {
     const queryClient = useQueryClient();

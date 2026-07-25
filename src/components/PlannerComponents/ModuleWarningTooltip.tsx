@@ -3,7 +3,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/comp
 import { cn } from "@/lib/utils";
 import MissingPrereqTreeRenderer from "./MissingPrereqRenderer";
 import { formatSemesterKeyReadable } from "@/utils/plannerUtils/semesterKeyUtils";
-import type { TrimmedPrereqResult } from "@/utils/plannerUtils/prereqUtils";
+import type { TrimmedPrereqResult } from "@/utils/plannerUtils/plannerPreReqUtils";
 
 interface Props {
     takenTooEarlyIssues: TrimmedPrereqResult | null;
