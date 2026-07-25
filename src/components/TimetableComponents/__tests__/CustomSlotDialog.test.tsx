@@ -26,10 +26,7 @@ describe("CustomSlotDialog", () => {
         vi.mocked(getModule).mockResolvedValue(null);
     });
 
-    function renderDialog(
-        onCustomEvent = vi.fn().mockResolvedValue(undefined),
-        props = {}
-    ) {
+    function renderDialog(onCustomEvent = vi.fn().mockResolvedValue(undefined), props = {}) {
         return {
             onCustomEvent,
             ...render(
@@ -49,11 +46,8 @@ describe("CustomSlotDialog", () => {
 
         fireEvent.click(screen.getByRole("button"));
 
-        expect(
-            screen.getByText("Customizable Block Creator")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Customizable Block Creator")).toBeInTheDocument();
     });
-
 
     it("creates a custom event with valid input", async () => {
         const onCustomEvent = vi.fn().mockResolvedValue(undefined);
@@ -90,7 +84,6 @@ describe("CustomSlotDialog", () => {
         );
     });
 
-
     it("rejects empty activity name", async () => {
         const onCustomEvent = vi.fn();
 
@@ -105,15 +98,11 @@ describe("CustomSlotDialog", () => {
         );
 
         await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith(
-                "Missing Input",
-                expect.anything()
-            );
+            expect(toast.error).toHaveBeenCalledWith("Missing Input", expect.anything());
         });
 
         expect(onCustomEvent).not.toHaveBeenCalled();
     });
-
 
     it("rejects invalid time range", async () => {
         renderDialog();
@@ -146,10 +135,7 @@ describe("CustomSlotDialog", () => {
         );
 
         await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith(
-                "Invalid Time",
-                expect.anything()
-            );
+            expect(toast.error).toHaveBeenCalledWith("Invalid Time", expect.anything());
         });
     });
 
@@ -165,9 +151,7 @@ describe("CustomSlotDialog", () => {
         });
 
         for (const week of WEEKS) {
-            fireEvent.click(
-                screen.getByLabelText(`W${week}`)
-            );
+            fireEvent.click(screen.getByLabelText(`W${week}`));
         }
 
         fireEvent.click(
@@ -177,13 +161,9 @@ describe("CustomSlotDialog", () => {
         );
 
         await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith(
-                "Invalid Selection",
-                expect.anything()
-            );
+            expect(toast.error).toHaveBeenCalledWith("Invalid Selection", expect.anything());
         });
     });
-
 
     it("rejects names that match official modules", async () => {
         vi.mocked(getModule).mockResolvedValue({
@@ -210,18 +190,12 @@ describe("CustomSlotDialog", () => {
         );
 
         await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith(
-                "Naming Conflict",
-                expect.anything()
-            );
+            expect(toast.error).toHaveBeenCalledWith("Naming Conflict", expect.anything());
         });
     });
 
-
     it("allows creation if NUSMods lookup fails", async () => {
-        vi.mocked(getModule).mockRejectedValue(
-            new Error("Network error")
-        );
+        vi.mocked(getModule).mockRejectedValue(new Error("Network error"));
 
         const onCustomEvent = vi.fn().mockResolvedValue(undefined);
 
@@ -246,7 +220,6 @@ describe("CustomSlotDialog", () => {
         });
     });
 
-
     it("loads existing custom lesson in edit mode", () => {
         const editLesson: DisplayLesson = {
             id: "abc",
@@ -263,28 +236,18 @@ describe("CustomSlotDialog", () => {
             weekBitmask: 3,
         };
 
-        renderDialog(
-            vi.fn(),
-            {
-                open: true,
-                editLesson,
-            }
-        );
+        renderDialog(vi.fn(), {
+            open: true,
+            editLesson,
+        });
 
-        expect(
-            screen.getByDisplayValue("CCA")
-        ).toBeInTheDocument();
+        expect(screen.getByDisplayValue("CCA")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("Edit Custom Block")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Edit Custom Block")).toBeInTheDocument();
     });
 
-
     it("calls update callback in edit mode", async () => {
-        const onUpdateCustomEvent = vi
-            .fn()
-            .mockResolvedValue(undefined);
+        const onUpdateCustomEvent = vi.fn().mockResolvedValue(undefined);
 
         const editLesson: DisplayLesson = {
             id: "abc",
@@ -301,14 +264,11 @@ describe("CustomSlotDialog", () => {
             weekBitmask: 1,
         };
 
-        renderDialog(
-            vi.fn(),
-            {
-                open: true,
-                editLesson,
-                onUpdateCustomEvent,
-            }
-        );
+        renderDialog(vi.fn(), {
+            open: true,
+            editLesson,
+            onUpdateCustomEvent,
+        });
 
         fireEvent.click(
             screen.getByRole("button", {
@@ -320,9 +280,6 @@ describe("CustomSlotDialog", () => {
             expect(onUpdateCustomEvent).toHaveBeenCalled();
         });
 
-        expect(onUpdateCustomEvent).toHaveBeenCalledWith(
-            "abc",
-            expect.any(Object)
-        );
+        expect(onUpdateCustomEvent).toHaveBeenCalledWith("abc", expect.any(Object));
     });
 });

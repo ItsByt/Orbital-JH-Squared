@@ -43,7 +43,6 @@ describe("SemesterNavigation", () => {
         ).toBeInTheDocument();
     });
 
-
     it("navigates to semester 1 timetable when Semester 1 is clicked", () => {
         renderComponent(2);
 
@@ -53,11 +52,8 @@ describe("SemesterNavigation", () => {
             })
         );
 
-        expect(mockNavigate).toHaveBeenCalledWith(
-            "/timetable/sem-1"
-        );
+        expect(mockNavigate).toHaveBeenCalledWith("/timetable/sem-1");
     });
-
 
     it("navigates to semester 2 timetable when Semester 2 is clicked", () => {
         renderComponent(1);
@@ -68,11 +64,8 @@ describe("SemesterNavigation", () => {
             })
         );
 
-        expect(mockNavigate).toHaveBeenCalledWith(
-            "/timetable/sem-2"
-        );
+        expect(mockNavigate).toHaveBeenCalledWith("/timetable/sem-2");
     });
-
 
     it("highlights Semester 1 when semester is 1", () => {
         renderComponent(1);
@@ -85,15 +78,10 @@ describe("SemesterNavigation", () => {
             name: "Semester 2",
         });
 
-        expect(sem1Button.className).toContain(
-            "bg-[#749c83]"
-        );
+        expect(sem1Button.className).toContain("bg-[#749c83]");
 
-        expect(sem2Button.className).toContain(
-            "border-border"
-        );
+        expect(sem2Button.className).toContain("border-border");
     });
-
 
     it("highlights Semester 2 when semester is 2", () => {
         renderComponent(2);
@@ -106,12 +94,8 @@ describe("SemesterNavigation", () => {
             name: "Semester 2",
         });
 
-        expect(sem2Button.className).toContain(
-            "bg-[#749c83]"
-        );
+        expect(sem2Button.className).toContain("bg-[#749c83]");
 
-        expect(sem1Button.className).toContain(
-            "border-border"
-        );
+        expect(sem1Button.className).toContain("border-border");
     });
 });

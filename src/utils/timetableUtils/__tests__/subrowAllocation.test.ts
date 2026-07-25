@@ -2,11 +2,7 @@ import { describe, it, expect } from "vitest";
 import { calculateDayLayout } from "../subrowAllocation";
 import type { DisplayLesson } from "@/types";
 
-function lesson(
-    id: string,
-    start: string,
-    end: string
-): DisplayLesson {
+function lesson(id: string, start: string, end: string): DisplayLesson {
     const toMinutes = (time: string) => {
         const h = Number(time.slice(0, 2));
         const m = Number(time.slice(2));
@@ -53,10 +49,7 @@ describe("calculateDayLayout", () => {
     });
 
     it("places overlapping lessons into different rows", () => {
-        const lessons = [
-            lesson("A", "0900", "1100"),
-            lesson("B", "1000", "1200"),
-        ];
+        const lessons = [lesson("A", "0900", "1100"), lesson("B", "1000", "1200")];
 
         const result = calculateDayLayout(lessons);
 

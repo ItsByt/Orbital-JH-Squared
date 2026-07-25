@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView"; 
+import { useTimetableView } from "@/hooks/TimetableHooks/useTimetableView";
 import type { DisplayLesson } from "@/types";
 
-const createLesson = (
-    overrides: Partial<DisplayLesson> = {}
-): DisplayLesson => ({
+const createLesson = (overrides: Partial<DisplayLesson> = {}): DisplayLesson => ({
     id: "1",
     moduleCode: "CS1010",
     lessonType: "LEC",
@@ -23,9 +21,7 @@ const createLesson = (
 
 describe("useTimetableView", () => {
     it("returns empty structures when given no lessons", () => {
-        const { result } = renderHook(() =>
-            useTimetableView([], [])
-        );
+        const { result } = renderHook(() => useTimetableView([], []));
 
         expect(result.current.lessonsByDay).toEqual({
             Monday: [],
@@ -49,20 +45,11 @@ describe("useTimetableView", () => {
             day: "Friday",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [mondayLesson, fridayLesson],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([mondayLesson, fridayLesson], []));
 
-        expect(result.current.lessonsByDay.Monday).toEqual([
-            mondayLesson,
-        ]);
+        expect(result.current.lessonsByDay.Monday).toEqual([mondayLesson]);
 
-        expect(result.current.lessonsByDay.Friday).toEqual([
-            fridayLesson,
-        ]);
+        expect(result.current.lessonsByDay.Friday).toEqual([fridayLesson]);
     });
 
     it("ignores lessons with unsupported days", () => {
@@ -70,12 +57,7 @@ describe("useTimetableView", () => {
             day: "Saturday",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [weekendLesson],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([weekendLesson], []));
 
         expect(result.current.lessonsByDay.Monday).toEqual([]);
         expect(result.current.lessonsByDay.Friday).toEqual([]);
@@ -88,18 +70,11 @@ describe("useTimetableView", () => {
             day: "Tuesday",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [],
-                [alternative]
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([], [alternative]));
 
         expect(result.current.lessonsByDay.Tuesday).toHaveLength(1);
 
-        expect(
-            result.current.lessonsByDay.Tuesday[0]
-        ).toEqual({
+        expect(result.current.lessonsByDay.Tuesday[0]).toEqual({
             ...alternative,
             isAlternative: true,
             weekBitmask: alternative.weekBitmask,
@@ -120,17 +95,10 @@ describe("useTimetableView", () => {
             startTime: "1000",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [moduleLesson],
-                [alternative]
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([moduleLesson], [alternative]));
 
         expect(result.current.lessonsByDay.Monday).toHaveLength(1);
-        expect(
-            result.current.lessonsByDay.Monday[0].isAlternative
-        ).toBeUndefined();
+        expect(result.current.lessonsByDay.Monday[0].isAlternative).toBeUndefined();
     });
 
     it("keeps alternative lessons with different classes", () => {
@@ -144,18 +112,11 @@ describe("useTimetableView", () => {
             day: "Monday",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [moduleLesson],
-                [alternative]
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([moduleLesson], [alternative]));
 
         expect(result.current.lessonsByDay.Monday).toHaveLength(2);
 
-        expect(
-            result.current.lessonsByDay.Monday[1].isAlternative
-        ).toBe(true);
+        expect(result.current.lessonsByDay.Monday[1].isAlternative).toBe(true);
     });
 
     it("deduplicates active academic modules by module code", () => {
@@ -175,19 +136,9 @@ describe("useTimetableView", () => {
             moduleCode: "MA1521",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [lec, tut, math],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([lec, tut, math], []));
 
-        expect(
-            result.current.uniqueActiveModules
-        ).toEqual([
-            lec,
-            math,
-        ]);
+        expect(result.current.uniqueActiveModules).toEqual([lec, math]);
     });
 
     it("keeps all personal blocks even with duplicate names", () => {
@@ -203,16 +154,9 @@ describe("useTimetableView", () => {
             lessonType: "Personal Block",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [blockOne, blockTwo],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([blockOne, blockTwo], []));
 
-        expect(
-            result.current.uniqueActiveModules
-        ).toHaveLength(2);
+        expect(result.current.uniqueActiveModules).toHaveLength(2);
     });
 
     it("counts personal block names case-insensitively", () => {
@@ -234,12 +178,7 @@ describe("useTimetableView", () => {
             lessonType: "Personal Block",
         });
 
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [gymOne, gymTwo, study],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([gymOne, gymTwo, study], []));
 
         expect(result.current.customNameCounts).toEqual({
             GYM: 2,
@@ -248,15 +187,8 @@ describe("useTimetableView", () => {
     });
 
     it("ignores null-like values defensively", () => {
-        const { result } = renderHook(() =>
-            useTimetableView(
-                [],
-                []
-            )
-        );
+        const { result } = renderHook(() => useTimetableView([], []));
 
-        expect(
-            result.current.uniqueActiveModules
-        ).toEqual([]);
+        expect(result.current.uniqueActiveModules).toEqual([]);
     });
 });

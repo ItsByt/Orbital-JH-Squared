@@ -3,7 +3,11 @@ import { Search, Loader2, ArrowLeft } from "lucide-react";
 import AutoCompleteSearch from "@/hooks/GeneralHooks/useModuleSearch";
 import { usePlannerStore } from "@/store/usePlannerStore";
 import { getModule } from "@/services/nusmods";
-import { getNextDisplayOrder, buildPlannerModule, buildCustomPlannerModule } from "@/utils/plannerUtils/plannerFormatters";
+import {
+    getNextDisplayOrder,
+    buildPlannerModule,
+    buildCustomPlannerModule,
+} from "@/utils/plannerUtils/plannerFormatters";
 import { checkValidSemesterUsingModuleDetails } from "@/utils/plannerUtils/validateModuleSemester";
 import { isUnvalidatedSemesterKey, parseSemesterKey } from "@/utils/plannerUtils/semesterKeyUtils";
 
@@ -11,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { toast } from "sonner";
 import { getErrorMessage } from "@/utils/generalUtils/getErrorMessage";
 import { useAddPlannerModule } from "@/hooks/PlannerHooks/useAddPlannerModule";
-import CustomModuleForm from "./CustomModuleForm"; 
+import CustomModuleForm from "./CustomModuleForm";
 
 export default function AddCourseModal({
     open,
@@ -78,7 +82,7 @@ export default function AddCourseModal({
                     return;
                 }
             }
-            
+
             const board = usePlannerStore.getState().board;
             const currentSemModules = board[semesterKey] || [];
 
@@ -165,7 +169,7 @@ export default function AddCourseModal({
                         </div>
                     )}
                 </DialogHeader>
-                
+
                 {/* To Toggle between API Search Results and Custom Module Form */}
                 <div className="max-h-[300px] overflow-y-auto">
                     {!isCustomMode ? (

@@ -6,44 +6,20 @@ import type { DisplayLesson } from "@/types";
 interface MockClassCardProps {
     lesson: DisplayLesson;
     onSelectClass: (lesson: DisplayLesson) => void;
-    onSwapClass: (
-        selected: DisplayLesson | null,
-        target: DisplayLesson
-    ) => void;
+    onSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
     onUpdateCustomLesson: (lesson: DisplayLesson) => void;
 }
 
 vi.mock("../ClassCard", () => ({
-    default: ({
-        lesson,
-        onSelectClass,
-        onSwapClass,
-        onUpdateCustomLesson,
-    }: MockClassCardProps) => (
+    default: ({ lesson, onSelectClass, onSwapClass, onUpdateCustomLesson }: MockClassCardProps) => (
         <div data-testid={`class-${lesson.id}`}>
             <span>{lesson.moduleCode}</span>
 
-            <button
-                onClick={() => onSelectClass(lesson)}
-            >
-                Select
-            </button>
+            <button onClick={() => onSelectClass(lesson)}>Select</button>
 
-            <button
-                onClick={() =>
-                    onSwapClass(null, lesson)
-                }
-            >
-                Swap
-            </button>
+            <button onClick={() => onSwapClass(null, lesson)}>Swap</button>
 
-            <button
-                onClick={() =>
-                    onUpdateCustomLesson(lesson)
-                }
-            >
-                Update
-            </button>
+            <button onClick={() => onUpdateCustomLesson(lesson)}>Update</button>
         </div>
     ),
 }));
@@ -51,25 +27,14 @@ vi.mock("../ClassCard", () => ({
 vi.mock("@/utils/timetableUtils/subrowAllocation", () => ({
     calculateDayLayout: vi.fn(() => ({
         totalRowsForDay: 1,
-        lessonRowMap: new Map([
-            ["1", 0],
-        ]),
+        lessonRowMap: new Map([["1", 0]]),
     })),
 }));
 
 describe("TimetableGrid", () => {
-    const DAYS = [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-    ];
+    const DAYS = ["Monday", "Tuesday", "Wednesday"];
 
-    const HOURS = [
-        "0900",
-        "1000",
-        "1100",
-        "1200",
-    ];
+    const HOURS = ["0900", "1000", "1100", "1200"];
 
     const lesson: DisplayLesson = {
         id: "1",
@@ -86,19 +51,13 @@ describe("TimetableGrid", () => {
         weekBitmask: 1,
     };
 
-
     function renderGrid(
         props: Partial<{
             lessonsByDay: Record<string, DisplayLesson[]>;
             selectedLesson: DisplayLesson | null;
             handleSelectClass: (lesson: DisplayLesson) => void;
-            handleSwapClass: (
-                selected: DisplayLesson | null,
-                target: DisplayLesson
-            ) => void;
-            handleUpdateCustomLesson: (
-                lesson: DisplayLesson
-            ) => void;
+            handleSwapClass: (selected: DisplayLesson | null, target: DisplayLesson) => void;
+            handleUpdateCustomLesson: (lesson: DisplayLesson) => void;
             captureMode: boolean;
         }> = {}
     ) {
@@ -120,52 +79,35 @@ describe("TimetableGrid", () => {
         );
     }
 
-
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
-
     it("renders all day labels", () => {
         renderGrid();
 
-        expect(
-            screen.getByText("Mon")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Mon")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("Tue")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Tue")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("Wed")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Wed")).toBeInTheDocument();
     });
-
 
     it("renders hour headers", () => {
         renderGrid();
 
         HOURS.forEach((hour) => {
-            expect(
-                screen.getByText(hour)
-            ).toBeInTheDocument();
+            expect(screen.getByText(hour)).toBeInTheDocument();
         });
     });
-
 
     it("renders lessons inside timetable", () => {
         renderGrid();
 
-        expect(
-            screen.getByTestId("class-1")
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("class-1")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("CS1010")
-        ).toBeInTheDocument();
+        expect(screen.getByText("CS1010")).toBeInTheDocument();
     });
-
 
     it("filters lessons outside timetable range", () => {
         const outsideLesson: DisplayLesson = {
@@ -177,26 +119,16 @@ describe("TimetableGrid", () => {
 
         renderGrid({
             lessonsByDay: {
-                Monday: [
-                    lesson,
-                    outsideLesson,
-                ],
+                Monday: [lesson, outsideLesson],
                 Tuesday: [],
                 Wednesday: [],
             },
         });
 
+        expect(screen.getByTestId("class-1")).toBeInTheDocument();
 
-        expect(
-            screen.getByTestId("class-1")
-        ).toBeInTheDocument();
-
-
-        expect(
-            screen.queryByTestId("class-outside")
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId("class-outside")).not.toBeInTheDocument();
     });
-
 
     it("calls select callback when class is selected", () => {
         const handleSelectClass = vi.fn();
@@ -205,19 +137,14 @@ describe("TimetableGrid", () => {
             handleSelectClass,
         });
 
-
         fireEvent.click(
             screen.getByRole("button", {
                 name: "Select",
             })
         );
 
-
-        expect(
-            handleSelectClass
-        ).toHaveBeenCalledWith(lesson);
+        expect(handleSelectClass).toHaveBeenCalledWith(lesson);
     });
-
 
     it("calls swap callback when swap is clicked", () => {
         const handleSwapClass = vi.fn();
@@ -226,22 +153,14 @@ describe("TimetableGrid", () => {
             handleSwapClass,
         });
 
-
         fireEvent.click(
             screen.getByRole("button", {
                 name: "Swap",
             })
         );
 
-
-        expect(
-            handleSwapClass
-        ).toHaveBeenCalledWith(
-            null,
-            lesson
-        );
+        expect(handleSwapClass).toHaveBeenCalledWith(null, lesson);
     });
-
 
     it("calls update callback when update is clicked", () => {
         const handleUpdateCustomLesson = vi.fn();
@@ -250,46 +169,30 @@ describe("TimetableGrid", () => {
             handleUpdateCustomLesson,
         });
 
-
         fireEvent.click(
             screen.getByRole("button", {
                 name: "Update",
             })
         );
 
-
-        expect(
-            handleUpdateCustomLesson
-        ).toHaveBeenCalledWith(lesson);
+        expect(handleUpdateCustomLesson).toHaveBeenCalledWith(lesson);
     });
-
 
     it("supports capture mode", () => {
         const { container } = renderGrid({
             captureMode: true,
         });
 
+        const wrapper = container.firstChild as HTMLElement;
 
-        const wrapper =
-            container.firstChild as HTMLElement;
-
-
-        expect(
-            wrapper.className
-        ).toContain(
-            "overflow-visible"
-        );
+        expect(wrapper.className).toContain("overflow-visible");
     });
-
 
     it("renders selected lesson correctly", () => {
         renderGrid({
             selectedLesson: lesson,
         });
 
-
-        expect(
-            screen.getByTestId("class-1")
-        ).toBeInTheDocument();
+        expect(screen.getByTestId("class-1")).toBeInTheDocument();
     });
 });

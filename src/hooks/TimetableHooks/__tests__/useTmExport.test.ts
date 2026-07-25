@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useTimetableExport } from "@/hooks/TimetableHooks/useTimetableExport"; 
+import { useTimetableExport } from "@/hooks/TimetableHooks/useTimetableExport";
 import * as htmlToImage from "html-to-image";
 
 vi.mock("html-to-image", () => ({
@@ -13,13 +13,10 @@ describe("useTimetableExport", () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        vi.stubGlobal(
-            "requestAnimationFrame",
-            (callback: FrameRequestCallback) => {
-                callback(0);
-                return 0;
-            }
-        );
+        vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+            callback(0);
+            return 0;
+        });
     });
 
     it("initialises with captureMode false", () => {
@@ -65,16 +62,13 @@ describe("useTimetableExport", () => {
             await result.current.downloadTimetable();
         });
 
-        expect(mockedToPng).toHaveBeenCalledWith(
-            element,
-            {
-                backgroundColor: "#121212",
-                pixelRatio: 2,
-                width: 800,
-                height: 1200,
-                cacheBust: true,
-            }
-        );
+        expect(mockedToPng).toHaveBeenCalledWith(element, {
+            backgroundColor: "#121212",
+            pixelRatio: 2,
+            width: 800,
+            height: 1200,
+            cacheBust: true,
+        });
 
         expect(clickSpy).toHaveBeenCalledTimes(1);
         expect(result.current.captureMode).toBe(false);
@@ -101,13 +95,9 @@ describe("useTimetableExport", () => {
 
         const anchor = document.createElement("a");
 
-        const createElementSpy = vi
-            .spyOn(document, "createElement")
-            .mockReturnValueOnce(anchor);
+        const createElementSpy = vi.spyOn(document, "createElement").mockReturnValueOnce(anchor);
 
-        const clickSpy = vi
-            .spyOn(anchor, "click")
-            .mockImplementation(() => {});
+        const clickSpy = vi.spyOn(anchor, "click").mockImplementation(() => {});
 
         await act(async () => {
             await result.current.downloadTimetable();
@@ -143,8 +133,7 @@ describe("useTimetableExport", () => {
 
         result.current.timetableRef.current = element;
 
-        vi.spyOn(HTMLAnchorElement.prototype, "click")
-            .mockImplementation(() => {});
+        vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
 
         await act(async () => {
             await result.current.downloadTimetable();
@@ -156,13 +145,9 @@ describe("useTimetableExport", () => {
     });
 
     it("handles export failure and restores state", async () => {
-        mockedToPng.mockRejectedValue(
-            new Error("PNG conversion failed")
-        );
+        mockedToPng.mockRejectedValue(new Error("PNG conversion failed"));
 
-        const consoleSpy = vi
-            .spyOn(console, "error")
-            .mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
         const { result } = renderHook(() => useTimetableExport(1));
 
@@ -190,10 +175,7 @@ describe("useTimetableExport", () => {
             expect(result.current.captureMode).toBe(false);
         });
 
-        expect(consoleSpy).toHaveBeenCalledWith(
-            "Failed to export timetable:",
-            expect.any(Error)
-        );
+        expect(consoleSpy).toHaveBeenCalledWith("Failed to export timetable:", expect.any(Error));
 
         expect(element.style.width).toBe("300px");
         expect(element.style.height).toBe("400px");

@@ -25,11 +25,11 @@ export default function GradeSelector({
 
     const handleGradeChange = (newGrade: string | undefined) => {
         if (newGrade === currentGrade) return;
-        mutate({ 
-            semesterKey, 
-            moduleCode, 
-            grade: newGrade, 
-            previousGrade: currentGrade // passed along for rollback on error
+        mutate({
+            semesterKey,
+            moduleCode,
+            grade: newGrade,
+            previousGrade: currentGrade, // passed along for rollback on error
         });
     };
 

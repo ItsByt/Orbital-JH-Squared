@@ -130,9 +130,7 @@ describe("ClassCard", () => {
 
         renderCard(baseLesson, [baseLesson, conflictingLesson]);
 
-        const card = screen.getByTitle(
-            "TIMETABLE CLASH: Overlaps with CS2040 (Lecture)"
-        );
+        const card = screen.getByTitle("TIMETABLE CLASH: Overlaps with CS2040 (Lecture)");
 
         expect(card).toBeInTheDocument();
         expect(screen.getByText("⚠️")).toBeInTheDocument();

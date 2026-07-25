@@ -1,9 +1,6 @@
 import { useEffect, type RefObject } from "react";
 
-export function useDragScroll(
-    scrollContainerRef: RefObject<HTMLDivElement>,
-    isDragging: boolean
-) {
+export function useDragScroll(scrollContainerRef: RefObject<HTMLDivElement>, isDragging: boolean) {
     useEffect(() => {
         // We only run this loop when a module is actively being dragged
         if (!isDragging) return;

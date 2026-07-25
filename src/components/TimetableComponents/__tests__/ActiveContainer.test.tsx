@@ -5,20 +5,12 @@ import ActiveContainer from "../ActiveContainer";
 import type { DisplayLesson } from "@/types";
 
 vi.mock("@/components/GeneralComponents/SearchBar", () => ({
-    default: ({
-        onSelect,
-    }: {
-        onSelect: (moduleCode: string) => void;
-    }) => (
-        <button onClick={() => onSelect("CS1010")}>
-            Mock Search Result
-        </button>
+    default: ({ onSelect }: { onSelect: (moduleCode: string) => void }) => (
+        <button onClick={() => onSelect("CS1010")}>Mock Search Result</button>
     ),
 }));
 
-const createLesson = (
-    overrides: Partial<DisplayLesson> = {}
-): DisplayLesson => ({
+const createLesson = (overrides: Partial<DisplayLesson> = {}): DisplayLesson => ({
     id: "1",
     moduleCode: "CS1010",
     lessonType: "LEC",
@@ -37,9 +29,7 @@ const createLesson = (
 
 describe("ActiveContainer", () => {
     const defaultProps = {
-        uniqueActiveModules: [
-            createLesson(),
-        ],
+        uniqueActiveModules: [createLesson()],
         customNameCounts: {},
         handleAddModule: vi.fn().mockResolvedValue(undefined),
         handleRemoveModule: vi.fn(),
@@ -48,50 +38,27 @@ describe("ActiveContainer", () => {
     };
 
     it("renders active modules and module count", () => {
-        render(
-            <ActiveContainer {...defaultProps} />
-        );
+        render(<ActiveContainer {...defaultProps} />);
 
-        expect(
-            screen.getByText("Active Modules (1)")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Active Modules (1)")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("CS1010")
-        ).toBeInTheDocument();
+        expect(screen.getByText("CS1010")).toBeInTheDocument();
     });
 
     it("does not render active section when there are no modules", () => {
-        render(
-            <ActiveContainer
-                {...defaultProps}
-                uniqueActiveModules={[]}
-            />
-        );
+        render(<ActiveContainer {...defaultProps} uniqueActiveModules={[]} />);
 
-        expect(
-            screen.queryByText(/Active Modules/)
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/Active Modules/)).not.toBeInTheDocument();
     });
 
     it("calls handleAddModule when SearchBar selects a module", async () => {
         const handleAddModule = vi.fn().mockResolvedValue(undefined);
 
-        render(
-            <ActiveContainer
-                {...defaultProps}
-                handleAddModule={handleAddModule}
-            />
-        );
+        render(<ActiveContainer {...defaultProps} handleAddModule={handleAddModule} />);
 
-        await userEvent.click(
-            screen.getByText("Mock Search Result")
-        );
+        await userEvent.click(screen.getByText("Mock Search Result"));
 
-        expect(handleAddModule).toHaveBeenCalledWith(
-            "CS1010",
-            defaultProps.uniqueActiveModules
-        );
+        expect(handleAddModule).toHaveBeenCalledWith("CS1010", defaultProps.uniqueActiveModules);
     });
 
     it("shows duplicate personal block information", () => {
@@ -114,41 +81,27 @@ describe("ActiveContainer", () => {
             />
         );
 
-        expect(
-            screen.getByText("Mon")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Mon")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("0900-1000")
-        ).toBeInTheDocument();
+        expect(screen.getByText("0900-1000")).toBeInTheDocument();
     });
 
     it("opens module options menu", async () => {
-        render(
-            <ActiveContainer {...defaultProps} />
-        );
+        render(<ActiveContainer {...defaultProps} />);
 
-        const optionsButton =
-            screen.getByRole("button", {
-                name: "Options for CS1010",
-            });
+        const optionsButton = screen.getByRole("button", {
+            name: "Options for CS1010",
+        });
 
         await userEvent.click(optionsButton);
 
-        expect(
-            screen.getByText("Remove Module")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Remove Module")).toBeInTheDocument();
     });
 
     it("calls handleRemoveModule when removing a module", async () => {
         const handleRemoveModule = vi.fn();
 
-        render(
-            <ActiveContainer
-                {...defaultProps}
-                handleRemoveModule={handleRemoveModule}
-            />
-        );
+        render(<ActiveContainer {...defaultProps} handleRemoveModule={handleRemoveModule} />);
 
         await userEvent.click(
             screen.getByRole("button", {
@@ -156,26 +109,15 @@ describe("ActiveContainer", () => {
             })
         );
 
-        await userEvent.click(
-            screen.getByText("Remove Module")
-        );
+        await userEvent.click(screen.getByText("Remove Module"));
 
-        expect(handleRemoveModule).toHaveBeenCalledWith(
-            "CS1010",
-            "1",
-            "LEC"
-        );
+        expect(handleRemoveModule).toHaveBeenCalledWith("CS1010", "1", "LEC");
     });
 
     it("calls handleUpdateColor when selecting a preset color", async () => {
         const handleUpdateColor = vi.fn();
 
-        render(
-            <ActiveContainer
-                {...defaultProps}
-                handleUpdateColor={handleUpdateColor}
-            />
-        );
+        render(<ActiveContainer {...defaultProps} handleUpdateColor={handleUpdateColor} />);
 
         await userEvent.click(
             screen.getByRole("button", {
@@ -189,24 +131,12 @@ describe("ActiveContainer", () => {
             })
         );
 
-        expect(handleUpdateColor).toHaveBeenCalledWith(
-            "CS1010",
-            "#56A58B",
-            "1",
-            "LEC"
-        );
+        expect(handleUpdateColor).toHaveBeenCalledWith("CS1010", "#56A58B", "1", "LEC");
     });
 
     it("passes semester to SearchBar", () => {
-        render(
-            <ActiveContainer
-                {...defaultProps}
-                semester={2}
-            />
-        );
+        render(<ActiveContainer {...defaultProps} semester={2} />);
 
-        expect(
-            screen.getByText("Mock Search Result")
-        ).toBeInTheDocument();
+        expect(screen.getByText("Mock Search Result")).toBeInTheDocument();
     });
 });

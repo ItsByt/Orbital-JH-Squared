@@ -3,16 +3,9 @@ import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { useTimetableData } from "../useTimetableData";
-import type {
-    DisplayLesson,
-    ModuleDetails,
-    SavedTimetableModule,
-} from "@/types";
+import type { DisplayLesson, ModuleDetails, SavedTimetableModule } from "@/types";
 import { getUserId } from "@/services/auth";
-import {
-    getUserModules,
-    swapLessonInTimetableDB,
-} from "@/services/timetableDB";
+import { getUserModules, swapLessonInTimetableDB } from "@/services/timetableDB";
 import { getModule } from "@/services/nusmods";
 
 vi.mock("@/services/auth", () => ({
@@ -46,11 +39,7 @@ const createWrapper = () => {
     });
 
     return function Wrapper({ children }: { children: ReactNode }) {
-        return (
-            <QueryClientProvider client={queryClient}>
-                {children}
-            </QueryClientProvider>
-        );
+        return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
     };
 };
 
@@ -121,12 +110,9 @@ describe("useTimetableData", () => {
             error: null,
         });
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.loading).toBe(false);
@@ -139,12 +125,9 @@ describe("useTimetableData", () => {
     it("returns empty modules when user is not logged in", async () => {
         mockedGetUserId.mockResolvedValue(null);
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.loading).toBe(false);
@@ -164,12 +147,9 @@ describe("useTimetableData", () => {
 
         mockedGetModule.mockResolvedValue(moduleDetails);
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.modules).toHaveLength(1);
@@ -197,12 +177,9 @@ describe("useTimetableData", () => {
 
         mockedGetModule.mockResolvedValue(moduleDetails);
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         act(() => {
             result.current.selectModuleToCompare(selectedLesson);
@@ -231,12 +208,9 @@ describe("useTimetableData", () => {
 
         mockedSwapLesson.mockResolvedValue(undefined);
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.modules).toHaveLength(1);
@@ -256,13 +230,10 @@ describe("useTimetableData", () => {
         });
 
         await act(async () => {
-            await result.current.swapModuleSlot(
-                selectedLesson,
-                {
-                    ...selectedLesson,
-                    classNo: "2",
-                }
-            );
+            await result.current.swapModuleSlot(selectedLesson, {
+                ...selectedLesson,
+                classNo: "2",
+            });
         });
 
         await waitFor(() => {
@@ -280,29 +251,21 @@ describe("useTimetableData", () => {
 
         mockedGetModule.mockResolvedValue(moduleDetails);
 
-        mockedSwapLesson.mockRejectedValue(
-            new Error("Database failed")
-        );
+        mockedSwapLesson.mockRejectedValue(new Error("Database failed"));
 
-        const { result } = renderHook(
-            () => useTimetableData(2026, 1),
-            {
-                wrapper: createWrapper(),
-            }
-        );
+        const { result } = renderHook(() => useTimetableData(2026, 1), {
+            wrapper: createWrapper(),
+        });
 
         await waitFor(() => {
             expect(result.current.modules).toHaveLength(1);
         });
 
         await act(async () => {
-            await result.current.swapModuleSlot(
-                selectedLesson,
-                {
-                    ...selectedLesson,
-                    classNo: "2",
-                }
-            );
+            await result.current.swapModuleSlot(selectedLesson, {
+                ...selectedLesson,
+                classNo: "2",
+            });
         });
 
         await waitFor(() => {

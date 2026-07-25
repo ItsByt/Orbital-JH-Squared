@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useTimetableSettings } from "@/hooks/TimetableHooks/useTimetableSettings"; 
+import { useTimetableSettings } from "@/hooks/TimetableHooks/useTimetableSettings";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { supabase } from "@/services/supabase";
 
@@ -19,13 +19,9 @@ vi.mock("@/services/supabase", () => ({
 
 const mockedUseSettingsStore = vi.mocked(useSettingsStore);
 
-const mockedGetUser = vi.mocked(
-    supabase.auth.getUser
-);
+const mockedGetUser = vi.mocked(supabase.auth.getUser);
 
-const mockedFrom = vi.mocked(
-    supabase.from
-);
+const mockedFrom = vi.mocked(supabase.from);
 
 describe("useTimetableSettings", () => {
     const hydrateSettings = vi.fn();
@@ -76,12 +72,7 @@ describe("useTimetableSettings", () => {
 
         const { result } = renderHook(() => useTimetableSettings());
 
-        expect(result.current.dynamicHours).toEqual([
-            "1000",
-            "1100",
-            "1200",
-            "1300",
-        ]);
+        expect(result.current.dynamicHours).toEqual(["1000", "1100", "1200", "1300"]);
     });
 
     it("loads and hydrates user settings", async () => {
@@ -122,9 +113,7 @@ describe("useTimetableSettings", () => {
             });
         });
 
-        expect(mockedFrom).toHaveBeenCalledWith(
-            "accessibilities"
-        );
+        expect(mockedFrom).toHaveBeenCalledWith("accessibilities");
 
         expect(selectMock).toHaveBeenCalledWith(
             "start_hour, end_hour, card_font_size, card_font_family"
@@ -166,17 +155,12 @@ describe("useTimetableSettings", () => {
             }),
         } as unknown as ReturnType<typeof supabase.from>);
 
-        const consoleSpy = vi
-            .spyOn(console, "error")
-            .mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
         renderHook(() => useTimetableSettings());
 
         await waitFor(() => {
-            expect(consoleSpy).toHaveBeenCalledWith(
-                "Fetch error:",
-                expect.any(Error)
-            );
+            expect(consoleSpy).toHaveBeenCalledWith("Fetch error:", expect.any(Error));
         });
 
         expect(hydrateSettings).not.toHaveBeenCalled();
@@ -209,9 +193,7 @@ describe("useTimetableSettings", () => {
             }),
         } as unknown as ReturnType<typeof supabase.from>);
 
-        const { rerender } = renderHook(() =>
-            useTimetableSettings()
-        );
+        const { rerender } = renderHook(() => useTimetableSettings());
 
         await waitFor(() => {
             expect(hydrateSettings).toHaveBeenCalledTimes(1);
