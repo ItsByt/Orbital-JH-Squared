@@ -82,6 +82,7 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
 
     return (
         <div
+            data-testid={`year-block-${yearNum}`}
             className={`flex-shrink-0 w-max min-w-[500px] ${bgColor} rounded-xl p-5 flex flex-col snap-start shadow-md h-max border border-zinc-200 dark:border-zinc-800 relative`}
         >
             {/* Header: Year Info & Totals */}
@@ -94,7 +95,10 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
 
                 <div className="flex flex-col items-end gap-1">
                     {/* Top line: Year Load + S/U Count */}
-                    <div className="text-right text-[13px] text-zinc-500 dark:text-zinc-400 font-medium leading-tight">
+                    <div
+                        data-testid={`year-stats-${yearNum}`}
+                        className="text-right text-[13px] text-zinc-500 dark:text-zinc-400 font-medium leading-tight"
+                    >
                         <span>
                             {yearTotals.count} Courses / {yearTotals.units} Units
                         </span>
@@ -112,7 +116,10 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
 
                     {/* Bottom line: Progressive GPA */}
                     {progressiveStats.gpa !== null && (
-                        <div className="text-right text-[13px] font-bold text-[#56A58B] tracking-wide">
+                        <div
+                            data-testid={`year-gpa-${yearNum}`}
+                            className="text-right text-[13px] font-bold text-[#56A58B] tracking-wide"
+                        >
                             Cumulative GPA: {progressiveStats.gpa.toFixed(2)}
                         </div>
                     )}
@@ -122,7 +129,10 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                         <div className="mt-2.5">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <button className="flex items-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-100/50 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2.5 py-1.5 transition-all">
+                                    <button
+                                        data-testid={`add-special-term-trigger-${yearNum}`}
+                                        className="flex items-center text-xs font-semibold text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white border border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-100/50 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded px-2.5 py-1.5 transition-all"
+                                    >
                                         <Plus size={14} className="mr-1" /> Add Special Term
                                     </button>
                                 </DropdownMenuTrigger>
@@ -133,6 +143,7 @@ export default function YearBlock({ yearNum }: YearBlockProps) {
                                     {hiddenCustomTerms.map((term) => (
                                         <DropdownMenuItem
                                             key={term.key}
+                                            data-testid={`add-term-${term.key}-year-${yearNum}`}
                                             onClick={() =>
                                                 showCustomColumn(`Y${yearNum}${term.key}`)
                                             }

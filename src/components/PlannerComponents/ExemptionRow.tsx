@@ -47,7 +47,10 @@ export default function ExemptionRow() {
     });
 
     return (
-        <div className="shrink-0 border-t border-zinc-200 dark:border-zinc-800 pt-5 px-6 pb-4 group">
+        <div
+            data-testid="exemption-row"
+            className="shrink-0 border-t border-zinc-200 dark:border-zinc-800 pt-5 px-6 pb-4 group"
+        >
             <div className="mb-4 min-h-[44px] flex flex-col justify-start">
                 {/* Top Row: Title & Actions */}
                 <div className="flex justify-start gap-4 items-center min-h-[24px]">
@@ -69,6 +72,7 @@ export default function ExemptionRow() {
                             ) : isConfirming ? (
                                 <div className="flex items-center gap-2 text-[14px] font-bold">
                                     <span
+                                        data-testid="confirm-clear-exemptions"
                                         onClick={() => clearMutation.mutate()}
                                         className="text-red-500 hover:text-red-400 hover:underline cursor-pointer"
                                     >
@@ -83,6 +87,7 @@ export default function ExemptionRow() {
                                 </div>
                             ) : (
                                 <button
+                                    data-testid="clear-exemptions-btn"
                                     onClick={() => setIsConfirming(true)}
                                     className="outline-none flex items-center"
                                 >
@@ -95,7 +100,7 @@ export default function ExemptionRow() {
 
                 {/* Bottom Row: Units */}
                 {exemptionCount > 0 && !isConfirming && !clearMutation.isPending && (
-                    <div className="mt-1">
+                    <div data-testid="exemption-stats" className="mt-1">
                         <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                             {exemptionCount} Courses / {exemptionUnits} Units
                         </span>
@@ -128,6 +133,7 @@ export default function ExemptionRow() {
                     <div
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
+                        data-testid="droppable-zone-exemptions"
                         className={cn(
                             "flex flex-nowrap overflow-x-auto gap-4 min-h-[110px] w-max min-w-[500px] max-w-full p-4 rounded-md border border-dashed pb-4 scrollbar-thin scrollbar-thumb-zinc-700",
                             snapshot.isDraggingOver
@@ -153,6 +159,7 @@ export default function ExemptionRow() {
             {/* Adding Exemptions */}
             <div className="mt-3">
                 <button
+                    data-testid="add-exemption-btn"
                     onClick={() => setIsSearchOpen(true)}
                     className="flex items-center text-[#ff5c5c] hover:text-[#ff7878] text-[13px] font-semibold transition-colors cursor-pointer"
                 >

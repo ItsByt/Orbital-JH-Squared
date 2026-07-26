@@ -2,12 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "next-themes";
 
-import { createClient, type Session } from "@supabase/supabase-js";
+import { type Session } from "@supabase/supabase-js";
 import { Toaster } from "@/components/ui/sonner";
 import { Loader2 } from "lucide-react";
 import { useSettingsStore } from "./store/useSettingsStore";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { supabase } from "./services/supabase";
 import Welcome from "@/pages/authentication/Welcome";
 import Register from "@/pages/authentication/Register";
 import Login from "@/pages/authentication/Login";
@@ -19,10 +20,6 @@ import Courses from "@/pages/webpages/Courses";
 import Pre_Requisite from "@/pages/webpages/Pre_Requisite";
 import Settings from "@/pages/webpages/Settings";
 import { getCurrentAcadSem } from "./utils/generalUtils/time";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 const queryClient = new QueryClient();
 

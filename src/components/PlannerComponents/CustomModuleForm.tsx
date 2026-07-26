@@ -65,7 +65,7 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
     };
 
     return (
-        <form onSubmit={handleSubmit} className="p-4 space-y-5">
+        <form data-testid="custom-module-form" onSubmit={handleSubmit} className="p-4 space-y-5">
             <div className="space-y-1.5">
                 <Label
                     htmlFor="custom-code"
@@ -75,6 +75,7 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
                 </Label>
                 <Input
                     id="custom-code"
+                    data-testid="custom-module-code-input"
                     required
                     placeholder="e.g. MA4271"
                     value={formData.code}
@@ -92,6 +93,7 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
                 </Label>
                 <Input
                     id="custom-title"
+                    data-testid="custom-module-title-input"
                     required
                     placeholder="e.g. Differential Geometry of Curves and Surfaces"
                     value={formData.title}
@@ -109,6 +111,7 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
                 </Label>
                 <Input
                     id="custom-units"
+                    data-testid="custom-module-units-input"
                     required
                     type="number"
                     min={0}
@@ -124,6 +127,7 @@ export default function CustomModuleForm({ isProcessing, onSubmit }: CustomModul
 
             <Button
                 type="submit"
+                data-testid="submit-custom-module-btn"
                 disabled={isProcessing}
                 className="w-full bg-[#56A58B] hover:bg-[#468973] text-white mt-2"
             >

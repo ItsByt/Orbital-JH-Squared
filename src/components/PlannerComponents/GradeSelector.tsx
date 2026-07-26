@@ -40,6 +40,7 @@ export default function GradeSelector({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
+                        data-testid={`grade-selector-trigger-${moduleCode}`}
                         disabled={isPending}
                         className={cn(
                             "flex items-center gap-1 bg-black/20 hover:bg-black/30 border border-white/10",
@@ -66,6 +67,7 @@ export default function GradeSelector({
                         {AVAILABLE_GRADES.map((grade) => (
                             <DropdownMenuItem
                                 key={grade}
+                                data-testid={`grade-option-${grade}-${moduleCode}`}
                                 onClick={() => handleGradeChange(grade)}
                                 className={cn(
                                     "flex justify-center text-xs font-bold cursor-pointer rounded-sm py-1.5",
@@ -83,6 +85,7 @@ export default function GradeSelector({
                     <div className="h-px bg-border my-1.5" />
 
                     <DropdownMenuItem
+                        data-testid={`grade-clear-${moduleCode}`}
                         onClick={() => handleGradeChange(undefined)}
                         className="flex justify-center text-xs text-muted-foreground hover:text-red-400 focus:text-red-400 cursor-pointer py-1.5"
                     >

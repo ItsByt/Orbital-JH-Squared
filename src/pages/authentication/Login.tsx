@@ -79,6 +79,7 @@ export default function Login() {
                         <Input
                             id="email"
                             type="email"
+                            data-testid="login-email-input"
                             placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -94,6 +95,7 @@ export default function Login() {
                         <Input
                             id="password"
                             type="password"
+                            data-testid="login-password-input"
                             placeholder="Enter your password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -114,6 +116,7 @@ export default function Login() {
 
                     <Button
                         type="submit"
+                        data-testid="login-submit-button"
                         variant="outline"
                         className="w-full h-11 text-base font-medium rounded-lg border-[#749c83] text-[#749c83] hover:bg-[#749c83] hover:text-white"
                     >
