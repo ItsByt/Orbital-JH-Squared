@@ -19,6 +19,12 @@ jobs:
               run: npx playwright install --with-deps
             - name: Run Playwright tests
               run: npx playwright test
+              env: 
+                VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+                VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+                VITE_SUPABASE_SECRET_KEY: ${{ secrets.VITE_SUPABASE_SECRET_KEY }}
+                E2E_WORKER_PASSWORD: ${{ secrets.E2E_WORKER_PASSWORD }}
+                E2E_WORKERS: ${{ secrets.E2E_WORKERS }}
             - uses: actions/upload-artifact@v4
               if: ${{ !cancelled() }}
               with:
