@@ -65,7 +65,10 @@ export default function SemesterColumn({
     const showClearButton = modules.length > 0 || isCustom;
 
     return (
-        <div className={cn("flex flex-col group w-[230px] shrink-0 h-max")}>
+        <div
+            data-testid={`semester-column-${semesterKey}`}
+            className={cn("flex flex-col group w-[230px] shrink-0 h-max")}
+        >
             <div className="mb-3 px-1 min-h-[44px] flex flex-col justify-start">
                 {/* Top Row: Title & Actions */}
                 <div className="flex justify-between items-center gap-2 min-h-[24px]">
@@ -159,7 +162,7 @@ export default function SemesterColumn({
                         ref={provided.innerRef} //attaches the DOM node
                         {...provided.droppableProps} //props needed for DnD
                         className={cn(
-                            "flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px] min-h-0",
+                            "flex flex-col gap-2 flex-1 overflow-y-auto pr-1 pb-2 min-h-[100px]",
                             snapshot.isDraggingOver &&
                                 !dragState.isOverInvalidSem &&
                                 "shadow-xl opacity-90 ring-2 ring-white/50",
@@ -185,6 +188,7 @@ export default function SemesterColumn({
             {/* Adding Courses*/}
             <div className="mt-3 shrink-0">
                 <button
+                    data-testid={`add-course-btn-${semesterKey}`}
                     onClick={() => setIsSearchOpen(true)}
                     className="flex items-center text-[#ff5c5c] hover:text-[#ff7878] text-[13px] font-semibold transition-colors cursor-pointer"
                 >

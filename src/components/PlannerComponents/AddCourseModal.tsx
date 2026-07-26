@@ -128,7 +128,10 @@ export default function AddCourseModal({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-[450px] bg-[#18181b] border-zinc-800 p-0 overflow-hidden gap-0">
+            <DialogContent
+                data-testid="add-course-modal"
+                className="sm:max-w-[450px] bg-[#18181b] border-zinc-800 p-0 overflow-hidden gap-0"
+            >
                 <DialogTitle className="sr-only">Add Module to {semesterKey}</DialogTitle>
 
                 {/* To Toggle between Search Input and Back Button (If in Custom Mode) */}
@@ -182,6 +185,7 @@ export default function AddCourseModal({
                             {searchResults.map((mod) => (
                                 <button
                                     key={mod.moduleCode}
+                                    data-testid={`api-search-result-${mod.moduleCode}`}
                                     onClick={() => handleSelectAPIModule(mod.moduleCode)}
                                     disabled={isProcessing}
                                     className="w-full text-left p-3 hover:bg-zinc-800/50 rounded-md transition-colors flex flex-col group cursor-pointer disabled:opacity-50"

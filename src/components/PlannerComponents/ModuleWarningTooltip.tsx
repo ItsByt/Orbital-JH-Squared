@@ -6,6 +6,7 @@ import { formatSemesterKeyReadable } from "@/utils/plannerUtils/semesterKeyUtils
 import type { TrimmedPrereqResult } from "@/utils/plannerUtils/plannerPreReqUtils";
 
 interface Props {
+    testId?: string;
     takenTooEarlyIssues: TrimmedPrereqResult | null;
     boardMap: Record<string, { time: number; semKey: string }>; // HashMap of Module Code to (Absolute Time, semKey}
     targetTime: number;
@@ -13,16 +14,18 @@ interface Props {
 }
 
 function WarningSection({
+    testId,
     title,
     colorClass,
     children,
 }: {
+    testId?: string;
     title: string;
     colorClass: string;
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col gap-1.5">
+        <div data-testid={testId} className="flex flex-col gap-1.5">
             <div
                 className={cn(
                     "font-bold flex items-start gap-1.5 text-[13px] leading-tight",
@@ -38,6 +41,7 @@ function WarningSection({
 }
 
 export default function ModuleWarningTooltip({
+    testId,
     takenTooEarlyIssues,
     boardMap,
     targetTime,
@@ -55,6 +59,7 @@ export default function ModuleWarningTooltip({
             <Tooltip>
                 <TooltipTrigger asChild>
                     <div
+                        data-testid={testId}
                         className={cn(
                             "rounded-sm p-0.5 cursor-help shadow-md border shrink-0",
                             isRedIcon
@@ -74,6 +79,7 @@ export default function ModuleWarningTooltip({
                         {/* Completely Missing from Planner */}
                         {hasMissing && takenTooEarlyIssues?.tree && (
                             <WarningSection
+                                testId="warning-section-missing"
                                 title="These courses are missing from your planner:"
                                 colorClass="text-red-400"
                             >

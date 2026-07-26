@@ -38,6 +38,7 @@ function PlannerContent() {
 
                     {/* Toggle Button for Focus Mode*/}
                     <Button
+                        data-testid="focus-mode-toggle"
                         variant={isFocusMode ? "default" : "outline"}
                         onClick={toggleFocusMode}
                         className={`flex items-center gap-2 h-9 transition-all ${
@@ -57,6 +58,7 @@ function PlannerContent() {
             {/* flex-1 lets it fill the rest of the screen, overflow-x-auto enables the single scrollbar */}
             <div
                 ref={scrollContainerRef}
+                data-testid="planner-scroll-container"
                 className="flex flex-1 overflow-x-auto gap-4 pb-4 scrollbar-thin scrollbar-thumb-zinc-700"
             >
                 {YEARS.map((yearNum) => (
@@ -87,7 +89,10 @@ export default function Planner() {
     // Loading
     if (isLoading) {
         return (
-            <div className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-200">
+            <div
+                data-testid="planner-loading-screen"
+                className="flex h-screen w-full flex-col items-center justify-center bg-background text-foreground transition-colors duration-200"
+            >
                 <Loader2 className="h-10 w-10 animate-spin text-[#749c83]" />
                 <span className="ml-3 mt-4 text-base font-medium text-muted-foreground">
                     Loading planner data...

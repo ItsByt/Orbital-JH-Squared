@@ -36,7 +36,10 @@ export default function GlobalStatistics() {
                     <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
                         Cumulative GPA
                     </p>
-                    <p className="text-lg font-bold text-zinc-100 leading-tight">
+                    <p
+                        data-testid="global-gpa"
+                        className="text-lg font-bold text-zinc-100 leading-tight"
+                    >
                         {stats.gpa !== null ? stats.gpa.toFixed(2) : "0.00"}
                     </p>
                 </div>
@@ -53,7 +56,10 @@ export default function GlobalStatistics() {
                     <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
                         Units (Completed / Planned)
                     </p>
-                    <p className="text-lg font-bold text-zinc-100 leading-tight">
+                    <p
+                        data-testid="global-units"
+                        className="text-lg font-bold text-zinc-100 leading-tight"
+                    >
                         {stats.totalCompletedUnits}
                         <span className="text-sm text-zinc-500 ml-1">/ {stats.plannedUnits}</span>
                     </p>
@@ -70,7 +76,10 @@ export default function GlobalStatistics() {
                     <p className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
                         S/U Used
                     </p>
-                    <p className="text-lg font-bold text-zinc-100 leading-tight">
+                    <p
+                        data-testid="global-su-count"
+                        className="text-lg font-bold text-zinc-100 leading-tight"
+                    >
                         {stats.suUsedCount}
                     </p>
                 </div>

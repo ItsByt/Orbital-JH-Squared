@@ -154,7 +154,11 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
     const hasActiveFocus = Object.keys(focusMap).length > 0;
 
     return (
-        <Draggable draggableId={module.moduleCode} index={index}>
+        <Draggable
+            data-testid={`module-card-${module.moduleCode}`}
+            draggableId={module.moduleCode}
+            index={index}
+        >
             {/* Draggable snapshot properties -> isDragging, draggingOver */}
             {(provided, snapshot) => (
                 // Block background, text color, and hover effects
@@ -162,6 +166,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
+                    data-testid={`module-card-${module.moduleCode}`}
                     onClick={() => {
                         if (isFocusMode) setFocusedModule(module.moduleCode);
                     }}
@@ -185,7 +190,10 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                         {/* Dropdown Menu triggered by Chevron */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="hover:bg-black/20 rounded p-0.5 transition-colors cursor-pointer outline-none">
+                                <button
+                                    data-testid={`module-menu-trigger-${module.moduleCode}`}
+                                    className="hover:bg-black/20 rounded p-0.5 transition-colors cursor-pointer outline-none"
+                                >
                                     <ChevronDown size={14} className="text-white/80" />
                                 </button>
                             </DropdownMenuTrigger>
@@ -195,6 +203,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                             >
                                 {/* Removing a module */}
                                 <DropdownMenuItem
+                                    data-testid={`module-delete-${module.moduleCode}`}
                                     onClick={handleDelete}
                                     disabled={isProcessing}
                                     className={cn(
@@ -209,6 +218,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 {/* To toggle Pre-requisite Warning */}
                                 {hasAnyPreReqWarning && semesterKey !== EXEMPTION_KEY && (
                                     <DropdownMenuItem
+                                        data-testid={`module-toggle-warning-${module.moduleCode}`}
                                         onClick={() => {
                                             toggleWarning(semesterKey, module.moduleCode);
                                             toggleWarningMutation.mutate({
@@ -237,6 +247,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                                 {/* For toggling Excluding From Total*/}
                                 {module.isExemption && (
                                     <DropdownMenuItem
+                                        data-testid={`module-toggle-exclude-${module.moduleCode}`}
                                         onClick={() => {
                                             toggleExclude(semesterKey, module.moduleCode);
                                             toggleExcludeMutation.mutate({
@@ -280,6 +291,7 @@ export default function ModuleBlock({ module, semesterKey, index }: ModuleBlockP
                             {/* Pre-req Warning */}
                             {!snapshot.isDragging && !module.hidePreReqWarning && (
                                 <ModuleWarningTooltip
+                                    testId={`warning-icon-${module.moduleCode}`}
                                     takenTooEarlyIssues={takenTooEarlyIssues}
                                     boardMap={filteredBoardMap}
                                     targetTime={targetTime}

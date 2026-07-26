@@ -201,7 +201,10 @@ export default function MissingPrereqTreeRenderer({
     };
 
     return (
-        <div className="text-[12px] leading-relaxed break-words whitespace-normal text-zinc-300">
+        <div
+            data-testid="missing-prereq-renderer-container"
+            className="text-[12px] leading-relaxed break-words whitespace-normal text-zinc-300"
+        >
             {typeof tree === "object" && "and" in tree ? (
                 <ul className="list-disc pl-4 space-y-1">
                     {/* To create separate bullet points in "and" (requires all) scenario */}
