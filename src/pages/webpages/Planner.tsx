@@ -12,6 +12,7 @@ import { formatPlannerBoard } from "@/utils/plannerUtils/plannerFormatters";
 import { getPlannerModules } from "@/services/plannerDB";
 
 import { FocusModeProvider, useFocusModeContext } from "@/context/FocusModeContext";
+import { FocusModeGuide } from "@/components/PlannerComponents/FocusModeGuide";
 import { useDragScroll } from "@/hooks/PlannerHooks/useDragScroll";
 import { usePlannerDragAndDrop } from "@/hooks/PlannerHooks/usePlannerDragAndDrop";
 import GlobalStatistics from "@/components/PlannerComponents/GlobalStatistics";
@@ -50,6 +51,8 @@ function PlannerContent() {
                         {isFocusMode ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                         {isFocusMode ? "Focus Mode: ON" : "Focus Mode"}
                     </Button>
+
+                    <FocusModeGuide />
                 </div>
                 <GlobalStatistics />
             </div>
